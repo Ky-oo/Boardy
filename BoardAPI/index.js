@@ -1,22 +1,39 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
-// --- Données en mémoire (copie la partie JSON ici, sans les guillemets externes) ---
 const db = {
   users: [
     {
       id: 1,
       firstname: "Alice",
       lastname: "Martin",
+      pseudo: "aliceMartin",
+      email: "alice@gmail.com",
+      password: "azerty",
       city: "Lyon",
       role: "user",
     },
-    { id: 2, firstname: "Bob", lastname: "Durand", city: "Lyon", role: "user" },
+    {
+      id: 2,
+      firstname: "Bob",
+      lastname: "Durand",
+      pseudo: "bobDurand",
+      email: "bob@gmail.com",
+      password: "azerty",
+      city: "Lyon",
+      role: "user",
+    },
     {
       id: 3,
       firstname: "Clara",
       lastname: "Admin",
+      pseudo: "claraAdmin",
+      email: "clara@gmail.com",
+      password: "azerty",
       city: "Paris",
       role: "admin",
     },
@@ -40,8 +57,8 @@ const db = {
       id: 1,
       title: "Soirée jeux au Bar du Meeple",
       description: "Découverte de jeux modernes, tous niveaux.",
-      gameId: null,
-      date: "2025-03-01T19:30:00.000Z",
+      gameId: 11,
+      date: "2026-03-01T19:30:00.000Z",
       address: "12 Rue des Jeux, 69001 Lyon",
       seats: 16,
       type: "organisation",

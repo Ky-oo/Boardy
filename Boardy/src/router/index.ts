@@ -5,6 +5,7 @@ import type { RouteRecordRaw } from "vue-router";
 import Home from "../pages/Home.vue";
 import Account from "../pages/Account.vue";
 import CreateEvent from "../pages/CreateEvent.vue";
+import Login from "@/pages/Login.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -21,6 +22,11 @@ const routes: RouteRecordRaw[] = [
     path: "/create_event",
     name: "create_event",
     component: CreateEvent,
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: Login,
   },
 ];
 
