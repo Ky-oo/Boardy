@@ -2,7 +2,10 @@
   <div class="login-container">
     <div class="login-card">
       <h1 class="login-title">Connexion</h1>
-      <form @submit.prevent="handleLogin" class="login-form">
+      <form
+        @submit.prevent="authStore.login(email, password)"
+        class="login-form"
+      >
         <div class="form-group">
           <label for="email">Email</label>
           <input
@@ -46,20 +49,6 @@ const email = ref("");
 const password = ref("");
 const error = ref("");
 const loading = ref(false);
-
-const handleLogin = async () => {
-  error.value = "";
-  loading.value = true;
-
-  try {
-    await authStore.login(email.value, password.value);
-    router.push("/");
-  } catch (err) {
-    error.value = err.message || "Erreur de connexion";
-  } finally {
-    loading.value = false;
-  }
-};
 </script>
 
 <style scoped>

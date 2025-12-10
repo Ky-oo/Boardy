@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
 import type { User, UserWithoutPassword } from "../types/User";
 import { get } from "../utils/api/api.ts";
-import { useRouter } from "vue-router";
-
-const router = useRouter();
+import { router } from "../router/index.ts";
 
 export const useAuth = defineStore("auth", {
   state: () => ({
@@ -21,9 +19,10 @@ export const useAuth = defineStore("auth", {
       try {
         const response = await get(`/users`);
 
-        const user: User = response.data.find(
+        const user: User = response.find(
           (u: any) => u.email === email && u.password === password
         );
+
         if (!user) {
           throw new Error("Email ou mot de passe incorrect.");
         }
