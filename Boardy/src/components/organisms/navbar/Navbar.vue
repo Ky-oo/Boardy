@@ -25,7 +25,7 @@
         </li>
         <li v-if="!authStore.isLogged">
           <router-link
-            to="/login"
+            to="/register"
             class="text-white hover:cursor-pointer hover:text-gray-300"
           >
             Inscription
@@ -33,7 +33,7 @@
         </li>
         <li v-if="!authStore.isLogged">
           <router-link
-            to="/register"
+            to="/login"
             class="text-white hover:cursor-pointer hover:text-gray-300"
           >
             Connexion
