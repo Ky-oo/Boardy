@@ -13,8 +13,8 @@
   </div>
 
   <div class="bloc-cat grid grid-cols-3 gap-24 px-40 mb-16">
-    <div class="red-border">
-      <div class="card-red bg-custom-red p-8 rounded-xl h-full">
+    <router-link to="/category/organisation" class="red-border">
+      <div class="card-red bg-custom-red p-8 rounded-xl h-full cursor-pointer">
         <div class="flex justify-between items-center">
           <IconBars class="text-custom-white" />
           <p
@@ -30,9 +30,9 @@
           Evenements organisés par des établissements ou organisations.
         </p>
       </div>
-    </div>
+    </router-link>
 
-    <div class="red-border">
+    <router-link to="/category/user" class="red-border">
       <div class="card-red bg-custom-red p-8 rounded-xl h-full">
         <div class="flex justify-between items-center">
           <IconGamers class="text-custom-white" />
@@ -46,12 +46,12 @@
           Par des joueurs
         </h3>
         <p class="text-2xl font-light text-custom-white">
-          Trouver des joueurs proches de chez vous qui cherchent d’autres
+          Trouver des joueurs proches de chez vous qui cherchent d'autres
           joueurs.
         </p>
       </div>
-    </div>
-    <div class="red-border">
+    </router-link>
+    <router-link to="/category/event" class="red-border">
       <div class="card-red bg-[#F7001F] p-8 rounded-xl h-full">
         <div class="flex justify-between items-center">
           <IconEvents class="text-custom-white" />
@@ -68,7 +68,7 @@
           Les grands événements et rassemblements de la communauté.
         </p>
       </div>
-    </div>
+    </router-link>
   </div>
 
   <!-- Section des activités à venir -->

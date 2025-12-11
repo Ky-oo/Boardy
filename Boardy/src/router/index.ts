@@ -3,20 +3,26 @@ import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 import { useAuth } from "@/stores/authStore";
 
-import Home from "../pages/Home.vue";
-import Account from "../pages/Account.vue";
-import CreateEvent from "../pages/CreateEvent.vue";
+import Home from "@/pages/Home.vue";
+import Account from "@/pages/Account.vue";
+import CreateEvent from "@/pages/CreateEvent.vue";
 import Login from "@/pages/Login.vue";
-import ActivityDetail from "../pages/ActivityDetail.vue";
-import ParticipationConfirmed from "../pages/ParticipationConfirmed.vue";
+import ActivityDetail from "@/pages/ActivityDetail.vue";
+import ParticipationConfirmed from "@/pages/ParticipationConfirmed.vue";
 import Register from "@/pages/Register.vue";
 import MyEvent from "@/pages/MyEvent.vue";
+import Category from "@/pages/Category.vue";
 
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "home",
     component: Home,
+  },
+  {
+    path: "/category/:type",
+    name: "category",
+    component: Category,
   },
   {
     path: "/activity/:id",
