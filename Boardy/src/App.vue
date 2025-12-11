@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import Footer from "./components/organisms/footer/Footer.vue";
 import Navbar from "./components/organisms/navbar/Navbar.vue";
+
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+
+const isFooterVisible = route.name != "login" && route.name != "register";
 </script>
 
 <template>
@@ -10,7 +16,7 @@ import Navbar from "./components/organisms/navbar/Navbar.vue";
     <RouterView />
   </main>
 
-  <Footer />
+  <Footer v-if="isFooterVisible" />
 </template>
 
 <style scoped></style>

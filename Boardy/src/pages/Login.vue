@@ -1,13 +1,13 @@
 <template>
   <div class="min-h-screen bg-white mx-20 bloc-cat-login">
     <div class="text-center pt-30 pb-8">
-      <h1 class="text-5xl font-family-urban text-black m-6">Connexion</h1>
+      <h1 class="text-5xl font-family-urban text-black my-6">Connexion</h1>
       <p class="text-black text-lg font-family-red-hat">
         Créez et participez à des événements avec votre compte Boardy.
       </p>
     </div>
 
-    <div class="flex justify-center items-start gap-16 px-8 pb-16">
+    <div class="flex justify-center items-center gap-16 px-8 pb-16">
       <div class="relative w-full pt-6">
         <div
           class="absolute -top-1 -right-6 w-full h-full border-2 border-red-500 rounded-lg"
@@ -28,6 +28,7 @@
             <input
               id="email"
               v-model="email"
+              autocomplete="new-password"
               type="email"
               placeholder="Entrez votre email"
               required

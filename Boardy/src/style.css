@@ -123,6 +123,17 @@
   border-radius: 0 10px 10px 0;
 }
 
+.bloc-cat-register::before {
+  content: "";
+  position: absolute;
+  top: 650px;
+  left: 0;
+  width: 60%;
+  height: 260px;
+  background: var(--color-custom-green);
+  border-radius: 0 10px 10px 0;
+}
+
 .bloc-activites {
   position: relative;
   margin-top: -100px;
