@@ -18,7 +18,10 @@
       {{ categoryDescription }}
     </p>
 
-    <div class="bloc-cat-event">
+    <div
+      class="bloc-cat-event"
+      :class="{ 'has-activities': paginatedActivities.length >= 7 }"
+    >
       <p class="text-lg text-gray-600 mb-6">
         {{ filteredActivities.length }} événement(s) trouvé(s)
       </p>

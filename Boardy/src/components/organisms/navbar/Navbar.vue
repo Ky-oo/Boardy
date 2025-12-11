@@ -16,7 +16,7 @@
             to="/my_events"
             class="text-custom-white hover:cursor-pointer hover:text-gray-300"
           >
-            Mes événenement
+            Mes événenements
           </router-link>
         </li>
         <li v-if="authStore.isLogged">
@@ -24,7 +24,7 @@
             to="/account"
             class="text-custom-white hover:cursor-pointer hover:text-gray-300"
           >
-            Mon profile
+            Mon profil
           </router-link>
         </li>
         <li v-if="authStore.isLogged">

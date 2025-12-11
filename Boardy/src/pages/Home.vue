@@ -12,7 +12,7 @@
     </h2>
   </div>
 
-  <div class="bloc-cat grid grid-cols-3 gap-24 px-40 mb-16">
+  <div class="bloc-cat grid grid-cols-3 gap-24 px-40">
     <router-link to="/category/organisation" class="red-border">
       <div class="card-red bg-custom-red p-8 rounded-xl h-full cursor-pointer">
         <div class="flex justify-between items-center">
@@ -71,8 +71,15 @@
     </router-link>
   </div>
 
+  <div class="mx-50 mb-35">
+    <FilterBar />
+  </div>
+
   <!-- Section des activités à venir -->
-  <div class="bloc-activites">
+  <div
+    class="bloc-activites"
+    :class="{ 'has-activities': paginatedActivities.length >= 7 }"
+  >
     <div class="mx-30 pb-16">
       <h2 class="text-md font-bold mb-6">
         {{ activityStore.getUpcomingActivities.length }} événements trouvés
@@ -149,6 +156,7 @@ import ActivityCard from "../components/molecules/ActivityCard.vue";
 import IconBars from "../components/atoms/icons/IconBars.vue";
 import IconEvents from "../components/atoms/icons/IconEvents.vue";
 import IconGamers from "../components/atoms/icons/IconGamers.vue";
+import FilterBar from "@/components/molecules/FilterBar.vue";
 
 // Utiliser le store
 const activityStore = useActivityStore();
