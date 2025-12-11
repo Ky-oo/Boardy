@@ -70,6 +70,7 @@ const db = {
       playersId: [1, 2],
       homeHost: false,
       price: 5,
+      private: false,
     },
     {
       id: 2,
@@ -86,6 +87,7 @@ const db = {
       hostId: 1,
       playersId: [1, 2],
       homeHost: true,
+      private: true,
     },
     {
       id: 3,
@@ -104,6 +106,7 @@ const db = {
       playersId: [],
       homeHost: false,
       price: 8,
+      private: false,
     },
     {
       id: 4,
@@ -120,6 +123,7 @@ const db = {
       hostId: 2,
       playersId: [2],
       homeHost: true,
+      private: true,
     },
     {
       id: 5,
@@ -139,6 +143,7 @@ const db = {
       playersId: [1, 2, 3],
       homeHost: false,
       price: 0,
+      private: false,
     },
     {
       id: 6,
@@ -156,6 +161,7 @@ const db = {
       hostId: 1,
       playersId: [1],
       homeHost: true,
+      private: true,
     },
     {
       id: 7,
@@ -174,6 +180,7 @@ const db = {
       playersId: [],
       homeHost: false,
       price: 3,
+      private: false,
     },
     {
       id: 8,
@@ -190,6 +197,7 @@ const db = {
       hostId: 3,
       playersId: [3],
       homeHost: false,
+      private: false,
     },
     {
       id: 9,
@@ -208,6 +216,7 @@ const db = {
       playersId: [1, 2],
       homeHost: false,
       price: 10,
+      private: false,
     },
     {
       id: 10,
@@ -226,6 +235,7 @@ const db = {
       playersId: [],
       homeHost: false,
       price: 5,
+      private: false,
     },
   ],
   activityPlayers: [

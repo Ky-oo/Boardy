@@ -31,6 +31,7 @@
         </p>
       </div>
     </div>
+
     <div class="red-border">
       <div class="card-red bg-custom-red p-8 rounded-xl h-full">
         <div class="flex justify-between items-center">

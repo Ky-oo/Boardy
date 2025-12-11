@@ -58,6 +58,25 @@ export const useActivityStore = defineStore("activity", {
         (a) => a.hostType === "user" && new Date(a.date) > now
       );
     },
+
+    // Obtenir des activités similaires basées sur l'activité actuelle
+    getSimilarActivities: (state): ActivityWithHost[] => {
+      if (!state.currentActivity) return [];
+
+      const now = new Date();
+      const currentId = state.currentActivity.id;
+      const currentCity = state.currentActivity.city;
+
+      return state.activities
+        .filter((a) => {
+          // Exclure l'activité actuelle et les activités passées
+          if (a.id === currentId || new Date(a.date) <= now) return false;
+
+          // Vérifier uniquement si l'activité est dans la même ville
+          return a.city === currentCity;
+        })
+        .slice(0, 3); // Limiter à 3 activités similaires
+    },
   },
 
   actions: {
@@ -106,7 +125,18 @@ export const useActivityStore = defineStore("activity", {
       this.loading = true;
       this.error = null;
       try {
-        this.currentActivity = await apiService.getActivity(id);
+        const activity: Activity = await get(`/activities/${id}`);
+
+        // Enrichir l'activité avec les données de l'hôte OU de l'organisation
+        if (activity.hostType === "organisation") {
+          const organisation: Organisation = await get(
+            `/organisations/${activity.hostId}`
+          );
+          this.currentActivity = { ...activity, organisation };
+        } else {
+          const host: User = await get(`/users/${activity.hostId}`);
+          this.currentActivity = { ...activity, host };
+        }
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors du chargement";

@@ -1,6 +1,7 @@
 <template>
-  <div
-    class="bg-custom-blue rounded-lg shadow-md p-6 text-custom-white flex justify-between h-full flex-col"
+  <router-link
+    :to="`/activity/${activity.id}`"
+    class="bg-custom-blue rounded-lg shadow-md p-6 text-custom-white flex justify-between h-full flex-col hover:shadow-xl transition-shadow cursor-pointer"
   >
     <div class="relative">
       <div
@@ -57,7 +58,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <nav class="fixed top-0 left-0 right-0 bg-custom-blue px-8 py-6 z-10">
+  <nav class="fixed top-0 left-0 right-0 bg-custom-blue px-8 py-6 z-20">
     <div class="container mx-auto flex justify-between items-center">
       <div class="text-2xl font-bold">
         <router-link to="/" class="text-primary hover:text-gray-300">
