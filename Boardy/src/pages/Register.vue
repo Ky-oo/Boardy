@@ -34,7 +34,7 @@
               type="text"
               placeholder="Entrez votre nom"
               required
-              class="w-full h-8 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
             />
           </div>
 
@@ -49,7 +49,7 @@
               type="text"
               placeholder="Entrez votre prénom"
               required
-              class="w-full h-8 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
             />
           </div>
 
@@ -64,7 +64,7 @@
               type="email"
               placeholder="Entrez votre email"
               required
-              class="w-full h-8 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
             />
           </div>
 
@@ -79,7 +79,7 @@
               type="password"
               placeholder="Entrez votre mot de passe"
               required
-              class="w-full h-8 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
             />
           </div>
 
@@ -95,13 +95,13 @@
                 type="text"
                 placeholder="Entrez votre ville"
                 required
-                class="flex-1 h-8 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+                class="flex-1 h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
               />
               <button
                 type="button"
                 @click="getUserLocation"
                 :disabled="locationLoading"
-                class="flex items-center gap-2 px-4 py-3 h-8 hover:cursor-pointer bg-white text-gray-500 hover:bg-blue-700 hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                class="flex items-center gap-2 px-4 py-3 h-10 hover:cursor-pointer bg-white text-gray-500 hover:bg-blue-700 hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 title="Utiliser ma position"
               >
                 <svg
@@ -155,7 +155,7 @@
 
           <button
             type="submit"
-            class="w-full h-8 mt-4 hover:cursor-pointer hover:bg-custom-green-hover text-gray-800 font-semibold rounded-xl bg-custom-green transition-colors"
+            class="w-full h-10 mt-4 hover:cursor-pointer hover:bg-custom-green-hover text-gray-800 font-semibold rounded-xl bg-custom-green transition-colors"
             :disabled="loading"
           >
             {{ loading ? "Création en cours..." : "Créer mon compte" }}

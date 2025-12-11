@@ -134,6 +134,17 @@
   border-radius: 0 10px 10px 0;
 }
 
+.bloc-cat-create_event::before {
+  content: "";
+  position: absolute;
+  top: 500px;
+  left: 0;
+  width: 40%;
+  height: 260px;
+  background: var(--color-custom-green);
+  border-radius: 0 10px 10px 0;
+}
+
 .bloc-activites {
   position: relative;
   margin-top: -100px;

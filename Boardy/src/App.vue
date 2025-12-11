@@ -6,7 +6,12 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 
-const isFooterVisible = route.name != "login" && route.name != "register";
+console.log("Route name:", route.name);
+
+const isFooterVisible =
+  route.name != "login" &&
+  route.name != "register" &&
+  route.name != "create-event";
 </script>
 
 <template>
