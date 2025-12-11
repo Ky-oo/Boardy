@@ -1,25 +1,25 @@
 <template>
-  <div class="min-h-screen bg-white bloc-cat-login">
+  <div class="min-h-screen bg-white mx-20 bloc-cat-login">
     <div class="text-center pt-30 pb-8">
-      <h1 class="text-5xl font-family-urban text-black mb-2">Connexion</h1>
+      <h1 class="text-5xl font-family-urban text-black m-6">Connexion</h1>
       <p class="text-black text-lg font-family-red-hat">
         Créez et participez à des événements avec votre compte Boardy.
       </p>
     </div>
 
     <div class="flex justify-center items-start gap-16 px-8 pb-16">
-      <div class="relative pt-6">
+      <div class="relative w-full pt-6">
         <div
           class="absolute -top-1 -right-6 w-full h-full border-2 border-red-500 rounded-lg"
         ></div>
         <img
           src="/img/login/login_image.png"
           alt="Personnes jouant à un jeu de société"
-          class="relative w-[500px] h-[400px] object-cover rounded-lg z-10"
+          class="relative w-full h-[400px] object-cover rounded-lg z-10"
         />
       </div>
 
-      <div class="bg-custom-blue rounded-3xl p-8 w-[500px] z-10">
+      <div class="bg-custom-blue rounded-3xl p-8 w-full z-10">
         <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
             <label for="email" class="text-custom-white font-medium"
@@ -75,7 +75,7 @@
             <div class="flex-1 h-px bg-white/50"></div>
           </div>
 
-          <div class="flex justify-center gap-6">
+          <div class="flex justify-center gap-10">
             <button
               type="button"
               class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
