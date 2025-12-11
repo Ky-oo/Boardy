@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Footer from "./components/organisms/footer/Footer.vue";
 import Navbar from "./components/organisms/navbar/Navbar.vue";
-import FloatingChatButton from "./components/atoms/FloatingChatButton.vue";
 </script>
 
 <template>
@@ -12,8 +11,6 @@ import FloatingChatButton from "./components/atoms/FloatingChatButton.vue";
   </main>
 
   <Footer />
-
-  <FloatingChatButton />
 </template>
 
 <style scoped></style>

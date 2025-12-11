@@ -27,6 +27,7 @@
   --color-custom-blue: #1468e5;
   --color-custom-red: #f7001f;
   --color-custom-green: #acebab;
+  --color-custom-green-hover: #aaebdd;
   --color-custom-white: #f4fffd;
   --color-primary: #101930;
 
@@ -109,6 +110,17 @@
   height: 260px;
   background: var(--color-custom-green);
   border-radius: 0 12px 12px 0;
+}
+
+.bloc-cat-login::before {
+  content: "";
+  position: absolute;
+  top: 500px;
+  left: 0;
+  width: 60%;
+  height: 260px;
+  background: var(--color-custom-green);
+  border-radius: 0 10px 10px 0;
 }
 
 .bloc-activites {

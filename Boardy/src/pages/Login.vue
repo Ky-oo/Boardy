@@ -1,46 +1,121 @@
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <h1 class="login-title">Connexion</h1>
-      <form
-        @submit.prevent="authStore.login(email, password)"
-        class="login-form"
-      >
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            placeholder="Entrez votre email"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">Mot de passe</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="Entrez votre mot de passe"
-            required
-          />
-        </div>
-        <div v-if="error" class="error-message">
-          {{ error }}
-        </div>
-        <button type="submit" class="btn-login" :disabled="loading">
-          {{ loading ? "Connexion..." : "Se connecter" }}
-        </button>
-      </form>
+  <div class="min-h-screen bg-white bloc-cat-login">
+    <div class="text-center pt-30 pb-8">
+      <h1 class="text-5xl font-family-urban text-black mb-2">Connexion</h1>
+      <p class="text-black text-lg font-family-red-hat">
+        Créez et participez à des événements avec votre compte Boardy.
+      </p>
+    </div>
+
+    <div class="flex justify-center items-start gap-16 px-8 pb-16">
+      <div class="relative pt-6">
+        <div
+          class="absolute -top-1 -right-6 w-full h-full border-2 border-red-500 rounded-lg"
+        ></div>
+        <img
+          src="/img/login/login_image.png"
+          alt="Personnes jouant à un jeu de société"
+          class="relative w-[500px] h-[400px] object-cover rounded-lg z-10"
+        />
+      </div>
+
+      <div class="bg-custom-blue rounded-3xl p-8 w-[500px] z-10">
+        <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <label for="email" class="text-custom-white font-medium"
+              >Email</label
+            >
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              placeholder="Entrez votre email"
+              required
+              class="w-full h-8 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="password" class="text-custom-white font-medium"
+              >Mot de passe</label
+            >
+            <input
+              id="password"
+              v-model="password"
+              type="password"
+              placeholder="Entrez votre mot de passe"
+              required
+              class="w-full h-8 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+            />
+          </div>
+
+          <div class="text-right">
+            <a
+              href="#"
+              class="text-custom-white text-sm underline hover:no-underline"
+              >Mot de passe oublié ?</a
+            >
+          </div>
+
+          <div v-if="error" class="text-red-200 text-sm text-center">
+            {{ error }}
+          </div>
+
+          <button
+            type="submit"
+            class="w-full h-8 hover:cursor-pointer hover:bg-custom-green-hover text-gray-800 font-semibold rounded-xl bg-custom-green transition-colors"
+            :disabled="loading"
+          >
+            {{ loading ? "Connexion..." : "Se connecter" }}
+          </button>
+
+          <div class="flex items-center gap-4 mt-2">
+            <div class="flex-1 h-px bg-white/50"></div>
+            <span class="text-custom-white text-sm">Ou se connecter avec</span>
+            <div class="flex-1 h-px bg-white/50"></div>
+          </div>
+
+          <div class="flex justify-center gap-6">
+            <button
+              type="button"
+              class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+            >
+              <IconGoogle class="text-custom-white w-10 h-10" />
+            </button>
+            <button
+              type="button"
+              class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+            >
+              <IconApple class="text-custom-white w-10 h-10" />
+            </button>
+            <button
+              type="button"
+              class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+            >
+              <IconFacebook class="text-custom-white w-10 h-10" />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="w-full bg-white text-primary font-semibold rounded-xl h-10 hover:cursor-pointer hover:bg-gray-200 transition-colors mt-2"
+            @click="router.push('/register')"
+          >
+            Je n'ai pas de compte
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/stores/authStore";
+import IconGoogle from "@/components/atoms/icons/IconGoogle.vue";
+import IconApple from "@/components/atoms/icons/IconApple.vue";
+import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
 
 const router = useRouter();
 const authStore = useAuth();
@@ -49,84 +124,16 @@ const email = ref("");
 const password = ref("");
 const error = ref("");
 const loading = ref(false);
+
+const handleLogin = async () => {
+  loading.value = true;
+  error.value = "";
+  try {
+    await authStore.login(email.value, password.value);
+  } catch (e: any) {
+    error.value = e.message || "Erreur de connexion";
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
-
-<style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-}
-
-.login-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-}
-
-.login-title {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #333;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 500;
-  color: #555;
-}
-
-.form-group input {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #4caf50;
-}
-
-.error-message {
-  color: #f44336;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.btn-login {
-  padding: 0.75rem;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.btn-login:hover:not(:disabled) {
-  background-color: #45a049;
-}
-
-.btn-login:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-</style>

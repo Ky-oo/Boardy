@@ -46,7 +46,7 @@
         <li>
           <router-link
             to="/create_event"
-            class="hover:cursor-pointer hover:text-gray-300 bg-custom-green text-black px-6 py-3 rounded-2xl"
+            class="hover:cursor-pointer hover:bg-custom-green-hover bg-custom-green text-black px-6 py-3 rounded-2xl"
             >Créer un évenement
           </router-link>
         </li>
