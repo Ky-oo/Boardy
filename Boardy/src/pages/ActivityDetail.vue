@@ -54,7 +54,7 @@
               <button
                 v-else
                 disabled
-                class="bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed font-bold w-full"
+                class="bg-gray-400 text-custom-white px-6 py-3 rounded-lg cursor-not-allowed font-bold w-full"
               >
                 En attente de l'hôte
               </button>
