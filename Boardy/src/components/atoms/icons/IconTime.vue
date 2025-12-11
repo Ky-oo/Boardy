@@ -9,14 +9,14 @@
     <g clip-path="url(#clip0_142_240)">
       <path
         d="M8 4V8L10.6667 9.33333"
-        stroke="#F4FFFD"
+        stroke="currentColor"
         stroke-width="1.33333"
         stroke-linecap="round"
         stroke-linejoin="round"
       />
       <path
         d="M8.00004 14.6667C11.6819 14.6667 14.6667 11.6819 14.6667 8.00004C14.6667 4.31814 11.6819 1.33337 8.00004 1.33337C4.31814 1.33337 1.33337 4.31814 1.33337 8.00004C1.33337 11.6819 4.31814 14.6667 8.00004 14.6667Z"
-        stroke="#F4FFFD"
+        stroke="currentColor"
         stroke-width="1.33333"
         stroke-linecap="round"
         stroke-linejoin="round"

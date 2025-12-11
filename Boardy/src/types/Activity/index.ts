@@ -18,6 +18,7 @@ export type Activity = {
   playersId: number[];
   homeHost: boolean;
   price?: number;
+  private: boolean;
 };
 
 // Type enrichi avec les données de l'hôte (User) OU de l'organisation
