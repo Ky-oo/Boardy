@@ -35,6 +35,10 @@
   --font-family-urban: "Urban Sketart", cursive;
 }
 
+body {
+  font-family: "Red Hat Display", sans-serif;
+}
+
 /***** Home Page *****/
 
 .logo {
