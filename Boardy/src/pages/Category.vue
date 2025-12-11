@@ -9,7 +9,7 @@
 
     <div class="flex items-end gap-4 mb-8">
       <component :is="categoryIcon" class="text-custom-primary w-16 h-16" />
-      <h1 class="text-4xl font-black text-custom-primary">
+      <h1 class="text-4xl font-primary text-custom-primary">
         {{ categoryTitle }}
       </h1>
     </div>
@@ -53,7 +53,7 @@
         <button
           @click="currentPage--"
           :disabled="currentPage === 1"
-          class="px-4 py-2 rounded-lg border border-custom-primary text-custom-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-custom-primary hover:text-white transition-colors"
+          class="px-4 py-2 rounded-lg border border-custom-primary text-custom-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-custom-primary hover:text-custom-white transition-colors"
         >
           Précédent
         </button>
@@ -66,8 +66,8 @@
             :class="[
               'px-4 py-2 rounded-lg border transition-colors',
               currentPage === page
-                ? 'bg-custom-primary text-white border-custom-primary'
-                : 'border-custom-primary text-custom-primary hover:bg-custom-primary hover:text-white',
+                ? 'bg-custom-primary text-custom-white border-custom-primary'
+                : 'border-custom-primary text-custom-primary hover:bg-custom-primary hover:text-custom-white',
             ]"
           >
             {{ page }}
@@ -77,7 +77,7 @@
         <button
           @click="currentPage++"
           :disabled="currentPage === totalPages"
-          class="px-4 py-2 rounded-lg border border-custom-primary text-custom-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-custom-primary hover:text-white transition-colors"
+          class="px-4 py-2 rounded-lg border border-custom-primary text-custom-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-custom-primary hover:text-custom-white transition-colors"
         >
           Suivant
         </button>

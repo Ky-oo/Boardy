@@ -27,10 +27,10 @@
         <div class="flex flex-col gap-6 h-full">
           <div class="bg-custom-red p-8 rounded-xl flex-1">
             <div class="flex justify-between items-center">
-              <h2 class="text-2xl font-black text-custom-white">
+              <h2 class="text-2xl font-primary text-custom-white">
                 Places restantes
               </h2>
-              <p class="text-custom-white text-2xl font-black">
+              <p class="text-custom-white text-2xl font-primary">
                 {{
                   activityStore.currentActivity.seats -
                   activityStore.currentActivity.playersId.length
@@ -60,7 +60,7 @@
           </div>
 
           <div class="bg-custom-blue p-8 rounded-xl flex-1">
-            <h2 class="text-2xl font-black text-custom-white mb-4">
+            <h2 class="text-2xl font-primary text-custom-white mb-4">
               Bon à savoir
             </h2>
 
@@ -75,7 +75,7 @@
       <div class="bg-custom-blue p-8 rounded-xl mb-6">
         <div class="grid grid-cols-2 gap-24">
           <div class="div">
-            <h2 class="text-2xl text-custom-white font-black">
+            <h2 class="text-2xl text-custom-white font-primary">
               {{ activityStore.currentActivity.title }}
             </h2>
             <p class="text-xl text-custom-white mt-4">

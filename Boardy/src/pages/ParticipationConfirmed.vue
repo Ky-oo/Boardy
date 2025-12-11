@@ -12,14 +12,14 @@
       <div class="flex gap-4 justify-center">
         <router-link
           to="/"
-          class="bg-custom-blue text-white px-8 py-4 rounded-lg hover:bg-blue-600 text-xl font-bold"
+          class="bg-custom-blue text-custom-white px-8 py-4 rounded-lg hover:bg-blue-600 text-xl font-bold"
         >
           Retour à l'accueil
         </router-link>
 
         <button
           @click="$router.back()"
-          class="bg-custom-red text-white px-8 py-4 rounded-lg hover:bg-red-600 text-xl font-bold"
+          class="bg-custom-red text-custom-white px-8 py-4 rounded-lg hover:bg-red-600 text-xl font-bold"
         >
           Voir l'activité
         </button>

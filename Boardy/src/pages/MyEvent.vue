@@ -1,6 +1,8 @@
 <template>
   <div class="pt-40 mx-30 py-8">
-    <h1 class="text-3xl font-black text-custom-primary mb-8">Mes événements</h1>
+    <h1 class="text-3xl font-primary text-custom-primary mb-8">
+      Mes événements
+    </h1>
 
     <!-- Événements créés -->
     <section class="mb-12">

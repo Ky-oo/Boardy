@@ -14,7 +14,7 @@
         <li v-if="authStore.isLogged">
           <router-link
             to="/my_events"
-            class="text-white hover:cursor-pointer hover:text-gray-300"
+            class="text-custom-white hover:cursor-pointer hover:text-gray-300"
           >
             Mes événenement
           </router-link>
@@ -22,7 +22,7 @@
         <li v-if="authStore.isLogged">
           <router-link
             to="/account"
-            class="text-white hover:cursor-pointer hover:text-gray-300"
+            class="text-custom-white hover:cursor-pointer hover:text-gray-300"
           >
             Mon profile
           </router-link>
@@ -30,7 +30,7 @@
         <li v-if="authStore.isLogged">
           <button
             @click="authStore.logout()"
-            class="text-white hover:cursor-pointer hover:text-gray-300"
+            class="text-custom-white hover:cursor-pointer hover:text-gray-300"
           >
             Déconnexion
           </button>
@@ -38,7 +38,7 @@
         <li v-if="!authStore.isLogged">
           <router-link
             to="/register"
-            class="text-white hover:cursor-pointer hover:text-gray-300"
+            class="text-custom-white hover:cursor-pointer hover:text-gray-300"
           >
             Inscription
           </router-link>
@@ -46,7 +46,7 @@
         <li v-if="!authStore.isLogged">
           <router-link
             to="/login"
-            class="text-white hover:cursor-pointer hover:text-gray-300"
+            class="text-custom-white hover:cursor-pointer hover:text-gray-300"
           >
             Connexion
           </router-link>
@@ -54,7 +54,7 @@
         <li>
           <router-link
             to="/create_event"
-            class="hover:cursor-pointer hover:bg-custom-green-hover bg-custom-green text-black px-6 py-3 rounded-2xl"
+            class="hover:cursor-pointer hover:bg-custom-green-hover bg-custom-green text-primary px-6 py-3 rounded-2xl"
             >Créer un événement
           </router-link>
         </li>

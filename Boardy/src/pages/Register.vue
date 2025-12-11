@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-white mx-20 bloc-cat-register">
+  <div class="min-h-screen bg-custom-white mx-20 bloc-cat-register">
     <div class="text-center pt-30 pb-8">
-      <h1 class="text-5xl font-family-urban text-black my-6">
+      <h1 class="text-5xl font-family-urban text-primary my-6">
         Créer un compte
       </h1>
-      <p class="text-black text-lg font-family-red-hat">
+      <p class="text-primary text-lg font-family-red-hat">
         Créez et participez à des événements avec votre compte Boardy.
       </p>
     </div>
@@ -34,7 +34,7 @@
               type="text"
               placeholder="Entrez votre nom"
               required
-              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
@@ -49,7 +49,7 @@
               type="text"
               placeholder="Entrez votre prénom"
               required
-              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
@@ -64,7 +64,7 @@
               type="email"
               placeholder="Entrez votre email"
               required
-              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
@@ -79,7 +79,7 @@
               type="password"
               placeholder="Entrez votre mot de passe"
               required
-              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
@@ -95,13 +95,13 @@
                 type="text"
                 placeholder="Entrez votre ville"
                 required
-                class="flex-1 h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+                class="flex-1 h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
               />
               <button
                 type="button"
                 @click="getUserLocation"
                 :disabled="locationLoading"
-                class="flex items-center gap-2 px-4 py-3 h-10 hover:cursor-pointer bg-white text-gray-500 hover:bg-blue-700 hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                class="flex items-center gap-2 px-4 py-3 h-10 hover:cursor-pointer bg-custom-white text-gray-500 hover:bg-blue-700 hover:text-custom-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 title="Utiliser ma position"
               >
                 <svg
@@ -166,9 +166,9 @@
           </div>
 
           <div class="flex items-center gap-4 mt-2">
-            <div class="flex-1 h-px bg-white/50"></div>
+            <div class="flex-1 h-px bg-custom-white/50"></div>
             <span class="text-custom-white text-sm">Ou continuer avec</span>
-            <div class="flex-1 h-px bg-white/50"></div>
+            <div class="flex-1 h-px bg-custom-white/50"></div>
           </div>
 
           <div class="flex justify-center gap-10">

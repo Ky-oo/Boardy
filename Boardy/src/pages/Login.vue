@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-white mx-20 bloc-cat-login">
+  <div class="min-h-screen bg-custom-white mx-20 bloc-cat-login">
     <div class="text-center pt-30 pb-8">
-      <h1 class="text-5xl font-family-urban text-black my-6">Connexion</h1>
-      <p class="text-black text-lg font-family-red-hat">
+      <h1 class="text-5xl font-family-urban text-primary my-6">Connexion</h1>
+      <p class="text-primary text-lg font-family-red-hat">
         Créez et participez à des événements avec votre compte Boardy.
       </p>
     </div>
@@ -32,7 +32,7 @@
               type="email"
               placeholder="Entrez votre email"
               required
-              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
@@ -46,7 +46,7 @@
               type="password"
               placeholder="Entrez votre mot de passe"
               required
-              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
@@ -71,9 +71,9 @@
           </button>
 
           <div class="flex items-center gap-4 mt-2">
-            <div class="flex-1 h-px bg-white/50"></div>
+            <div class="flex-1 h-px bg-custom-white/50"></div>
             <span class="text-custom-white text-sm">Ou se connecter avec</span>
-            <div class="flex-1 h-px bg-white/50"></div>
+            <div class="flex-1 h-px bg-custom-white/50"></div>
           </div>
 
           <div class="flex justify-center gap-10">
@@ -99,7 +99,7 @@
 
           <button
             type="button"
-            class="w-full bg-white text-primary font-semibold rounded-xl h-10 hover:cursor-pointer hover:bg-gray-200 transition-colors mt-2"
+            class="w-full bg-custom-white text-primary font-semibold rounded-xl h-10 hover:cursor-pointer hover:bg-gray-200 transition-colors mt-2"
             @click="router.push('/register')"
           >
             Je n'ai pas de compte

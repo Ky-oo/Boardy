@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-white mx-50 bloc-cat-create_event">
+  <div class="min-h-screen bg-custom-white mx-50 bloc-cat-create_event">
     <div class="text-center pt-30 pb-8">
-      <h1 class="text-5xl font-family-urban text-black my-6">
+      <h1 class="text-5xl font-family-urban text-primary my-6">
         Créer votre partie idéale
       </h1>
-      <p class="text-black text-lg font-family-red-hat">
+      <p class="text-primary text-lg font-family-red-hat">
         Avec votre compte joueur vous pouvez organiser une partie pour chercher
         des joueurs.
       </p>
@@ -27,7 +27,7 @@
       <div class="z-10 w-full">
         <form @submit.prevent="handleCreateEvent" class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
-            <label for="event-title" class="text-black font-medium"
+            <label for="event-title" class="text-primary font-medium"
               >Titre de l'événements*</label
             >
             <input
@@ -36,24 +36,24 @@
               type="text"
               placeholder="Ex: soirée Catan, ..."
               required
-              class="border-[1.5px] hover:cursor-text border-custom-blue w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="border-[1.5px] hover:cursor-text border-custom-blue w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
           <div class="flex flex-col gap-2">
-            <label for="date" class="text-black font-medium">Date*</label>
+            <label for="date" class="text-primary font-medium">Date*</label>
             <input
               id="date"
               v-model="date"
               type="date"
               required
-              class="w-full h-10 px-4 py-3 hover:cursor-text rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 hover:cursor-text rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
           <div class="flex gap-2 w-full place-content-around">
             <div class="flex flex-col gap-2 w-full">
-              <label for="start-time" class="text-black font-medium"
+              <label for="start-time" class="text-primary font-medium"
                 >Heure de début*</label
               >
               <input
@@ -62,12 +62,12 @@
                 type="time"
                 placeholder="Entrez votre heure de début"
                 required
-                class="w-full px-4 py-3 h-10 hover:cursor-text border-[1.5px] border-custom-blue rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+                class="w-full px-4 py-3 h-10 hover:cursor-text border-[1.5px] border-custom-blue rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
               />
             </div>
 
             <div class="flex flex-col gap-2 w-full">
-              <label for="end-time" class="text-black font-medium"
+              <label for="end-time" class="text-primary font-medium"
                 >Heure de fin*</label
               >
               <input
@@ -77,13 +77,13 @@
                 type="time"
                 placeholder="Entrez votre heure de fin"
                 required
-                class="h-10 px-4 py-3 border-[1.5px] hover:cursor-text border-custom-blue rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+                class="h-10 px-4 py-3 border-[1.5px] hover:cursor-text border-custom-blue rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
               />
             </div>
           </div>
 
           <div class="flex flex-col gap-2">
-            <label for="location" class="text-black font-medium"
+            <label for="location" class="text-primary font-medium"
               >Nom du lieu*</label
             >
             <input
@@ -92,12 +92,14 @@
               type="text"
               placeholder="Ex : Chez Thomas, Bar du coin,..."
               required
-              class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+              class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
             />
           </div>
 
           <div class="flex flex-col gap-2">
-            <label for="address" class="text-black font-medium">Adresse</label>
+            <label for="address" class="text-primary font-medium"
+              >Adresse</label
+            >
             <div class="flex gap-2">
               <input
                 id="address"
@@ -105,7 +107,7 @@
                 type="text"
                 placeholder="Ex : 44 rue de la paix, Paris, 75001 France"
                 required
-                class="flex-1 h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white"
+                class="flex-1 h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
               />
             </div>
           </div>
@@ -119,7 +121,7 @@
             />
             <label
               for="isHomeAddress"
-              class="text-black text-sm cursor-pointer"
+              class="text-primary text-sm cursor-pointer"
             >
               <span class="font-semibold"
                 >Est-ce l'adresse de votre domicile ?</span
@@ -132,7 +134,7 @@
           <div class="flex flex-col gap-2">
             <label
               for="description"
-              class="font-medium text-black py-1 rounded w-fit"
+              class="font-medium text-primary py-1 rounded w-fit"
             >
               Description
             </label>
@@ -141,12 +143,12 @@
               v-model="description"
               placeholder="Décrivez l'événement, l'ambiance, les attendus, ce qui est prévu,..."
               rows="4"
-              class="w-full px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-white resize-none"
+              class="w-full px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white resize-none"
             ></textarea>
           </div>
 
           <div class="flex flex-col gap-2">
-            <label for="games" class="text-black font-medium"
+            <label for="games" class="text-primary font-medium"
               >Jeux proposés*</label
             >
             <div
@@ -177,7 +179,7 @@
           </div>
 
           <div class="flex flex-col gap-2">
-            <label for="participants" class="text-black font-medium">
+            <label for="participants" class="text-primary font-medium">
               Nombre de participants*
               <span class="font-normal text-gray-500">(dont vous)</span>
             </label>
@@ -204,7 +206,7 @@
               type="checkbox"
               class="w-5 h-5 mt-1 rounded border-custom-blue accent-custom-blue cursor-pointer"
             />
-            <label for="isPrivate" class="text-black text-sm cursor-pointer">
+            <label for="isPrivate" class="text-primary text-sm cursor-pointer">
               <span class="font-semibold">Votre événement est-il privée ?</span>
               Si oui, vous devrez valider la demande de participation des
               joueurs qui veulent rejoindre votre partie. Si non, vous n'aurez
@@ -213,7 +215,7 @@
             </label>
           </div>
 
-          <p class="text-black text-sm">
+          <p class="text-primary text-sm">
             Événement créé par
             <span class="font-semibold">{{ creatorName }}</span
             >.
@@ -230,7 +232,7 @@
             </button>
             <button
               type="submit"
-              class="h-10 hover:cursor-pointer w-full bg-custom-blue hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors"
+              class="h-10 hover:cursor-pointer w-full bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors"
               :disabled="loading"
             >
               {{ loading ? "Création en cours..." : "Créez votre événement" }}
