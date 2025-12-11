@@ -1,10 +1,14 @@
 <template>
-  <nav class="fixed top-0 left-0 right-0 bg-blue-700 px-5 py-8 z-10">
+  <nav class="fixed top-0 left-0 right-0 bg-custom-blue px-8 py-6 z-10">
     <div class="container mx-auto flex justify-between items-center">
       <div class="text-2xl font-bold">
-        <router-link to="/" class="text-white hover:text-gray-300"
-          >BOARDY</router-link
-        >
+        <router-link to="/" class="text-primary hover:text-gray-300">
+          <img
+            class="logo"
+            src="/img/icon/boardy-logo-white.svg"
+            alt="Boardy Logo"
+          />
+        </router-link>
       </div>
       <ul class="flex space-x-4 gap-7">
         <li v-if="authStore.isLogged">
@@ -42,7 +46,7 @@
         <li>
           <router-link
             to="/create_event"
-            class="hover:cursor-pointer hover:text-gray-300 bg-green-300 text-black px-6 py-3 rounded-2xl"
+            class="hover:cursor-pointer hover:text-gray-300 bg-custom-green text-black px-6 py-3 rounded-2xl"
             >Créer un évenement
           </router-link>
         </li>

@@ -1,35 +1,62 @@
 // Store Pinia pour les activités
 import { defineStore } from "pinia";
-import type { Activity } from "../types/Activity/index";
+import type { Activity, ActivityWithHost } from "../types/Activity/index";
+import type { User } from "../types/User/index";
+import type { Organisation } from "../types/Organisation/index";
 import { get } from "../utils/api/api";
 
 export const useActivityStore = defineStore("activity", {
   state: () => ({
-    activities: [] as Activity[],
-    currentActivity: null as Activity | null,
+    activities: [] as ActivityWithHost[],
+    currentActivity: null as ActivityWithHost | null,
     loading: false,
     error: null as string | null,
   }),
 
   getters: {
-    getActivities: (state): Activity[] => state.activities,
+    getActivities: (state): ActivityWithHost[] => state.activities,
 
-    // Nombre d'activités par type
+    // Activités à venir (date future uniquement)
+    getUpcomingActivities: (state): ActivityWithHost[] => {
+      const now = new Date();
+      return state.activities.filter((a) => new Date(a.date) > now);
+    },
+
+    // Nombre d'activités par type (futures uniquement)
     getOrganisationActivitiesCount: (state): number => {
-      return state.activities.filter((a) => a.type === "organisation").length;
+      const now = new Date();
+      return state.activities.filter(
+        (a) => a.hostType === "organisation" && new Date(a.date) > now
+      ).length;
     },
 
     getUserActivitiesCount: (state): number => {
-      return state.activities.filter((a) => a.type === "user").length;
+      const now = new Date();
+      return state.activities.filter(
+        (a) => a.hostType === "user" && new Date(a.date) > now
+      ).length;
     },
 
-    // Filtrer les activités par type
+    getEventActivitiesCount: (state): number => {
+      const now = new Date();
+      return state.activities.filter(
+        (a) => a.hostType === "event" && new Date(a.date) > now
+      ).length;
+    },
+
+    // Filtrer les activités par type (futures uniquement)
     getOrganisationActivities: (state): Activity[] => {
-      return state.activities.filter((a) => a.type === "organisation");
+      const now = new Date();
+      return state.activities.filter(
+        (a) => a.hostType === "organisation" && new Date(a.date) > now
+      );
     },
 
     getUserActivities: (state): Activity[] => {
-      return state.activities.filter((a) => a.type === "user");
+      const now = new Date();
+      return state.activities.filter(
+        (a) => a.hostType === "user" && new Date(a.date) > now
+      );
     },
   },
 
@@ -38,7 +65,34 @@ export const useActivityStore = defineStore("activity", {
       this.loading = true;
       this.error = null;
       try {
-        this.activities = await get(`/activities`);
+        const activities: Activity[] = await get(`/activities`);
+
+        // Enrichir chaque activité avec les données de l'hôte OU de l'organisation
+        const enrichedActivities = await Promise.all(
+          activities.map(async (activity) => {
+            try {
+              if (activity.hostType === "organisation") {
+                // Charger l'organisation
+                const organisation: Organisation = await get(
+                  `/organisations/${activity.hostId}`
+                );
+                return { ...activity, organisation };
+              } else {
+                // Charger l'utilisateur (pour hostType "user" ou "event")
+                const host: User = await get(`/users/${activity.hostId}`);
+                return { ...activity, host };
+              }
+            } catch (error) {
+              console.error(
+                `Erreur lors du chargement de l'hôte/organisation ${activity.hostId}:`,
+                error
+              );
+              return activity; // Retourner l'activité sans l'hôte en cas d'erreur
+            }
+          })
+        );
+
+        this.activities = enrichedActivities;
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors du chargement";
@@ -66,9 +120,22 @@ export const useActivityStore = defineStore("activity", {
       this.loading = true;
       this.error = null;
       try {
-        const newActivity = await apiService.createActivity(activity);
-        this.activities.push(newActivity);
-        return newActivity;
+        const newActivity: Activity = await post("/activities", activity);
+
+        // Enrichir la nouvelle activité
+        let enrichedActivity: ActivityWithHost;
+        if (newActivity.type === "organisation") {
+          const organisation: Organisation = await get(
+            `/organisations/${newActivity.hostId}`
+          );
+          enrichedActivity = { ...newActivity, organisation };
+        } else {
+          const host: User = await get(`/users/${newActivity.hostId}`);
+          enrichedActivity = { ...newActivity, host };
+        }
+
+        this.activities.push(enrichedActivity);
+        return enrichedActivity;
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors de la création";
@@ -83,12 +150,25 @@ export const useActivityStore = defineStore("activity", {
       this.loading = true;
       this.error = null;
       try {
-        const updated = await apiService.updateActivity(id, activity);
+        const updated: Activity = await put(`/activities/${id}`, activity);
+
+        // Enrichir l'activité mise à jour
+        let enrichedActivity: ActivityWithHost;
+        if (updated.type === "organisation") {
+          const organisation: Organisation = await get(
+            `/organisations/${updated.hostId}`
+          );
+          enrichedActivity = { ...updated, organisation };
+        } else {
+          const host: User = await get(`/users/${updated.hostId}`);
+          enrichedActivity = { ...updated, host };
+        }
+
         const index = this.activities.findIndex((a) => a.id === id);
         if (index !== -1) {
-          this.activities[index] = updated;
+          this.activities[index] = enrichedActivity;
         }
-        return updated;
+        return enrichedActivity;
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors de la mise à jour";

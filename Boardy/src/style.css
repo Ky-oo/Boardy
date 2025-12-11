@@ -1,1 +1,142 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: "Red Hat Display";
+  src: url("/font/RedHatDisplay/RedHatDisplay-VariableFont_wght.ttf")
+    format("truetype");
+  font-weight: 300 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Red Hat Display";
+  src: url("/font/RedHatDisplay/RedHatDisplay-Italic-VariableFont_wght.ttf")
+    format("truetype");
+  font-weight: 300 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Urban Sketart";
+  src: url("/font/UrbanSketart/UrbanSketart.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  --color-custom-blue: #1468e5;
+  --color-custom-red: #f7001f;
+  --color-custom-green: #acebab;
+  --color-custom-white: #f4fffd;
+  --color-primary: #101930;
+
+  --font-family-red-hat: "Red Hat Display", sans-serif;
+  --font-family-urban: "Urban Sketart", cursive;
+}
+
+/***** Home Page *****/
+
+.logo {
+  width: 213px;
+}
+
+.bloc-bandeau {
+  background-image: url("/img/home/home-banner.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.bloc-bandeau::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 200px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 1) 100%
+  );
+}
+
+.logo-footer {
+  margin-top: -300px;
+}
+
+.red-border {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.card-red {
+  transition: all 0.3s ease;
+}
+
+.red-border::after {
+  content: "";
+  position: absolute;
+  bottom: 20px;
+  left: 25px;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #f7001f;
+  border-radius: 0.75rem;
+  pointer-events: none;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.card-red:hover {
+  transform: translate(24px, -20px);
+}
+
+.bloc-cat {
+  position: relative;
+  margin-top: -100px;
+  padding-bottom: 100px;
+}
+
+.bloc-cat::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  left: 0;
+  width: 75%;
+  height: 260px;
+  background: var(--color-custom-green);
+  border-radius: 0 12px 12px 0;
+}
+
+.bloc-activites {
+  position: relative;
+  margin-top: -100px;
+}
+
+.bloc-activites::before {
+  content: "";
+  position: absolute;
+  top: 20%;
+  right: 0;
+  width: 60%;
+  height: 260px;
+  background: var(--color-custom-green);
+  border-radius: 12px 0 0 12px;
+  z-index: -1;
+}
+
+.bloc-activites::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 260px;
+  background: var(--color-custom-green);
+  border-radius: 12px;
+  z-index: -1;
+}
