@@ -1,6 +1,7 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
+import { useAuth } from "@/stores/authStore";
 
 import Home from "../pages/Home.vue";
 import Account from "../pages/Account.vue";
@@ -26,21 +27,25 @@ const routes: RouteRecordRaw[] = [
     path: "/participation-confirmed",
     name: "participation-confirmed",
     component: ParticipationConfirmed,
+    meta: { requiresAuth: true },
   },
   {
     path: "/account",
     name: "account",
     component: Account,
+    meta: { requiresAuth: true },
   },
   {
     path: "/my_events",
     name: "my_events",
     component: MyEvent,
+    meta: { requiresAuth: true },
   },
   {
     path: "/create_event",
     name: "create_event",
     component: CreateEvent,
+    meta: { requiresAuth: true },
   },
   {
     path: "/login",
@@ -57,4 +62,14 @@ const routes: RouteRecordRaw[] = [
 export const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, _from, next) => {
+  const authStore = useAuth();
+
+  if (to.meta.requiresAuth && !authStore.checkIfLogged) {
+    next({ name: "login" });
+  } else {
+    next();
+  }
 });

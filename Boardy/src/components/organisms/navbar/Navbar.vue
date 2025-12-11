@@ -27,6 +27,14 @@
             Mon profile
           </router-link>
         </li>
+        <li v-if="authStore.isLogged">
+          <button
+            @click="authStore.logout()"
+            class="text-white hover:cursor-pointer hover:text-gray-300"
+          >
+            Déconnexion
+          </button>
+        </li>
         <li v-if="!authStore.isLogged">
           <router-link
             to="/register"
