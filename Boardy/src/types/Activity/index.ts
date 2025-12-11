@@ -11,6 +11,8 @@ export type Activity = {
   address: string;
   city: string;
   postalCode: number;
+  latitude?: number;
+  longitude?: number;
   seats: number;
   type: "Festival" | "Bar/Soirée" | "Par des joueurs";
   hostType: "organisation" | "user" | "event";

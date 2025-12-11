@@ -166,83 +166,67 @@ export const useActivityStore = defineStore("activity", {
       }
     },
 
-    async createActivity(activity: Omit<Activity, "id">) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const newActivity: Activity = await post("/activities", activity);
+    // async createActivity(activity: Omit<Activity, "id">) {
+    //   this.loading = true;
+    //   this.error = null;
+    //   try {
+    //     const newActivity: Activity = await post("/activities", activity);
 
-        // Enrichir la nouvelle activité
-        let enrichedActivity: ActivityWithHost;
-        if (newActivity.type === "organisation") {
-          const organisation: Organisation = await get(
-            `/organisations/${newActivity.hostId}`
-          );
-          enrichedActivity = { ...newActivity, organisation };
-        } else {
-          const host: User = await get(`/users/${newActivity.hostId}`);
-          enrichedActivity = { ...newActivity, host };
-        }
+    //     // Enrichir la nouvelle activité
+    //     let enrichedActivity: ActivityWithHost;
+    //     if (newActivity.type === "organisation") {
+    //       const organisation: Organisation = await get(
+    //         `/organisations/${newActivity.hostId}`
+    //       );
+    //       enrichedActivity = { ...newActivity, organisation };
+    //     } else {
+    //       const host: User = await get(`/users/${newActivity.hostId}`);
+    //       enrichedActivity = { ...newActivity, host };
+    //     }
 
-        this.activities.push(enrichedActivity);
-        return enrichedActivity;
-      } catch (err) {
-        this.error =
-          err instanceof Error ? err.message : "Erreur lors de la création";
-        console.error("Erreur createActivity:", err);
-        throw err;
-      } finally {
-        this.loading = false;
-      }
-    },
+    //     this.activities.push(enrichedActivity);
+    //     return enrichedActivity;
+    //   } catch (err) {
+    //     this.error =
+    //       err instanceof Error ? err.message : "Erreur lors de la création";
+    //     console.error("Erreur createActivity:", err);
+    //     throw err;
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
 
-    async updateActivity(id: number, activity: Partial<Activity>) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const updated: Activity = await put(`/activities/${id}`, activity);
+    // async updateActivity(id: number, activity: Partial<Activity>) {
+    //   this.loading = true;
+    //   this.error = null;
+    //   try {
+    //     const updated: Activity = await put(`/activities/${id}`, activity);
 
-        // Enrichir l'activité mise à jour
-        let enrichedActivity: ActivityWithHost;
-        if (updated.type === "organisation") {
-          const organisation: Organisation = await get(
-            `/organisations/${updated.hostId}`
-          );
-          enrichedActivity = { ...updated, organisation };
-        } else {
-          const host: User = await get(`/users/${updated.hostId}`);
-          enrichedActivity = { ...updated, host };
-        }
+    //     // Enrichir l'activité mise à jour
+    //     let enrichedActivity: ActivityWithHost;
+    //     if (updated.type === "organisation") {
+    //       const organisation: Organisation = await get(
+    //         `/organisations/${updated.hostId}`
+    //       );
+    //       enrichedActivity = { ...updated, organisation };
+    //     } else {
+    //       const host: User = await get(`/users/${updated.hostId}`);
+    //       enrichedActivity = { ...updated, host };
+    //     }
 
-        const index = this.activities.findIndex((a) => a.id === id);
-        if (index !== -1) {
-          this.activities[index] = enrichedActivity;
-        }
-        return enrichedActivity;
-      } catch (err) {
-        this.error =
-          err instanceof Error ? err.message : "Erreur lors de la mise à jour";
-        console.error("Erreur updateActivity:", err);
-        throw err;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async deleteActivity(id: number) {
-      this.loading = true;
-      this.error = null;
-      try {
-        await apiService.deleteActivity(id);
-        this.activities = this.activities.filter((a) => a.id !== id);
-      } catch (err) {
-        this.error =
-          err instanceof Error ? err.message : "Erreur lors de la suppression";
-        console.error("Erreur deleteActivity:", err);
-        throw err;
-      } finally {
-        this.loading = false;
-      }
-    },
+    //     const index = this.activities.findIndex((a) => a.id === id);
+    //     if (index !== -1) {
+    //       this.activities[index] = enrichedActivity;
+    //     }
+    //     return enrichedActivity;
+    //   } catch (err) {
+    //     this.error =
+    //       err instanceof Error ? err.message : "Erreur lors de la mise à jour";
+    //     console.error("Erreur updateActivity:", err);
+    //     throw err;
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
   },
 });
