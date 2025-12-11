@@ -77,6 +77,26 @@ export const useActivityStore = defineStore("activity", {
         })
         .slice(0, 3); // Limiter à 3 activités similaires
     },
+
+    // Événements créés par l'utilisateur (où il est l'hôte)
+    getMyCreatedActivities:
+      (state) =>
+      (userId: number): ActivityWithHost[] => {
+        const now = new Date();
+        return state.activities.filter(
+          (a) => a.hostId === userId && new Date(a.date) > now
+        );
+      },
+
+    // Événements auxquels l'utilisateur participe
+    getMyJoinedActivities:
+      (state) =>
+      (userId: number): ActivityWithHost[] => {
+        const now = new Date();
+        return state.activities.filter(
+          (a) => a.playersId.includes(userId) && new Date(a.date) > now
+        );
+      },
   },
 
   actions: {

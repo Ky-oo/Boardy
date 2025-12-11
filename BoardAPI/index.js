@@ -158,7 +158,7 @@ const db = {
       seats: 4,
       type: "Par des joueurs",
       hostType: "user",
-      hostId: 1,
+      hostId: 2,
       playersId: [1],
       homeHost: true,
       private: true,

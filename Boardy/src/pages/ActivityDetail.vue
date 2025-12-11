@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-38">
+  <div class="pt-30">
     <div v-if="activityStore.loading" class="text-center py-8">
       <p class="text-gray-600">Chargement de l'activité...</p>
     </div>
@@ -11,7 +11,7 @@
     <div v-else-if="activityStore.currentActivity" class="mx-30 py-8">
       <button
         @click="$router.back()"
-        class="flex items-center text-custom-primary text-2xl py-3 hover:cursor-pointer mb-6"
+        class="flex items-center text-custom-primary text-2xl py-3 hover:cursor-pointer mb-16"
       >
         <IconChevronLeft class="mr-2" /> Retour
       </button>

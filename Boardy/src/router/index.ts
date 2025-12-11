@@ -9,6 +9,7 @@ import Login from "@/pages/Login.vue";
 import ActivityDetail from "../pages/ActivityDetail.vue";
 import ParticipationConfirmed from "../pages/ParticipationConfirmed.vue";
 import Register from "@/pages/Register.vue";
+import MyEvent from "@/pages/MyEvent.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -30,6 +31,11 @@ const routes: RouteRecordRaw[] = [
     path: "/account",
     name: "account",
     component: Account,
+  },
+  {
+    path: "/my_events",
+    name: "my_events",
+    component: MyEvent,
   },
   {
     path: "/create_event",

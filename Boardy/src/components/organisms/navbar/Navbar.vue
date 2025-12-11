@@ -13,7 +13,7 @@
       <ul class="flex space-x-4 gap-7">
         <li v-if="authStore.isLogged">
           <router-link
-            to="/"
+            to="/my_events"
             class="text-white hover:cursor-pointer hover:text-gray-300"
           >
             Mes événenement
