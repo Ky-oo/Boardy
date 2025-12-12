@@ -370,7 +370,7 @@
             </div>
           </div>
           <div class="bg-custom-white p-8 rounded-2xl">
-            <img src="/img/activityPage/chat.png" alt="Chat" />
+            <img src="/img/activityPage/chat.png" alt="Chat" class="w-full" />
             <div class="relative mt-4">
               <input
                 type="text"
