@@ -284,6 +284,10 @@ function nextId(list) {
   return list.length ? Math.max(...list.map((i) => i.id)) + 1 : 1;
 }
 
+app.get("/", (req, res) => {
+  res.send("Bienvenue sur l'API BoardAPI !");
+});
+
 // --- Routes USERS ---
 app.get("/users", (req, res) => {
   res.json(db.users);
