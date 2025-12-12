@@ -44,9 +44,16 @@
                 class="py-8"
               />
               <button
-                v-if="!isPending"
+                v-if="!authStore.isLogged"
+                @click="$router.push('/login')"
+                class="bg-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full"
+              >
+                Connectez-vous pour participer
+              </button>
+              <button
+                v-else-if="!isPending && authStore.isLogged"
                 @click="handleParticipate"
-                class="bg-custom-white text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full"
+                class="bg-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full"
               >
                 Je participe à cet événement
               </button>
