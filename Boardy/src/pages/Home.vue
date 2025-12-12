@@ -52,7 +52,7 @@
       </div>
     </router-link>
     <router-link to="/category/event" class="red-border">
-      <div class="card-red bg-[#F7001F] p-8 rounded-xl h-full">
+      <div class="card-red bg-custom-red p-8 rounded-xl h-full">
         <div class="flex justify-between items-center">
           <IconEvents class="text-custom-white" />
           <p
