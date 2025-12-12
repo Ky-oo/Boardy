@@ -22,6 +22,10 @@
       class="bloc-cat-event"
       :class="{ 'has-activities': paginatedActivities.length >= 7 }"
     >
+      <div class="mx-20 mb-6">
+        <FilterBar />
+      </div>
+
       <p class="text-lg text-gray-600 mb-6">
         {{ filteredActivities.length }} événement(s) trouvé(s)
       </p>
@@ -98,6 +102,7 @@ import IconChevronLeft from "../components/atoms/icons/IconChevronLeft.vue";
 import IconBars from "../components/atoms/icons/IconBars.vue";
 import IconGamers from "../components/atoms/icons/IconGamers.vue";
 import IconEvents from "../components/atoms/icons/IconEvents.vue";
+import FilterBar from "@/components/molecules/FilterBar.vue";
 
 const route = useRoute();
 const activityStore = useActivityStore();
