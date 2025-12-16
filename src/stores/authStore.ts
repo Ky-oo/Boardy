@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { User, UserWithoutPassword } from "../types/User";
+import type { User, UserWithoutPassword } from "../types/User/index.ts";
 import { get } from "../utils/api/api.ts";
 import { router } from "../router/index.ts";
 
