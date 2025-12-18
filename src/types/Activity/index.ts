@@ -1,30 +1,44 @@
 import type { User } from "../User/index";
 import type { Organisation } from "../Organisation/index";
 
+export type ActivityUser = Pick<
+  User,
+  "id" | "firstname" | "lastname" | "pseudo" | "email"
+>;
+
+export type ActivityHostType = "organisation" | "user" | "event";
+
 export type Activity = {
   id: number;
   title: string;
   description: string;
-  gameId: number[];
+  gameId: number | null;
   date: string;
-  place_name?: string;
-  address: string;
+  place_name?: string | null;
+  address?: string | null;
   city: string;
-  postalCode: number;
-  latitude?: number;
-  longitude?: number;
+  postalCode: string;
+  latitude?: number | null;
+  longitude?: number | null;
   seats: number;
-  type: "Festival" | "Bar/Soirée" | "Par des joueurs";
-  hostType: "organisation" | "user" | "event";
-  hostId: number;
-  playersId: number[];
+  type: "Festival" | "Bar/Soiree" | "Par des joueurs";
   homeHost: boolean;
-  price?: number;
+  price?: string | null;
   private: boolean;
+  hostUserId?: number | null;
+  hostOrganisationId?: number | null;
+  hostType?: ActivityHostType;
+  hostId?: number | null;
+  hostUser?: ActivityUser | null;
+  hostOrganisation?: Organisation | null;
+  playersId: number[];
+  users?: ActivityUser[];
+  chatId?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
-// Type enrichi avec les données de l'hôte (User) OU de l'organisation
 export type ActivityWithHost = Activity & {
-  host?: User;
-  organisation?: Organisation;
+  host?: ActivityUser | null;
+  organisation?: Organisation | null;
 };

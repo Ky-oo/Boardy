@@ -1,9 +1,22 @@
-// Store Pinia pour les activités
 import { defineStore } from "pinia";
-import type { Activity, ActivityWithHost } from "../types/Activity/index";
-import type { User } from "../types/User/index";
-import type { Organisation } from "../types/Organisation/index";
-import { get } from "../utils/api/api";
+import type {
+  Activity,
+  ActivityHostType,
+  ActivityUser,
+  ActivityWithHost,
+} from "../types/Activity/index";
+import { del, get, post, put } from "../utils/api/api";
+
+const deriveHostType = (
+  hostOrganisation?: unknown,
+  hostUserId?: number | null,
+  hostType?: ActivityHostType
+): ActivityHostType => {
+  if (hostType) return hostType;
+  if (hostOrganisation) return "organisation";
+  if (hostUserId) return "user";
+  return "event";
+};
 
 export const useActivityStore = defineStore("activity", {
   state: () => ({
@@ -16,13 +29,13 @@ export const useActivityStore = defineStore("activity", {
   getters: {
     getActivities: (state): ActivityWithHost[] => state.activities,
 
-    // Activités à venir (date future uniquement)
+    // Activites a venir (date future uniquement)
     getUpcomingActivities: (state): ActivityWithHost[] => {
       const now = new Date();
       return state.activities.filter((a) => new Date(a.date) > now);
     },
 
-    // Nombre d'activités par type (futures uniquement)
+    // Nombre d'activites par type (futures uniquement)
     getOrganisationActivitiesCount: (state): number => {
       const now = new Date();
       return state.activities.filter(
@@ -44,7 +57,7 @@ export const useActivityStore = defineStore("activity", {
       ).length;
     },
 
-    // Filtrer les activités par type (futures uniquement)
+    // Filtrer les activites par type (futures uniquement)
     getOrganisationActivities: (state): Activity[] => {
       const now = new Date();
       return state.activities.filter(
@@ -59,7 +72,7 @@ export const useActivityStore = defineStore("activity", {
       );
     },
 
-    // Obtenir des activités similaires basées sur l'activité actuelle
+    // Obtenir des activites similaires basees sur l'activite actuelle
     getSimilarActivities: (state): ActivityWithHost[] => {
       if (!state.currentActivity) return [];
 
@@ -69,16 +82,13 @@ export const useActivityStore = defineStore("activity", {
 
       return state.activities
         .filter((a) => {
-          // Exclure l'activité actuelle et les activités passées
           if (a.id === currentId || new Date(a.date) <= now) return false;
-
-          // Vérifier uniquement si l'activité est dans la même ville
           return a.city === currentCity;
         })
-        .slice(0, 3); // Limiter à 3 activités similaires
+        .slice(0, 3);
     },
 
-    // Événements créés par l'utilisateur (où il est l'hôte)
+    // Evenements crees par l'utilisateur (ou il est l'hote)
     getMyCreatedActivities:
       (state) =>
       (userId: number): ActivityWithHost[] => {
@@ -88,7 +98,7 @@ export const useActivityStore = defineStore("activity", {
         );
       },
 
-    // Événements auxquels l'utilisateur participe
+    // Evenements auxquels l'utilisateur participe
     getMyJoinedActivities:
       (state) =>
       (userId: number): ActivityWithHost[] => {
@@ -100,38 +110,52 @@ export const useActivityStore = defineStore("activity", {
   },
 
   actions: {
+    normalizeActivity(activity: Activity): ActivityWithHost {
+      const hostOrganisation = activity.hostOrganisation ?? null;
+      const hostUser = activity.hostUser ?? null;
+
+      const hostType: ActivityHostType = deriveHostType(
+        hostOrganisation,
+        activity.hostUserId,
+        activity.hostType
+      );
+
+      const hostId =
+        activity.hostId ??
+        (hostType === "organisation"
+          ? hostOrganisation?.id ?? activity.hostOrganisationId ?? null
+          : hostUser?.id ?? activity.hostUserId ?? null);
+
+      const playersId =
+        activity.playersId?.length && activity.playersId.length > 0
+          ? activity.playersId
+          : activity.users?.map((u: ActivityUser) => u.id) ?? [];
+
+      return {
+        ...activity,
+        hostType,
+        hostId: hostId ?? null,
+        host: hostUser,
+        organisation: hostOrganisation,
+        playersId,
+      };
+    },
+
     async fetchActivities() {
       this.loading = true;
       this.error = null;
       try {
-        const activities: Activity[] = await get(`/activities`);
+        const response = await get(`/activity`);
+        const activities: Activity[] = Array.isArray(response)
+          ? response
+          : // support potential pagination wrappers {rows:[], data:[]}
+            (response?.rows as Activity[]) ||
+            (response?.data as Activity[]) ||
+            [];
 
-        // Enrichir chaque activité avec les données de l'hôte OU de l'organisation
-        const enrichedActivities = await Promise.all(
-          activities.map(async (activity) => {
-            try {
-              if (activity.hostType === "organisation") {
-                // Charger l'organisation
-                const organisation: Organisation = await get(
-                  `/organisations/${activity.hostId}`
-                );
-                return { ...activity, organisation };
-              } else {
-                // Charger l'utilisateur (pour hostType "user" ou "event")
-                const host: User = await get(`/users/${activity.hostId}`);
-                return { ...activity, host };
-              }
-            } catch (error) {
-              console.error(
-                `Erreur lors du chargement de l'hôte/organisation ${activity.hostId}:`,
-                error
-              );
-              return activity; // Retourner l'activité sans l'hôte en cas d'erreur
-            }
-          })
+        this.activities = activities.map((activity) =>
+          this.normalizeActivity(activity)
         );
-
-        this.activities = enrichedActivities;
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors du chargement";
@@ -145,18 +169,8 @@ export const useActivityStore = defineStore("activity", {
       this.loading = true;
       this.error = null;
       try {
-        const activity: Activity = await get(`/activities/${id}`);
-
-        // Enrichir l'activité avec les données de l'hôte OU de l'organisation
-        if (activity.hostType === "organisation") {
-          const organisation: Organisation = await get(
-            `/organisations/${activity.hostId}`
-          );
-          this.currentActivity = { ...activity, organisation };
-        } else {
-          const host: User = await get(`/users/${activity.hostId}`);
-          this.currentActivity = { ...activity, host };
-        }
+        const activity: Activity = await get(`/activity/${id}`);
+        this.currentActivity = this.normalizeActivity(activity);
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors du chargement";
@@ -166,67 +180,78 @@ export const useActivityStore = defineStore("activity", {
       }
     },
 
-    // async createActivity(activity: Omit<Activity, "id">) {
-    //   this.loading = true;
-    //   this.error = null;
-    //   try {
-    //     const newActivity: Activity = await post("/activities", activity);
+    async createActivity(activity: Record<string, unknown>) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const newActivity: Activity = await post("/activity", activity);
+        const normalized = this.normalizeActivity(newActivity);
+        this.activities.push(normalized);
+        return normalized;
+      } catch (err) {
+        this.error =
+          err instanceof Error ? err.message : "Erreur lors de la creation";
+        console.error("Erreur createActivity:", err);
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
 
-    //     // Enrichir la nouvelle activité
-    //     let enrichedActivity: ActivityWithHost;
-    //     if (newActivity.type === "organisation") {
-    //       const organisation: Organisation = await get(
-    //         `/organisations/${newActivity.hostId}`
-    //       );
-    //       enrichedActivity = { ...newActivity, organisation };
-    //     } else {
-    //       const host: User = await get(`/users/${newActivity.hostId}`);
-    //       enrichedActivity = { ...newActivity, host };
-    //     }
+    async updateActivity(id: number, activity: Partial<Activity>) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const updated: Activity = await put(`/activity/${id}`, activity);
+        const normalized = this.normalizeActivity(updated);
+        const index = this.activities.findIndex((a) => a.id === id);
+        if (index !== -1) {
+          this.activities[index] = normalized;
+        }
+        if (this.currentActivity?.id === id) {
+          this.currentActivity = normalized;
+        }
+        return normalized;
+      } catch (err) {
+        this.error =
+          err instanceof Error ? err.message : "Erreur lors de la mise a jour";
+        console.error("Erreur updateActivity:", err);
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
 
-    //     this.activities.push(enrichedActivity);
-    //     return enrichedActivity;
-    //   } catch (err) {
-    //     this.error =
-    //       err instanceof Error ? err.message : "Erreur lors de la création";
-    //     console.error("Erreur createActivity:", err);
-    //     throw err;
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
+    async joinActivity(id: number) {
+      try {
+        const updated: Activity = await post(`/activity/${id}/join`);
+        const normalized = this.normalizeActivity(updated);
+        this.currentActivity =
+          this.currentActivity?.id === id ? normalized : this.currentActivity;
+        this.activities = this.activities.map((a) =>
+          a.id === id ? normalized : a
+        );
+        return normalized;
+      } catch (err) {
+        console.error("Erreur joinActivity:", err);
+        throw err;
+      }
+    },
 
-    // async updateActivity(id: number, activity: Partial<Activity>) {
-    //   this.loading = true;
-    //   this.error = null;
-    //   try {
-    //     const updated: Activity = await put(`/activities/${id}`, activity);
-
-    //     // Enrichir l'activité mise à jour
-    //     let enrichedActivity: ActivityWithHost;
-    //     if (updated.type === "organisation") {
-    //       const organisation: Organisation = await get(
-    //         `/organisations/${updated.hostId}`
-    //       );
-    //       enrichedActivity = { ...updated, organisation };
-    //     } else {
-    //       const host: User = await get(`/users/${updated.hostId}`);
-    //       enrichedActivity = { ...updated, host };
-    //     }
-
-    //     const index = this.activities.findIndex((a) => a.id === id);
-    //     if (index !== -1) {
-    //       this.activities[index] = enrichedActivity;
-    //     }
-    //     return enrichedActivity;
-    //   } catch (err) {
-    //     this.error =
-    //       err instanceof Error ? err.message : "Erreur lors de la mise à jour";
-    //     console.error("Erreur updateActivity:", err);
-    //     throw err;
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
+    async leaveActivity(id: number) {
+      try {
+        const updated: Activity = await del(`/activity/${id}/leave`);
+        const normalized = this.normalizeActivity(updated);
+        this.currentActivity =
+          this.currentActivity?.id === id ? normalized : this.currentActivity;
+        this.activities = this.activities.map((a) =>
+          a.id === id ? normalized : a
+        );
+        return normalized;
+      } catch (err) {
+        console.error("Erreur leaveActivity:", err);
+        throw err;
+      }
+    },
   },
 });

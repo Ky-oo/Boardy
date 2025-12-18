@@ -1,29 +1,46 @@
 import axios from "axios";
 
-const baseURL = "https://boardy-h897.onrender.com";
+const baseURL =
+  import.meta.env.VITE_API_BASE_URL?.toString() || "http://localhost:3000";
 
 const api = axios.create({
   baseURL,
 });
 
-export const get = async (route: string, params?: Record<string, any>) => {
-  try {
-    const response = await api.get(route, { params });
-    return response.data;
-  } catch (error) {
-    throw error;
+export const setAuthToken = (token?: string | null) => {
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common.Authorization;
   }
+};
+
+export const get = async (route: string, params?: Record<string, any>) => {
+  const response = await api.get(route, { params });
+  return response.data;
 };
 
 export const post = async (
   route: string,
-  body: any,
+  body?: any,
   params?: Record<string, any>
 ) => {
-  try {
-    const response = await api.post(route, body, { params });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post(route, body, { params });
+  return response.data;
 };
+
+export const put = async (
+  route: string,
+  body?: any,
+  params?: Record<string, any>
+) => {
+  const response = await api.put(route, body, { params });
+  return response.data;
+};
+
+export const del = async (route: string, params?: Record<string, any>) => {
+  const response = await api.delete(route, { params });
+  return response.data;
+};
+
+export default api;

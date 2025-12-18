@@ -30,6 +30,7 @@
             <label for="event-title" class="text-primary font-medium"
               >Titre de l'événements*</label
             >
+
             <input
               id="event-title"
               v-model="eventTitle"
@@ -42,6 +43,7 @@
 
           <div class="flex flex-col gap-2">
             <label for="date" class="text-primary font-medium">Date*</label>
+
             <input
               id="date"
               v-model="date"
@@ -56,6 +58,7 @@
               <label for="start-time" class="text-primary font-medium"
                 >Heure de début*</label
               >
+
               <input
                 id="start-time"
                 v-model="startTime"
@@ -70,6 +73,7 @@
               <label for="end-time" class="text-primary font-medium"
                 >Heure de fin*</label
               >
+
               <input
                 id="end-time"
                 v-model="endTime"
@@ -86,6 +90,7 @@
             <label for="location" class="text-primary font-medium"
               >Nom du lieu*</label
             >
+
             <input
               id="location"
               v-model="location"
@@ -100,6 +105,7 @@
             <label for="address" class="text-primary font-medium"
               >Adresse</label
             >
+
             <div class="flex gap-2">
               <input
                 id="address"
@@ -119,6 +125,7 @@
               type="checkbox"
               class="w-5 h-5 mt-1 border-custom-blue accent-custom-blue cursor-pointer"
             />
+
             <label
               for="isHomeAddress"
               class="text-primary text-sm cursor-pointer"
@@ -126,6 +133,7 @@
               <span class="font-semibold"
                 >Est-ce l'adresse de votre domicile ?</span
               >
+
               Si c'est le cas nous cacherons l'adresse précise et la partagerons
               aux participants seulement 24h avant l'événement.
             </label>
@@ -138,6 +146,7 @@
             >
               Description
             </label>
+
             <textarea
               id="description"
               v-model="description"
@@ -151,6 +160,7 @@
             <label for="games" class="text-primary font-medium"
               >Jeux proposés*</label
             >
+
             <div
               class="flex items-center h-10 gap-2 border-[1.5px] border-custom-blue rounded-xl px-4 py-2"
             >
@@ -168,6 +178,7 @@
                   d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                 />
               </svg>
+
               <input
                 id="games"
                 v-model="games"
@@ -181,12 +192,15 @@
           <div class="flex flex-col gap-2">
             <label for="participants" class="text-primary font-medium">
               Nombre de participants*
+
               <span class="font-normal text-gray-500">(dont vous)</span>
             </label>
+
             <div
               class="flex items-center gap-2 border-[1.5px] border-custom-blue rounded-xl px-4 py-2 w-fit"
             >
               <IconParticipants class="w-5 h-5 text-gray-400 z" />
+
               <input
                 id="participants"
                 v-model.number="participants"
@@ -206,8 +220,10 @@
               type="checkbox"
               class="w-5 h-5 mt-1 rounded border-custom-blue accent-custom-blue cursor-pointer"
             />
+
             <label for="isPrivate" class="text-primary text-sm cursor-pointer">
               <span class="font-semibold">Votre événement est-il privée ?</span>
+
               Si oui, vous devrez valider la demande de participation des
               joueurs qui veulent rejoindre votre partie. Si non, vous n'aurez
               pas besoin de valider la demande et ils seront immédiatement
@@ -217,11 +233,13 @@
 
           <p class="text-primary text-sm">
             Événement créé par
+
             <span class="font-semibold">{{ creatorName }}</span
             >.
           </p>
 
           <!-- Boutons -->
+
           <div class="flex gap-4 mt-4">
             <button
               type="button"
@@ -230,6 +248,7 @@
             >
               Annuler
             </button>
+
             <button
               type="submit"
               class="h-10 hover:cursor-pointer w-full bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors"
@@ -253,11 +272,12 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/stores/authStore";
 import IconParticipants from "@/components/atoms/icons/IconParticipants.vue";
+import { useActivityStore } from "@/stores/activityStore";
 
 const router = useRouter();
 const authStore = useAuth();
+const activityStore = useActivityStore();
 
-// Form fields
 const eventTitle = ref("");
 const date = ref("");
 const startTime = ref("");
@@ -269,40 +289,50 @@ const description = ref("");
 const games = ref("");
 const participants = ref(4);
 const isPrivate = ref(false);
-
 const error = ref("");
 const loading = ref(false);
 
-// Get creator name from auth store
 const creatorName = computed(() => {
   const user = authStore.getUser;
   if (user) {
     return `${user.firstname} ${user.lastname?.charAt(0)}.`;
   }
-  return "Thomas B";
+  return "Anonyme";
 });
 
 const handleCreateEvent = async () => {
   loading.value = true;
   error.value = "";
   try {
-    // TODO: Implement event creation API call
-    console.log({
-      eventTitle: eventTitle.value,
-      date: date.value,
-      startTime: startTime.value,
-      endTime: endTime.value,
-      location: location.value,
-      address: address.value,
-      isHomeAddress: isHomeAddress.value,
+    if (!authStore.user) {
+      throw new Error("Vous devez être connecté pour créer un évènement");
+    }
+
+    const isoDate = new Date(
+      `${date.value}T${startTime.value || "00:00"}`
+    ).toISOString();
+
+    await activityStore.createActivity({
+      title: eventTitle.value,
       description: description.value,
-      games: games.value,
-      participants: participants.value,
-      isPrivate: isPrivate.value,
+      gameId: null,
+      date: isoDate,
+      place_name: location.value,
+      address: address.value,
+      city: authStore.user.city,
+      postalCode: "00000",
+      seats: participants.value,
+      type: "Par des joueurs",
+      homeHost: isHomeAddress.value,
+      price: null,
+      private: isPrivate.value,
+      hostUserId: authStore.user.id,
+      hostType: "user",
     });
+
     router.push("/");
   } catch (e: any) {
-    error.value = e.message || "Erreur lors de la création de l'événement";
+    error.value = e.message || "Erreur lors de la création de l'évènement";
   } finally {
     loading.value = false;
   }
