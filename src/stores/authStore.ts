@@ -7,8 +7,24 @@ type Tokens = {
   accessToken: string | null;
 };
 
+interface AuthState {
+  user: UserWithoutPassword | null;
+  isLogged: boolean;
+  tokens: Tokens;
+}
+
+interface LoginResponse {
+  user: UserWithoutPassword;
+  token: string;
+}
+
+interface RegisterResponse {
+  user: UserWithoutPassword;
+  token: string;
+}
+
 export const useAuth = defineStore("auth", {
-  state: () => ({
+  state: (): AuthState => ({
     user: null as UserWithoutPassword | null,
     isLogged: false as boolean,
     tokens: { accessToken: null } as Tokens,
@@ -16,12 +32,15 @@ export const useAuth = defineStore("auth", {
   getters: {
     getUser: (state): UserWithoutPassword | null => state.user,
     checkIfLogged: (state): boolean => state.isLogged,
-    getTokens: (state) => state.tokens,
+    getTokens: (state): Tokens => state.tokens,
   },
   actions: {
-    async login(email: string, password: string) {
+    async login(email: string, password: string): Promise<void> {
       try {
-        const response = await post(`/auth/login`, { email, password });
+        const response: LoginResponse = await post(`/auth/login`, {
+          email,
+          password,
+        });
         const { user, token } = response;
 
         if (!user || !token) {
@@ -51,9 +70,9 @@ export const useAuth = defineStore("auth", {
       email: string,
       password: string,
       city: string
-    ) {
+    ): Promise<void> {
       try {
-        const response = await post(`/auth/register`, {
+        const response: RegisterResponse = await post(`/auth/register`, {
           firstname,
           lastname,
           pseudo,
@@ -83,7 +102,7 @@ export const useAuth = defineStore("auth", {
       }
     },
 
-    logout() {
+    logout(): void {
       this.user = null;
       this.isLogged = false;
       this.tokens = { accessToken: null };
@@ -91,21 +110,19 @@ export const useAuth = defineStore("auth", {
       router.push("/");
     },
 
-    hydrateAuth() {
+    hydrateAuth(): void {
+      if (this.tokens?.accessToken) {
+        setAuthToken(this.tokens.accessToken);
+        this.isLogged = true;
+      }
+    },
+
+    initFromPersisted(): void {
       if (this.tokens?.accessToken) {
         setAuthToken(this.tokens.accessToken);
         this.isLogged = true;
       }
     },
   },
-  persist: {
-    enabled: true,
-    afterRestore: (ctx) => {
-      const token = ctx.store.tokens?.accessToken || null;
-      setAuthToken(token);
-      if (token) {
-        ctx.store.isLogged = true;
-      }
-    },
-  },
+  persist: true,
 });
