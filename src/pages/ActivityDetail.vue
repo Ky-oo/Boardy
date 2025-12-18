@@ -149,11 +149,7 @@
                   </div>
                   <div class="text-custom-white">
                     <p class="text-sm text-custom-green">Prix</p>
-                    {{
-                      activityStore.currentActivity.price
-                        ? `${activityStore.currentActivity.price}€`
-                        : "Gratuit"
-                    }}
+                    {{ formatPriceValue(activityStore.currentActivity.price) }}
                   </div>
                 </div>
                 <div class="flex items-center">
@@ -334,11 +330,7 @@
                   </div>
                   <div class="text-custom-white">
                     <p class="text-sm text-custom-green">Prix</p>
-                    {{
-                      activityStore.currentActivity.price
-                        ? `${activityStore.currentActivity.price}€`
-                        : "Gratuit"
-                    }}
+                    {{ formatPriceValue(activityStore.currentActivity.price) }}
                   </div>
                 </div>
                 <div class="flex items-center">
@@ -448,21 +440,27 @@ const formatTime = (date: string) => {
   });
 };
 
-const handleParticipate = () => {
-  if (activityStore.currentActivity?.private) {
-    // Si l'activité est privée, on change juste l'état
-    isPending.value = true;
-  } else {
-    // Si l'activité est publique, on ajoute le joueur et redirige
-    if (activityStore.currentActivity) {
-      // Ajouter un ID fictif (par exemple 999 pour l'utilisateur actuel)
-      activityStore.currentActivity.playersId.push(999);
-    }
+const formatPriceValue = (price?: string | number | null) => {
+  const num = price !== null && price !== undefined ? Number(price) : 0;
+  if (!num) return "Gratuit";
+  return `${num.toFixed(2)} €`;
+};
 
-    // Redirection après un court délai pour voir l'animation
-    setTimeout(() => {
-      router.push("/participation-confirmed");
-    }, 1000);
+const handleParticipate = async () => {
+  if (!activityStore.currentActivity) return;
+  try {
+    const updated = await activityStore.joinActivity(
+      activityStore.currentActivity.id
+    );
+    if (updated.private) {
+      isPending.value = true;
+    } else {
+      setTimeout(() => {
+        router.push("/participation-confirmed");
+      }, 500);
+    }
+  } catch (err) {
+    console.error("Erreur lors de la participation:", err);
   }
 };
 

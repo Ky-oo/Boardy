@@ -1,0 +1,44 @@
+import type { User } from "../User/index";
+import type { Organisation } from "../Organisation/index";
+
+export type ActivityUser = Pick<
+  User,
+  "id" | "firstname" | "lastname" | "pseudo" | "email"
+>;
+
+export type ActivityHostType = "organisation" | "user" | "event";
+
+export type Activity = {
+  id: number;
+  title: string;
+  description: string;
+  gameId: number | null;
+  date: string;
+  place_name?: string | null;
+  address?: string | null;
+  city: string;
+  postalCode: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  seats: number;
+  type: "Festival" | "Bar/Soiree" | "Par des joueurs";
+  homeHost: boolean;
+  price?: string | null;
+  private: boolean;
+  hostUserId?: number | null;
+  hostOrganisationId?: number | null;
+  hostType?: ActivityHostType;
+  hostId?: number | null;
+  hostUser?: ActivityUser | null;
+  hostOrganisation?: Organisation | null;
+  playersId: number[];
+  users?: ActivityUser[];
+  chatId?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type ActivityWithHost = Activity & {
+  host?: ActivityUser | null;
+  organisation?: Organisation | null;
+};

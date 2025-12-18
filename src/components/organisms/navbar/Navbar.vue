@@ -53,7 +53,7 @@
         </li>
         <li>
           <router-link
-            to="/create_event"
+            :to="authStore.isLogged ? '/create_event' : '/login'"
             class="hover:cursor-pointer hover:bg-custom-green-hover bg-custom-green text-primary px-6 py-3 rounded-2xl"
             >Créer un événement
           </router-link>

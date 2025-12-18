@@ -121,7 +121,7 @@ import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
 const router = useRouter();
 const authStore = useAuth();
 
-const email = ref("alice@gmail.com");
+const email = ref("alice@example.com");
 const password = ref("azerty");
 const error = ref("");
 const loading = ref(false);

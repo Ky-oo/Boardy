@@ -22,7 +22,7 @@
       </div>
 
       <div class="bg-custom-blue rounded-3xl p-8 w-full z-10">
-        <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
+        <form @submit.prevent="handleRegister" class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
             <label for="lastname" class="text-custom-white font-medium"
               >Nom</label
@@ -53,6 +53,20 @@
             />
           </div>
 
+          <div class="flex flex-col gap-2">
+            <label for="pseudo" class="text-custom-white font-medium"
+              >Pseudo</label
+            >
+            <input
+              id="pseudo"
+              v-model="pseudo"
+              autocomplete="nickname"
+              type="text"
+              placeholder="Choisissez un pseudo"
+              required
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+            />
+          </div>
           <div class="flex flex-col gap-2">
             <label for="email" class="text-custom-white font-medium"
               >Email</label
@@ -227,6 +241,7 @@ const authStore = useAuth();
 
 const firstname = ref("");
 const lastname = ref("");
+const pseudo = ref("");
 const email = ref("");
 const password = ref("");
 const city = ref("");
@@ -296,15 +311,16 @@ const getUserLocation = async () => {
   );
 };
 
-const handleLogin = async () => {
+const handleRegister = async () => {
   loading.value = true;
   error.value = "";
   try {
-    await authStore.login(email.value, password.value);
+    await authStore.register(firstname.value, lastname.value, pseudo.value, email.value, password.value, city.value);
   } catch (e: any) {
-    error.value = e.message || "Erreur de connexion";
+    error.value = e.message || "Erreur d'inscription";
   } finally {
     loading.value = false;
   }
 };
 </script>
+

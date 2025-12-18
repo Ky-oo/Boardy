@@ -70,7 +70,6 @@ import IconNav from "../atoms/icons/IconNav.vue";
 import IconParticipant from "../atoms/icons/IconParticipant.vue";
 import IconMeeple from "../atoms/icons/IconMeeple.vue";
 
-// Récupérer l'activité passée en props
 const props = defineProps<{
   activity: ActivityWithHost;
 }>();
@@ -92,31 +91,32 @@ const timeFormatted = new Date(props.activity.date).toLocaleTimeString(
   }
 );
 
-// Fonction pour obtenir le bon chemin d'image selon le hostType
 const getImagePath = computed(() => {
   return `/img/home/img-${props.activity.hostType}.png`;
 });
 
 const getAddress = computed(() => {
   if (props.activity.homeHost === true && props.activity.host) {
-    return `${props.activity.city}, Chez ${props.activity.host.firstname} ${props.activity.host.lastname}`;
-  } else {
-    return `${props.activity.city}, ${
-      props.activity.place_name || props.activity.address
+    return `${props.activity.city}, Chez ${props.activity.host.firstname} ${
+      props.activity.host.lastname ?? ""
     }`;
   }
+  return `${props.activity.city}, ${
+    props.activity.place_name || props.activity.address || ""
+  }`;
 });
 
 const getPrice = computed(() => {
-  if (
-    props.activity.price === 0 ||
-    props.activity.price === null ||
-    props.activity.price === undefined
-  ) {
+  const priceNumber =
+    props.activity.price !== null && props.activity.price !== undefined
+      ? Number(props.activity.price)
+      : 0;
+
+  if (!priceNumber) {
     return "Gratuit";
-  } else if (props.activity.price) {
-    return `${props.activity.price}€`;
   }
+
+  return `${priceNumber.toFixed(2)} €`;
 });
 
 const getHost = computed(() => {
@@ -134,7 +134,7 @@ const getHost = computed(() => {
   ) {
     return `Par ${props.activity.organisation.name}`;
   } else if (props.activity.hostType === "event" && props.activity.host) {
-    return `Par Meeples`;
+    return "Par Boardy";
   }
 });
 
@@ -143,7 +143,7 @@ const getTypeColor = computed(() => {
     return "bg-custom-white text-primary";
   } else if (props.activity.type === "Par des joueurs") {
     return "bg-custom-green text-primary";
-  } else if (props.activity.type === "Bar/Soirée") {
+  } else if (props.activity.type === "Bar/Soiree") {
     return "bg-custom-red";
   }
 });
