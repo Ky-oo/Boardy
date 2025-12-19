@@ -16,10 +16,7 @@
         <IconChevronLeft class="mr-2" /> Retour
       </button>
 
-      <div
-        v-if="canEdit"
-        class="flex justify-end gap-3 mb-6"
-      >
+      <div v-if="canEdit" class="flex justify-end gap-3 mb-6">
         <button
           class="px-4 py-2 bg-custom-blue text-white rounded-lg hover:bg-blue-600"
           @click="handleEdit"
@@ -394,7 +391,6 @@ import IconTime from "@/components/atoms/icons/IconTime.vue";
 import IconDollar from "@/components/atoms/icons/IconDollar.vue";
 import IconPerson from "@/components/atoms/icons/IconPerson.vue";
 import IconDe from "@/components/atoms/icons/IconDe.vue";
-import IconSend from "@/components/atoms/icons/IconSend.vue";
 import ActivityCard from "@/components/molecules/ActivityCard.vue";
 import ChatPanel from "@/components/organisms/ChatPanel.vue";
 import { useAuth } from "@/stores/authStore";

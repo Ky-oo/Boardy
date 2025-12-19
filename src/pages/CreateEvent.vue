@@ -273,6 +273,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuth } from "@/stores/authStore";
 import IconParticipants from "@/components/atoms/icons/IconParticipants.vue";
 import { useActivityStore } from "@/stores/activityStore";
+import type { Activity } from "@/types/Activity";
 
 const router = useRouter();
 const route = useRoute();
@@ -360,7 +361,7 @@ const handleSubmit = async () => {
       `${date.value}T${startTime.value || "00:00"}`
     ).toISOString();
 
-    const payload = {
+    const payload: Partial<Activity> = {
       title: eventTitle.value,
       description: description.value,
       gameId: null,

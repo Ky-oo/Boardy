@@ -79,6 +79,7 @@
         placeholder="Écrire un message..."
         class="w-full p-4 pr-14 bg-custom-white rounded-2xl outline-none focus:ring-2 focus:ring-custom-primary"
         @keydown.enter.prevent="sendMessage"
+        @input="handleTyping"
       />
       <button
         class="absolute right-3 top-1/2 -translate-y-1/2 bg-custom-blue p-2 rounded-lg hover:cursor-pointer disabled:opacity-50"
@@ -121,6 +122,7 @@ const messageInput = ref("");
 const isConnected = ref(false);
 const typingUsers = ref<Set<number>>(new Set());
 const error = ref("");
+const typingInterval = ref<number | null>(null);
 
 const removeMessagesByIds = (ids: (number | string)[]) => {
   if (!ids?.length) return;
@@ -130,6 +132,38 @@ const removeMessagesByIds = (ids: (number | string)[]) => {
     if (!identifier) return true;
     return !toDelete.has(identifier.toString());
   });
+};
+
+const sendTyping = () => {
+  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) return;
+  const payload = {
+    type: "typing",
+    activityId: props.activityId,
+    token: props.token,
+  };
+  ws.value.send(JSON.stringify(payload));
+};
+
+const startTypingLoop = () => {
+  if (typingInterval.value !== null) return;
+  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) return;
+  sendTyping();
+  typingInterval.value = window.setInterval(sendTyping, 1500);
+};
+
+const stopTypingLoop = () => {
+  if (typingInterval.value === null) return;
+  clearInterval(typingInterval.value);
+  typingInterval.value = null;
+};
+
+const handleTyping = () => {
+  const hasContent = messageInput.value.trim().length > 0;
+  if (hasContent) {
+    startTypingLoop();
+  } else {
+    stopTypingLoop();
+  }
 };
 
 const wsUrl =
@@ -162,6 +196,7 @@ const connect = () => {
         token: props.token,
       };
       ws.value?.send(JSON.stringify(payload));
+      if (messageInput.value.trim()) startTypingLoop();
     };
 
     ws.value.onmessage = (event) => {
@@ -254,6 +289,7 @@ const connect = () => {
 
     ws.value.onclose = () => {
       isConnected.value = false;
+      stopTypingLoop();
       setTimeout(connect, 2000); // retry simple
     };
   } catch (e: any) {
@@ -285,16 +321,12 @@ const sendMessage = () => {
   };
   messages.value = [...messages.value, temp];
   messageInput.value = "";
+
+  stopTypingLoop();
 };
 
 watch(messageInput, () => {
-  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) return;
-  const payload = {
-    type: "typing",
-    activityId: props.activityId,
-    token: props.token,
-  };
-  ws.value.send(JSON.stringify(payload));
+  handleTyping();
 });
 
 const deleteMessage = (message: ChatMessage) => {
@@ -339,6 +371,7 @@ watch(
   () => props.activityId,
   () => {
     messages.value = [];
+    stopTypingLoop();
     connect();
   }
 );
@@ -348,6 +381,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  stopTypingLoop();
   ws.value?.close();
 });
 
