@@ -365,37 +365,13 @@
           </div>
         </div>
 
-        <div class="bg-custom-green rounded-xl p-8">
-          <div class="flex justify-between items-center pb-8">
-            <h2 class="text-2xl">Chat de l'événement</h2>
-            <div class="flex">
-              <a
-                href="#"
-                class="px-6 py-3 rounded-2xl bg-custom-blue text-custom-white"
-                >Messages</a
-              >
-              <a href="#" class="px-6 py-3 rounded-2xl text-custom-blue"
-                >Participants</a
-              >
-            </div>
-          </div>
-          <div class="bg-custom-white p-8 rounded-2xl">
-            <img src="/img/activityPage/chat.png" alt="Chat" class="w-full" />
-            <div class="relative mt-4">
-              <input
-                type="text"
-                placeholder="Écrire un message..."
-                class="w-full p-4 pr-14 bg-custom-green rounded-2xl outline-none focus:ring-2 focus:ring-custom-primary"
-              />
-              <button
-                class="absolute right-3 top-1/2 -translate-y-1/2 bg-custom-blue p-2 rounded-lg hover:cursor-pointer"
-                @click="sendMessage"
-              >
-                <IconSend class="text-custom-white w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <ChatPanel
+          v-if="authStore.user && activityStore.currentActivity"
+          :activityId="activityStore.currentActivity.id"
+          :user="authStore.user"
+          :token="authStore.tokens?.accessToken || null"
+          class="mt-8"
+        />
       </div>
     </div>
 
@@ -420,6 +396,7 @@ import IconPerson from "@/components/atoms/icons/IconPerson.vue";
 import IconDe from "@/components/atoms/icons/IconDe.vue";
 import IconSend from "@/components/atoms/icons/IconSend.vue";
 import ActivityCard from "@/components/molecules/ActivityCard.vue";
+import ChatPanel from "@/components/organisms/ChatPanel.vue";
 import { useAuth } from "@/stores/authStore";
 
 const route = useRoute();
@@ -533,11 +510,6 @@ const getHost = computed(() => {
   }
   return "";
 });
-
-const sendMessage = () => {
-  // TODO: Implémenter l'envoi de message
-  console.log("Message envoyé");
-};
 
 onMounted(async () => {
   const id = Number(route.params.id);
