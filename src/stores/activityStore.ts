@@ -179,10 +179,12 @@ export const useActivityStore = defineStore("activity", {
       try {
         const activity: Activity = await get(`/activity/${id}`);
         this.currentActivity = this.normalizeActivity(activity);
+        return this.currentActivity;
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors du chargement";
         console.error("Erreur fetchActivity:", err);
+        throw err;
       } finally {
         this.loading = false;
       }
@@ -258,6 +260,19 @@ export const useActivityStore = defineStore("activity", {
         return normalized;
       } catch (err) {
         console.error("Erreur leaveActivity:", err);
+        throw err;
+      }
+    },
+
+    async deleteActivity(id: number) {
+      try {
+        await del(`/activity/${id}`);
+        this.activities = this.activities.filter((a) => a.id !== id);
+        if (this.currentActivity?.id === id) {
+          this.currentActivity = null;
+        }
+      } catch (err) {
+        console.error("Erreur deleteActivity:", err);
         throw err;
       }
     },

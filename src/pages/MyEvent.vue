@@ -214,4 +214,5 @@ const loadMoreJoined = async () => {
     joinedActivities.value.length
   );
 };
+
 </script>

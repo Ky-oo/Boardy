@@ -16,6 +16,24 @@
         <IconChevronLeft class="mr-2" /> Retour
       </button>
 
+      <div
+        v-if="canEdit"
+        class="flex justify-end gap-3 mb-6"
+      >
+        <button
+          class="px-4 py-2 bg-custom-blue text-white rounded-lg hover:bg-blue-600"
+          @click="handleEdit"
+        >
+          Modifier
+        </button>
+        <button
+          class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+          @click="handleDelete"
+        >
+          Supprimer
+        </button>
+      </div>
+
       <div v-if="!isParticipating">
         <div class="green-bloc grid grid-cols-2 gap-24 mb-16">
           <div class="red-border">
@@ -415,6 +433,15 @@ const isParticipating = computed(() => {
   return activityStore.currentActivity.playersId.includes(authStore.user.id);
 });
 
+const canEdit = computed(() => {
+  if (!authStore.user || !activityStore.currentActivity) return false;
+  return (
+    activityStore.currentActivity.hostType === "user" &&
+    (activityStore.currentActivity.hostId === authStore.user.id ||
+      activityStore.currentActivity.hostUserId === authStore.user.id)
+  );
+});
+
 const daysRemaining = computed(() => {
   if (!activityStore.currentActivity) return ["0", "0"];
   const now = new Date();
@@ -462,6 +489,24 @@ const handleParticipate = async () => {
   } catch (err) {
     console.error("Erreur lors de la participation:", err);
   }
+};
+
+const handleEdit = () => {
+  if (!activityStore.currentActivity) return;
+  router.push({
+    path: "/create_event",
+    query: { edit: activityStore.currentActivity.id.toString() },
+  });
+};
+
+const handleDelete = async () => {
+  if (!activityStore.currentActivity) return;
+  const confirmDelete = window.confirm(
+    "Voulez-vous supprimer cette activité ?"
+  );
+  if (!confirmDelete) return;
+  await activityStore.deleteActivity(activityStore.currentActivity.id);
+  router.push("/");
 };
 
 const getHost = computed(() => {

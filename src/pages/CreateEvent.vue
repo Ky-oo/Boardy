@@ -25,7 +25,7 @@
       </div>
 
       <div class="z-10 w-full">
-        <form @submit.prevent="handleCreateEvent" class="flex flex-col gap-4">
+        <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
             <label for="event-title" class="text-primary font-medium"
               >Titre de l'événements*</label
@@ -254,7 +254,7 @@
               class="h-10 hover:cursor-pointer w-full bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors"
               :disabled="loading"
             >
-              {{ loading ? "Création en cours..." : "Créez votre événement" }}
+              {{ loading ? "Enregistrement..." : submitLabel }}
             </button>
           </div>
 
@@ -268,13 +268,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useAuth } from "@/stores/authStore";
 import IconParticipants from "@/components/atoms/icons/IconParticipants.vue";
 import { useActivityStore } from "@/stores/activityStore";
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuth();
 const activityStore = useActivityStore();
 
@@ -291,6 +292,8 @@ const participants = ref(4);
 const isPrivate = ref(false);
 const error = ref("");
 const loading = ref(false);
+const isEditMode = ref(false);
+const editId = ref<number | null>(null);
 
 const creatorName = computed(() => {
   const user = authStore.getUser;
@@ -300,7 +303,52 @@ const creatorName = computed(() => {
   return "Anonyme";
 });
 
-const handleCreateEvent = async () => {
+const submitLabel = computed(() =>
+  isEditMode.value ? "Mettre à jour l'événement" : "Créez votre événement"
+);
+
+const populateForm = (activity: any) => {
+  eventTitle.value = activity.title || "";
+  description.value = activity.description || "";
+  location.value = activity.place_name || "";
+  address.value = activity.address || "";
+  isHomeAddress.value = Boolean(activity.homeHost);
+  games.value = Array.isArray(activity.gameId)
+    ? activity.gameId.join(", ")
+    : activity.gameId || "";
+  participants.value = activity.seats || 4;
+  isPrivate.value = Boolean(activity.private);
+
+  const d = new Date(activity.date);
+  if (!isNaN(d.getTime())) {
+    date.value = d.toISOString().slice(0, 10);
+    startTime.value = d.toISOString().slice(11, 16);
+  }
+};
+
+onMounted(async () => {
+  const editParam = route.query.edit as string | undefined;
+  if (editParam) {
+    const id = Number(editParam);
+    if (id) {
+      isEditMode.value = true;
+      editId.value = id;
+      try {
+        loading.value = true;
+        const activity = await activityStore.fetchActivity(id);
+        if (activity) {
+          populateForm(activity);
+        }
+      } catch (e: any) {
+        error.value = e.message || "Impossible de charger l'événement";
+      } finally {
+        loading.value = false;
+      }
+    }
+  }
+});
+
+const handleSubmit = async () => {
   loading.value = true;
   error.value = "";
   try {
@@ -312,7 +360,7 @@ const handleCreateEvent = async () => {
       `${date.value}T${startTime.value || "00:00"}`
     ).toISOString();
 
-    await activityStore.createActivity({
+    const payload = {
       title: eventTitle.value,
       description: description.value,
       gameId: null,
@@ -328,7 +376,13 @@ const handleCreateEvent = async () => {
       private: isPrivate.value,
       hostUserId: authStore.user.id,
       hostType: "user",
-    });
+    };
+
+    if (isEditMode.value && editId.value) {
+      await activityStore.updateActivity(editId.value, payload);
+    } else {
+      await activityStore.createActivity(payload);
+    }
 
     router.push("/");
   } catch (e: any) {
