@@ -102,23 +102,24 @@
         <p class="text-gray-600">Aucune activité à venir pour le moment.</p>
       </div>
 
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <ActivityCard
-          v-for="activity in activityStore.getUpcomingActivities"
-          :key="activity.id"
-          :activity="activity"
-        />
-      </div>
-
-      <div class="flex justify-center mt-8">
-        <button
-          v-if="activityStore.hasMore"
-          @click="loadMore"
-          :disabled="activityStore.loading"
-          class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ activityStore.loading ? "Chargement..." : "Charger plus" }}
-        </button>
+      <div v-else>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <ActivityCard
+            v-for="activity in activityStore.getUpcomingActivities"
+            :key="activity.id"
+            :activity="activity"
+          />
+        </div>
+        <div class="flex justify-center mt-8">
+          <button
+            v-if="activityStore.hasMore"
+            @click="loadMore"
+            :disabled="activityStore.loading"
+            class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ activityStore.loading ? "Chargement..." : "Charger plus" }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

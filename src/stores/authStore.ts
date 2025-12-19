@@ -53,6 +53,7 @@ export const useAuth = defineStore("auth", {
         setAuthToken(token);
         router.push("/");
       } catch (error: unknown) {
+        console.log(error);
         const apiError = {
           message:
             error instanceof Error ? error.message : "Erreur de connexion",
