@@ -78,7 +78,9 @@
   <!-- Section des activités à venir -->
   <div
     class="bloc-activites"
-    :class="{ 'has-activities': paginatedActivities.length >= 7 }"
+    :class="{
+      'has-activities': activityStore.getUpcomingActivities.length >= 7,
+    }"
   >
     <div class="mx-30 pb-16">
       <h2 class="text-md font-bold mb-6">
@@ -102,35 +104,20 @@
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <ActivityCard
-          v-for="activity in paginatedActivities"
+          v-for="activity in activityStore.getUpcomingActivities"
           :key="activity.id"
           :activity="activity"
         />
       </div>
 
-      <!-- Pagination -->
-      <div
-        v-if="totalPages > 1"
-        class="flex justify-center items-center gap-4 mt-8"
-      >
+      <div class="flex justify-center mt-8">
         <button
-          @click="currentPage--"
-          :disabled="currentPage === 1"
-          class="px-4 py-2 bg-custom-blue text-custom-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600"
+          v-if="activityStore.hasMore"
+          @click="loadMore"
+          :disabled="activityStore.loading"
+          class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Précédent
-        </button>
-
-        <span class="text-gray-700">
-          Page {{ currentPage }} sur {{ totalPages }}
-        </span>
-
-        <button
-          @click="currentPage++"
-          :disabled="currentPage === totalPages"
-          class="px-4 py-2 bg-[#1468E5] text-custom-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600"
-        >
-          Suivant
+          {{ activityStore.loading ? "Chargement..." : "Charger plus" }}
         </button>
       </div>
     </div>
@@ -150,35 +137,22 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { onMounted } from "vue";
 import { useActivityStore } from "../stores/activityStore";
 import ActivityCard from "../components/molecules/ActivityCard.vue";
 import IconBars from "../components/atoms/icons/IconBars.vue";
 import IconEvents from "../components/atoms/icons/IconEvents.vue";
 import IconGamers from "../components/atoms/icons/IconGamers.vue";
 import FilterBar from "@/components/molecules/FilterBar.vue";
-
-// Utiliser le store
 const activityStore = useActivityStore();
-
-// Pagination
-const currentPage = ref(1);
-const itemsPerPage = 9;
-
-// Calculer le nombre total de pages
-const totalPages = computed(() => {
-  return Math.ceil(activityStore.getUpcomingActivities.length / itemsPerPage);
-});
-
-// Activités paginées
-const paginatedActivities = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return activityStore.getUpcomingActivities.slice(start, end);
-});
 
 // Charger les activités au montage
 onMounted(() => {
-  activityStore.fetchActivities();
+  activityStore.fetchActivities(1);
 });
+
+const loadMore = () => {
+  if (activityStore.loading || !activityStore.hasMore) return;
+  activityStore.fetchActivities(activityStore.currentPage + 1, true);
+};
 </script>

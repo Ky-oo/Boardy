@@ -24,6 +24,8 @@ export const useActivityStore = defineStore("activity", {
     currentActivity: null as ActivityWithHost | null,
     loading: false,
     error: null as string | null,
+    currentPage: 1 as number,
+    hasMore: true as boolean,
   }),
 
   getters: {
@@ -141,21 +143,27 @@ export const useActivityStore = defineStore("activity", {
       };
     },
 
-    async fetchActivities() {
+    async fetchActivities(page = 1, append = false) {
       this.loading = true;
       this.error = null;
       try {
-        const response = await get(`/activity`);
+        const response = await get(`/activity`, { page });
         const activities: Activity[] = Array.isArray(response)
           ? response
-          : // support potential pagination wrappers {rows:[], data:[]}
-            (response?.rows as Activity[]) ||
+          : (response?.rows as Activity[]) ||
             (response?.data as Activity[]) ||
             [];
 
-        this.activities = activities.map((activity) =>
+        const normalized = activities.map((activity) =>
           this.normalizeActivity(activity)
         );
+
+        this.activities = append
+          ? [...this.activities, ...normalized]
+          : normalized;
+
+        this.currentPage = page;
+        this.hasMore = activities.length >= 6;
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors du chargement";
