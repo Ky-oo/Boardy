@@ -79,7 +79,7 @@
         placeholder="Écrire un message..."
         class="w-full p-4 pr-14 bg-custom-white rounded-2xl outline-none focus:ring-2 focus:ring-custom-primary"
         @keydown.enter.prevent="sendMessage"
-        @input="handleTyping"
+        @input="notifyTyping"
       />
       <button
         class="absolute right-3 top-1/2 -translate-y-1/2 bg-custom-blue p-2 rounded-lg hover:cursor-pointer disabled:opacity-50"
@@ -98,6 +98,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import IconSend from "@/components/atoms/icons/IconSend.vue";
 
 type ChatMessage = {
@@ -116,13 +117,14 @@ const props = defineProps<{
   token?: string | null;
 }>();
 
+const router = useRouter();
 const ws = ref<WebSocket | null>(null);
 const messages = ref<ChatMessage[]>([]);
 const messageInput = ref("");
 const isConnected = ref(false);
 const typingUsers = ref<Set<number>>(new Set());
 const error = ref("");
-const typingInterval = ref<number | null>(null);
+const shouldReconnect = ref(true);
 
 const removeMessagesByIds = (ids: (number | string)[]) => {
   if (!ids?.length) return;
@@ -134,39 +136,14 @@ const removeMessagesByIds = (ids: (number | string)[]) => {
   });
 };
 
-const sendTyping = () => {
-  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) return;
-  const payload = {
-    type: "typing",
-    activityId: props.activityId,
-    token: props.token,
-  };
-  ws.value.send(JSON.stringify(payload));
-};
-
-const startTypingLoop = () => {
-  if (typingInterval.value !== null) return;
-  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) return;
-  sendTyping();
-  typingInterval.value = window.setInterval(sendTyping, 1500);
-};
-
-const stopTypingLoop = () => {
-  if (typingInterval.value === null) return;
-  clearInterval(typingInterval.value);
-  typingInterval.value = null;
-};
-
-const handleTyping = () => {
-  const hasContent = messageInput.value.trim().length > 0;
-  if (hasContent) {
-    startTypingLoop();
-  } else {
-    stopTypingLoop();
-  }
-};
-
 const wsUrl = import.meta.env.VITE_WS_URL as string | undefined;
+
+const handleAuthExpired = (message?: string) => {
+  shouldReconnect.value = false;
+  error.value = message || "Session expirée. Veuillez vous reconnecter.";
+  ws.value?.close();
+  router.push("/login");
+};
 
 const typingUsersLabel = computed(() => {
   const names: string[] = [];
@@ -181,8 +158,9 @@ const typingUsersLabel = computed(() => {
 });
 
 const connect = () => {
+  if (!shouldReconnect.value) return;
   if (!wsUrl) {
-    error.value = "WebSocket URL non défini";
+    error.value = "WebSocket URL non definie";
     return;
   }
   try {
@@ -196,12 +174,24 @@ const connect = () => {
         token: props.token,
       };
       ws.value?.send(JSON.stringify(payload));
-      if (messageInput.value.trim()) startTypingLoop();
     };
 
     ws.value.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        const lowerMessage =
+          typeof data?.message === "string" ? data.message.toLowerCase() : "";
+        const authError =
+          data?.type === "unauthorized" ||
+          data?.type === "auth-error" ||
+          data?.code === 401 ||
+          data?.code === "TOKEN_EXPIRED" ||
+          lowerMessage.includes("token") ||
+          lowerMessage.includes("expir");
+        if (authError) {
+          handleAuthExpired(data?.message);
+          return;
+        }
         switch (data.type) {
           case "history":
             if (Array.isArray(data.messages)) {
@@ -284,12 +274,14 @@ const connect = () => {
     };
 
     ws.value.onerror = () => {
-      error.value = "Connexion WebSocket échouée";
+      error.value = "Connexion WebSocket echouee";
     };
 
     ws.value.onclose = () => {
       isConnected.value = false;
-      setTimeout(connect, 2000); // retry simple
+      if (shouldReconnect.value) {
+        setTimeout(connect, 2000);
+      }
     };
   } catch (e: any) {
     error.value = e?.message || "Erreur WebSocket";
@@ -322,7 +314,7 @@ const sendMessage = () => {
   messageInput.value = "";
 };
 
-watch(messageInput, () => {
+const notifyTyping = () => {
   if (!ws.value || ws.value.readyState !== WebSocket.OPEN) return;
   const payload = {
     type: "typing",
@@ -330,7 +322,7 @@ watch(messageInput, () => {
     token: props.token,
   };
   ws.value.send(JSON.stringify(payload));
-});
+};
 
 const deleteMessage = (message: ChatMessage) => {
   if (message.userId !== props.user.id) return;
@@ -383,6 +375,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  shouldReconnect.value = false;
   ws.value?.close();
 });
 
