@@ -166,11 +166,29 @@ const handleTyping = () => {
   }
 };
 
-const wsUrl =
-  (import.meta.env.VITE_WS_URL as string | undefined) ||
-  (import.meta.env.VITE_API_BASE_URL
-    ? (import.meta.env.VITE_API_BASE_URL as string).replace(/^http/, "ws")
-    : "ws://localhost:3000");
+const resolveWsUrl = () => {
+  const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
+  const apiBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  const fallback = apiBase
+    ? (apiBase as string).replace(/^http/, "ws")
+    : "ws://localhost:3000";
+
+  let url = envUrl || fallback;
+
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === "ws:") parsed.protocol = "wss:";
+      url = parsed.toString();
+    } catch {
+      url = url.replace(/^ws:\/\//i, "wss://");
+    }
+  }
+
+  return url;
+};
+
+const wsUrl = resolveWsUrl();
 
 const typingUsersLabel = computed(() => {
   const names: string[] = [];
