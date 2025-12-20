@@ -166,43 +166,7 @@ const handleTyping = () => {
   }
 };
 
-const normalizeProtocolTypos = (raw?: string) => {
-  if (!raw) return raw;
-  return raw
-    .replace(/^(https?)(\/\/)/i, "$1://")
-    .replace(/^(wss?)(\/\/)/i, "$1://");
-};
-
-const resolveWsUrl = () => {
-  const envUrl = normalizeProtocolTypos(import.meta.env.VITE_WS_URL as string | undefined);
-  const apiBase = normalizeProtocolTypos(import.meta.env.VITE_API_BASE_URL as string | undefined);
-  const fallback = apiBase
-    ? (apiBase as string).replace(/^http/, "ws")
-    : "ws://localhost:3000";
-
-  let url = envUrl || fallback;
-
-  if (!/^[a-z]+:\/\//i.test(url)) {
-    if (typeof window !== "undefined") {
-      const base = window.location.origin.replace(/^http/, "ws");
-      url = new URL(url, base).toString();
-    }
-  }
-
-  if (typeof window !== "undefined" && window.location.protocol === "https:") {
-    try {
-      const parsed = new URL(url);
-      if (parsed.protocol === "ws:") parsed.protocol = "wss:";
-      url = parsed.toString();
-    } catch {
-      url = url.replace(/^ws:\/\//i, "wss://");
-    }
-  }
-
-  return url;
-};
-
-const wsUrl = resolveWsUrl();
+const wsUrl = import.meta.env.VITE_WS_URL as string | undefined;
 
 const typingUsersLabel = computed(() => {
   const names: string[] = [];
@@ -217,6 +181,10 @@ const typingUsersLabel = computed(() => {
 });
 
 const connect = () => {
+  if (!wsUrl) {
+    error.value = "WebSocket URL non défini";
+    return;
+  }
   try {
     ws.value = new WebSocket(wsUrl);
     ws.value.onopen = () => {
@@ -321,7 +289,6 @@ const connect = () => {
 
     ws.value.onclose = () => {
       isConnected.value = false;
-      stopTypingLoop();
       setTimeout(connect, 2000); // retry simple
     };
   } catch (e: any) {
@@ -353,12 +320,16 @@ const sendMessage = () => {
   };
   messages.value = [...messages.value, temp];
   messageInput.value = "";
-
-  stopTypingLoop();
 };
 
 watch(messageInput, () => {
-  handleTyping();
+  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) return;
+  const payload = {
+    type: "typing",
+    activityId: props.activityId,
+    token: props.token,
+  };
+  ws.value.send(JSON.stringify(payload));
 });
 
 const deleteMessage = (message: ChatMessage) => {
@@ -403,7 +374,6 @@ watch(
   () => props.activityId,
   () => {
     messages.value = [];
-    stopTypingLoop();
     connect();
   }
 );
@@ -413,7 +383,6 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  stopTypingLoop();
   ws.value?.close();
 });
 
