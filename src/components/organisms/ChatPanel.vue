@@ -166,14 +166,28 @@ const handleTyping = () => {
   }
 };
 
+const normalizeProtocolTypos = (raw?: string) => {
+  if (!raw) return raw;
+  return raw
+    .replace(/^(https?)(\/\/)/i, "$1://")
+    .replace(/^(wss?)(\/\/)/i, "$1://");
+};
+
 const resolveWsUrl = () => {
-  const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
-  const apiBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  const envUrl = normalizeProtocolTypos(import.meta.env.VITE_WS_URL as string | undefined);
+  const apiBase = normalizeProtocolTypos(import.meta.env.VITE_API_BASE_URL as string | undefined);
   const fallback = apiBase
     ? (apiBase as string).replace(/^http/, "ws")
     : "ws://localhost:3000";
 
   let url = envUrl || fallback;
+
+  if (!/^[a-z]+:\/\//i.test(url)) {
+    if (typeof window !== "undefined") {
+      const base = window.location.origin.replace(/^http/, "ws");
+      url = new URL(url, base).toString();
+    }
+  }
 
   if (typeof window !== "undefined" && window.location.protocol === "https:") {
     try {
