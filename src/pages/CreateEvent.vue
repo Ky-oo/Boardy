@@ -107,14 +107,54 @@
             >
 
             <div class="flex gap-2">
-              <input
-                id="address"
-                v-model="address"
-                type="text"
-                placeholder="Ex : 44 rue de la paix, Paris, 75001 France"
-                required
-                class="flex-1 h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
-              />
+              <div class="relative flex-1">
+                <input
+                  id="address"
+                  v-model="address"
+                  type="text"
+                  placeholder="Ex : 44 rue de la paix, Paris, 75001 France"
+                  required
+                  class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+                  @input="handleAddressInput"
+                  @focus="showAddressSuggestions = true"
+                  @blur="handleAddressBlur"
+                />
+                <div
+                  v-if="
+                    showAddressSuggestions &&
+                    (addressLoading ||
+                      addressSuggestions.length ||
+                      address.trim().length >= 3)
+                  "
+                  class="absolute left-0 right-0 mt-1 bg-custom-white border border-custom-blue rounded-xl shadow-lg max-h-48 overflow-y-auto z-20"
+                >
+                  <div
+                    v-if="addressLoading"
+                    class="px-3 py-2 text-xs text-gray-500"
+                  >
+                    Recherche adresse...
+                  </div>
+                  <button
+                    v-for="suggestion in addressSuggestions"
+                    :key="suggestion.place_id"
+                    type="button"
+                    class="w-full text-left hover:cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    @mousedown.prevent="selectAddressSuggestion(suggestion)"
+                  >
+                    {{ suggestion.display_name }}
+                  </button>
+                  <div
+                    v-if="
+                      !addressLoading &&
+                      addressSuggestions.length === 0 &&
+                      address.trim().length >= 3
+                    "
+                    class="px-3 py-2 text-xs text-gray-500"
+                  >
+                    Aucune adresse trouvee
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -274,6 +314,7 @@ import { useAuth } from "@/stores/authStore";
 import IconParticipants from "@/components/atoms/icons/IconParticipants.vue";
 import { useActivityStore } from "@/stores/activityStore";
 import type { Activity } from "@/types/Activity";
+import { useAddressAutocomplete } from "@/utils/addressAutocomplete";
 
 const router = useRouter();
 const route = useRoute();
@@ -295,6 +336,22 @@ const error = ref("");
 const loading = ref(false);
 const isEditMode = ref(false);
 const editId = ref<number | null>(null);
+const latitude = ref<number | null>(null);
+const longitude = ref<number | null>(null);
+const {
+  addressSuggestions,
+  addressLoading,
+  showAddressSuggestions,
+  handleAddressInput,
+  handleAddressBlur,
+  selectAddressSuggestion,
+  geocodeLocation,
+} = useAddressAutocomplete({
+  address,
+  location,
+  latitude,
+  longitude,
+});
 
 const creatorName = computed(() => {
   const user = authStore.getUser;
@@ -313,6 +370,8 @@ const populateForm = (activity: any) => {
   description.value = activity.description || "";
   location.value = activity.place_name || "";
   address.value = activity.address || "";
+  latitude.value = activity.latitude ?? null;
+  longitude.value = activity.longitude ?? null;
   isHomeAddress.value = Boolean(activity.homeHost);
   games.value = Array.isArray(activity.gameId)
     ? activity.gameId.join(", ")
@@ -361,6 +420,12 @@ const handleSubmit = async () => {
       `${date.value}T${startTime.value || "00:00"}`
     ).toISOString();
 
+    const coords = await geocodeLocation();
+
+    if (!coords && (!latitude.value || !longitude.value)) {
+      throw new Error("Adresse introuvable. Verifiez le lieu ou l'adresse.");
+    }
+
     const payload: Partial<Activity> = {
       title: eventTitle.value,
       description: description.value,
@@ -370,6 +435,8 @@ const handleSubmit = async () => {
       address: address.value,
       city: authStore.user.city,
       postalCode: "00000",
+      latitude: latitude.value,
+      longitude: longitude.value,
       seats: participants.value,
       type: "Par des joueurs",
       homeHost: isHomeAddress.value,
