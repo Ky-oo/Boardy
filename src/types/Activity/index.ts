@@ -23,7 +23,7 @@ export type Activity = {
   seats: number;
   type: "Festival" | "Bars & Soirées" | "Par des joueurs";
   homeHost: boolean;
-  price?: string | null;
+  price?: number | null;
   private: boolean;
   hostUserId?: number | null;
   hostOrganisationId?: number | null;
