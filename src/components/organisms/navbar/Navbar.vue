@@ -21,7 +21,7 @@
         </li>
         <li v-if="authStore.isLogged">
           <router-link
-            to="/account"
+            to="/profile"
             class="text-custom-white hover:cursor-pointer hover:text-gray-300"
           >
             Mon profil
