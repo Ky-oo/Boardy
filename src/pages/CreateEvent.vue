@@ -1,24 +1,33 @@
 <template>
   <div class="min-h-screen bg-custom-white mx-50 bloc-cat-create_event">
     <div class="text-center pt-30 pb-8">
-      <h1 class="text-5xl font-family-urban text-primary my-6">
-        Créer votre partie idéale
+      <h1
+        v-if="isEditMode"
+        class="text-5xl font-family-urban text-primary my-6"
+      >
+        Editez votre partie
       </h1>
-      <p class="text-primary text-lg font-family-red-hat">
-        Avec votre compte joueur vous pouvez organiser une partie pour chercher
-        des joueurs.
-      </p>
+      <div v-else>
+        <h1 class="text-5xl font-family-urban text-primary my-6">
+          Créer votre partie idéale
+        </h1>
+        <p class="text-primary text-lg font-family-red-hat">
+          Avec votre compte joueur vous pouvez organiser une partie pour
+          chercher des joueurs.
+        </p>
+      </div>
     </div>
 
     <div class="flex justify-center w-full items-start gap-16 px-8 pb-16">
       <div class="relative pt-6 w-full">
         <img
-          src="/img/createEvent/stepper.png"
+          src="/img/createEvent/stepper.svg"
           alt="Étapes de création d'événement"
           class="w-full mb-8"
         />
         <img
-          src="/img/createEvent/create_event-image.png"
+          src="/img/createEvent/create_event-image.jpg"
+          sizes="(min-width: 1024px) 50vw, 100vw"
           alt="Personnes jouant à un jeu de société"
           class="relative w-full h-[300px] object-cover rounded-lg z-10"
         />
