@@ -18,13 +18,13 @@
 
       <div v-if="canEdit" class="flex justify-end gap-3 mb-6">
         <button
-          class="px-4 py-2 bg-custom-blue text-white rounded-lg hover:bg-blue-600"
+          class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-blue-600"
           @click="handleEdit"
         >
           Modifier
         </button>
         <button
-          class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+          class="px-4 py-2 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600"
           @click="handleDelete"
         >
           Supprimer

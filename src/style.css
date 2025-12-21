@@ -223,3 +223,21 @@ body {
   border-radius: 0 12px 12px 0;
   z-index: -1;
 }
+
+.toast-enter-active,
+.toast-leave-active,
+.toast-move {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.toast-enter-to,
+.toast-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}

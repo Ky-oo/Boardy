@@ -6,6 +6,7 @@ import type {
   ActivityWithHost,
 } from "../types/Activity/index";
 import { del, get, post, put } from "../utils/api/api";
+import { useToastStore } from "./toastStore";
 
 const deriveHostType = (
   hostOrganisation?: unknown,
@@ -197,6 +198,8 @@ export const useActivityStore = defineStore("activity", {
         const newActivity: Activity = await post("/activity", activity);
         const normalized = this.normalizeActivity(newActivity);
         this.activities.push(normalized);
+        const toastStore = useToastStore();
+        toastStore.addToast("Activité bien créée.", { type: "success" });
         return normalized;
       } catch (err) {
         this.error =
@@ -221,6 +224,8 @@ export const useActivityStore = defineStore("activity", {
         if (this.currentActivity?.id === id) {
           this.currentActivity = normalized;
         }
+        const toastStore = useToastStore();
+        toastStore.addToast("Activité mise à jour.", { type: "success" });
         return normalized;
       } catch (err) {
         this.error =
@@ -271,6 +276,8 @@ export const useActivityStore = defineStore("activity", {
         if (this.currentActivity?.id === id) {
           this.currentActivity = null;
         }
+        const toastStore = useToastStore();
+        toastStore.addToast("Activité supprimée.", { type: "warning" });
       } catch (err) {
         console.error("Erreur deleteActivity:", err);
         throw err;

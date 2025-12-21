@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import type { UserWithoutPassword } from "../types/User/index.ts";
 import { post, setAuthToken } from "../utils/api/api.ts";
 import { router } from "../router/index.ts";
+import { useToastStore } from "./toastStore";
 
 type Tokens = {
   accessToken: string | null;
@@ -51,6 +52,8 @@ export const useAuth = defineStore("auth", {
         this.user = user;
         this.tokens.accessToken = token;
         setAuthToken(token);
+        const toastStore = useToastStore();
+        toastStore.addToast("Vous êtes connecté.", { type: "success" });
         router.push("/");
       } catch (error: unknown) {
         console.log(error);
@@ -91,6 +94,10 @@ export const useAuth = defineStore("auth", {
         this.user = user;
         this.tokens.accessToken = token;
         setAuthToken(token);
+        const toastStore = useToastStore();
+        toastStore.addToast("Inscription réussie. Bienvenue !", {
+          type: "success",
+        });
         router.push("/");
       } catch (error: unknown) {
         const apiError = {
@@ -108,6 +115,8 @@ export const useAuth = defineStore("auth", {
       this.isLogged = false;
       this.tokens = { accessToken: null };
       setAuthToken(null);
+      const toastStore = useToastStore();
+      toastStore.addToast("Vous êtes déconnecté.", { type: "warning" });
       router.push("/");
     },
 
