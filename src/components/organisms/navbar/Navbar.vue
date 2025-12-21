@@ -28,6 +28,22 @@
           </router-link>
         </li>
         <li v-if="authStore.isLogged">
+          <router-link
+            to="/organisation"
+            class="text-custom-white hover:cursor-pointer hover:text-gray-300"
+          >
+            Mon organisation
+          </router-link>
+        </li>
+        <li v-if="authStore.user?.role === 'admin'">
+          <router-link
+            to="/admin"
+            class="text-custom-white hover:cursor-pointer hover:text-gray-300"
+          >
+            Admin
+          </router-link>
+        </li>
+        <li v-if="authStore.isLogged">
           <button
             @click="authStore.logout()"
             class="text-custom-white hover:cursor-pointer hover:text-gray-300"

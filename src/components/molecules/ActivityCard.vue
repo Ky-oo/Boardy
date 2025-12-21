@@ -143,7 +143,7 @@ const getTypeColor = computed(() => {
     return "bg-custom-white text-primary";
   } else if (props.activity.type === "Par des joueurs") {
     return "bg-custom-green text-primary";
-  } else if (props.activity.type === "Bar/Soiree") {
+  } else if (props.activity.type === "Bars & Soirées") {
     return "bg-custom-red";
   }
 });

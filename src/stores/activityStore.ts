@@ -195,6 +195,14 @@ export const useActivityStore = defineStore("activity", {
       this.loading = true;
       this.error = null;
       try {
+        if (activity.hostType === "organisation") {
+          activity.type = "Bars & Soirées";
+        } else if (activity.hostType === "user") {
+          activity.type = "Par des joueurs";
+        } else {
+          activity.type = "Festival";
+        }
+
         const newActivity: Activity = await post("/activity", activity);
         const normalized = this.normalizeActivity(newActivity);
         this.activities.push(normalized);

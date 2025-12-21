@@ -9,7 +9,11 @@
       </h1>
       <div v-else>
         <h1 class="text-5xl font-family-urban text-primary my-6">
-          Créer votre partie idéale
+          {{
+            effectiveOrganisationId
+              ? "Créer une soirée pour votre établissement"
+              : "Créer votre partie idéale"
+          }}
         </h1>
         <p class="text-primary text-lg font-family-red-hat">
           Avec votre compte joueur vous pouvez organiser une partie pour
@@ -149,7 +153,9 @@
                     :key="suggestion.place_id"
                     type="button"
                     class="w-full text-left hover:cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    @mousedown.prevent="handleSelectAddressSuggestion(suggestion)"
+                    @mousedown.prevent="
+                      handleSelectAddressSuggestion(suggestion)
+                    "
                   >
                     {{ suggestion.display_name }}
                   </button>
@@ -168,7 +174,7 @@
             </div>
           </div>
 
-          <div class="flex items-start gap-3">
+          <div v-if="!effectiveOrganisationId" class="flex items-start gap-3">
             <input
               id="isHomeAddress"
               v-model="isHomeAddress"
@@ -256,10 +262,52 @@
                 v-model.number="participants"
                 type="number"
                 min="2"
-                max="20"
+                :max="effectiveOrganisationId ? 100 : 20"
                 required
                 class="w-16 bg-transparent text-gray-700 focus:outline-none"
               />
+            </div>
+          </div>
+
+          <div v-if="effectiveOrganisationId" class="flex flex-col gap-2">
+            <label class="text-primary font-medium">Tarif*</label>
+            <div class="flex flex-wrap items-center gap-4">
+              <label class="flex items-center gap-2 text-sm text-primary">
+                <input
+                  v-model="priceType"
+                  type="radio"
+                  name="priceType"
+                  value="free"
+                  class="w-4 h-4 hover:cursor-pointer accent-custom-blue cursor-pointer"
+                  @change="handlePriceTypeChange"
+                />
+                Gratuit
+              </label>
+              <label class="flex items-center gap-2 text-sm text-primary">
+                <input
+                  v-model="priceType"
+                  type="radio"
+                  name="priceType"
+                  value="paid"
+                  class="w-4 h-4 hover:cursor-pointer accent-custom-blue cursor-pointer"
+                  @change="handlePriceTypeChange"
+                />
+                Payant
+              </label>
+              <div class="flex items-center gap-2">
+                <input
+                  id="price"
+                  v-model.number="priceValue"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  :disabled="priceType === 'free'"
+                  :required="priceType === 'paid'"
+                  placeholder="0.00"
+                  class="w-24 h-10 px-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white disabled:opacity-60"
+                />
+                <span class="text-sm text-gray-500">EUR</span>
+              </div>
             </div>
           </div>
 
@@ -281,7 +329,13 @@
             </label>
           </div>
 
-          <p class="text-primary text-sm">
+          <p v-if="organisationName" class="text-primary text-sm">
+            Organisé par
+            <span class="font-semibold">{{ organisationName }}</span
+            >.
+          </p>
+
+          <p v-else class="text-primary text-sm">
             Événement créé par
 
             <span class="font-semibold">{{ creatorName }}</span
@@ -325,11 +379,13 @@ import IconParticipants from "@/components/atoms/icons/IconParticipants.vue";
 import { useActivityStore } from "@/stores/activityStore";
 import type { Activity } from "@/types/Activity";
 import { useAddressAutocomplete } from "@/utils/addressAutocomplete";
+import { useOrganisationStore } from "@/stores/organisationStore";
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuth();
 const activityStore = useActivityStore();
+const organisationStore = useOrganisationStore();
 
 const eventTitle = ref("");
 const date = ref("");
@@ -342,6 +398,8 @@ const description = ref("");
 const games = ref("");
 const participants = ref(4);
 const isPrivate = ref(false);
+const priceType = ref<"free" | "paid">("free");
+const priceValue = ref<number | null>(null);
 const error = ref("");
 const loading = ref(false);
 const isEditMode = ref(false);
@@ -349,6 +407,8 @@ const editId = ref<number | null>(null);
 const latitude = ref<number | null>(null);
 const longitude = ref<number | null>(null);
 const addressInputRef = ref<HTMLInputElement | null>(null);
+const editOrganisationId = ref<number | null>(null);
+
 const {
   addressSuggestions,
   addressLoading,
@@ -384,6 +444,29 @@ const setAddressInvalid = (message: string) => {
   addressInputRef.value.reportValidity();
 };
 
+const handlePriceTypeChange = () => {
+  if (priceType.value === "free") {
+    priceValue.value = null;
+  }
+};
+
+const routeOrganisationId = computed(() => {
+  const raw = route.query.organisationId;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  const parsed = value ? Number(value) : NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+});
+
+const effectiveOrganisationId = computed(
+  () => routeOrganisationId.value ?? editOrganisationId.value
+);
+
+const organisationName = computed(() => {
+  const id = effectiveOrganisationId.value;
+  if (!id) return null;
+  return organisationStore.getOrganisationById(id)?.name ?? null;
+});
+
 const creatorName = computed(() => {
   const user = authStore.getUser;
   if (user) {
@@ -403,12 +486,24 @@ const populateForm = (activity: any) => {
   address.value = activity.address || "";
   latitude.value = activity.latitude ?? null;
   longitude.value = activity.longitude ?? null;
+  editOrganisationId.value = activity.hostOrganisationId ?? null;
   isHomeAddress.value = Boolean(activity.homeHost);
   games.value = Array.isArray(activity.gameId)
     ? activity.gameId.join(", ")
     : activity.gameId || "";
   participants.value = activity.seats || 4;
   isPrivate.value = Boolean(activity.private);
+  const resolvedPrice =
+    activity.price !== null && activity.price !== undefined
+      ? Number(activity.price)
+      : 0;
+  if (resolvedPrice > 0) {
+    priceType.value = "paid";
+    priceValue.value = resolvedPrice;
+  } else {
+    priceType.value = "free";
+    priceValue.value = null;
+  }
 
   const d = new Date(activity.date);
   if (!isNaN(d.getTime())) {
@@ -417,7 +512,19 @@ const populateForm = (activity: any) => {
   }
 };
 
+const loadOrganisation = async (organisationId: number | null) => {
+  if (!organisationId) return;
+  try {
+    await organisationStore.fetchOrganisation(organisationId);
+  } catch (e) {
+    console.error("Erreur organisation:", e);
+  }
+};
+
 onMounted(async () => {
+  if (routeOrganisationId.value) {
+    await loadOrganisation(routeOrganisationId.value);
+  }
   const editParam = route.query.edit as string | undefined;
   if (editParam) {
     const id = Number(editParam);
@@ -429,6 +536,9 @@ onMounted(async () => {
         const activity = await activityStore.fetchActivity(id);
         if (activity) {
           populateForm(activity);
+          if (editOrganisationId.value) {
+            await loadOrganisation(editOrganisationId.value);
+          }
         }
       } catch (e: any) {
         error.value = e.message || "Impossible de charger l'événement";
@@ -475,11 +585,27 @@ const handleSubmit = async () => {
       seats: participants.value,
       type: "Par des joueurs",
       homeHost: isHomeAddress.value,
-      price: null,
       private: isPrivate.value,
-      hostUserId: authStore.user.id,
-      hostType: "user",
     };
+
+    if (effectiveOrganisationId.value) {
+      payload.hostOrganisationId = effectiveOrganisationId.value;
+      payload.hostType = "organisation";
+      if (priceType.value === "paid") {
+        const numericPrice = Number(priceValue.value);
+        if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+          error.value = "Veuillez renseigner un prix valide.";
+          return;
+        }
+        payload.price = numericPrice;
+      } else {
+        payload.price = 0;
+      }
+    } else {
+      payload.hostUserId = authStore.user.id;
+      payload.hostType = "user";
+      payload.price = null;
+    }
 
     if (isEditMode.value && editId.value) {
       await activityStore.updateActivity(editId.value, payload);

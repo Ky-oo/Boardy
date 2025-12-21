@@ -3,7 +3,7 @@
     <div class="text-center mb-10">
       <h1 class="text-5xl font-family-urban text-primary my-6">Mon profil</h1>
       <p class="text-primary text-lg font-family-red-hat">
-        Mettez a jour vos informations personnelles.
+        Mettez à jour vos informations personnelles.
       </p>
     </div>
 
@@ -18,7 +18,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="flex flex-col gap-2">
             <label for="firstname" class="text-primary font-medium"
-              >Prenom*</label
+              >Prénom*</label
             >
             <input
               id="firstname"

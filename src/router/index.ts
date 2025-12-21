@@ -4,7 +4,6 @@ import type { RouteRecordRaw } from "vue-router";
 import { useAuth } from "@/stores/authStore";
 
 import Home from "@/pages/Home.vue";
-import Account from "@/pages/Account.vue";
 import CreateEvent from "@/pages/CreateEvent.vue";
 import Login from "@/pages/Login.vue";
 import ActivityDetail from "@/pages/ActivityDetail.vue";
@@ -13,6 +12,8 @@ import Register from "@/pages/Register.vue";
 import MyEvent from "@/pages/MyEvent.vue";
 import Category from "@/pages/Category.vue";
 import Profile from "@/pages/Profile.vue";
+import Admin from "@/pages/Admin.vue";
+import Organisation from "@/pages/Organisation.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -37,10 +38,14 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/account",
-    name: "account",
-    component: Account,
+    path: "/profile",
+    name: "profile",
+    component: Profile,
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/account",
+    redirect: { name: "profile" },
   },
   {
     path: "/my_events",
@@ -65,9 +70,16 @@ const routes: RouteRecordRaw[] = [
     component: Register,
   },
   {
-    path: "/profile",
-    name: "profile",
-    component: Profile,
+    path: "/admin",
+    name: "admin",
+    component: Admin,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: "/organisation",
+    name: "organisation",
+    component: Organisation,
+    meta: { requiresAuth: true },
   },
 ];
 
@@ -81,7 +93,13 @@ router.beforeEach((to, _from, next) => {
 
   if (to.meta.requiresAuth && !authStore.checkIfLogged) {
     next({ name: "login" });
-  } else {
-    next();
+    return;
   }
+  console.log(authStore.user?.role);
+  if (to.meta.requiresAdmin && authStore.user?.role !== "admin") {
+    next({ name: "home" });
+    return;
+  }
+
+  next();
 });

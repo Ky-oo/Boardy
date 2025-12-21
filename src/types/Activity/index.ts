@@ -21,7 +21,7 @@ export type Activity = {
   latitude?: number | null;
   longitude?: number | null;
   seats: number;
-  type: "Festival" | "Bar/Soiree" | "Par des joueurs";
+  type: "Festival" | "Bars & Soirées" | "Par des joueurs";
   homeHost: boolean;
   price?: string | null;
   private: boolean;

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import type { UserWithoutPassword } from "../types/User/index.ts";
-import { post, setAuthToken } from "../utils/api/api.ts";
+import { post, put, setAuthToken } from "../utils/api/api.ts";
 import { router } from "../router/index.ts";
 import { useToastStore } from "./toastStore";
 
@@ -118,6 +118,19 @@ export const useAuth = defineStore("auth", {
       const toastStore = useToastStore();
       toastStore.addToast("Vous êtes déconnecté.", { type: "warning" });
       router.push("/");
+    },
+
+    async updateProfile(
+      payload: Partial<UserWithoutPassword>
+    ): Promise<UserWithoutPassword> {
+      if (!this.user) {
+        throw new Error("Utilisateur non charge.");
+      }
+      const updated = await put(`/user/${this.user.id}`, payload);
+      this.user = updated;
+      const toastStore = useToastStore();
+      toastStore.addToast("Profil mis a jour.", { type: "success" });
+      return updated;
     },
 
     hydrateAuth(): void {
