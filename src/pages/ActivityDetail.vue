@@ -358,6 +358,7 @@
           :activityId="activityStore.currentActivity.id"
           :user="authStore.user"
           :token="authStore.tokens?.accessToken || null"
+          :participants-ids="activityStore.currentActivity.playersId"
           class="mt-8"
         />
       </div>

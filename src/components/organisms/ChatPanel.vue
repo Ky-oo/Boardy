@@ -17,6 +17,7 @@
     </div>
 
     <div
+      ref="messagesContainerRef"
       class="bg-custom-white p-4 rounded-2xl h-96 flex flex-col gap-2 overflow-y-auto"
     >
       <div v-if="messages.length === 0" class="text-gray-500 text-center py-6">
@@ -27,45 +28,54 @@
         :key="message.id || message.tempId"
         class="flex flex-col"
         :class="{
-          'items-end': message.userId === user.id,
-          'items-start': message.userId !== user.id,
+          'items-center': message.system,
+          'items-end': !message.system && message.userId === user.id,
+          'items-start': !message.system && message.userId !== user.id,
         }"
       >
-        <div
-          class="px-4 py-2 rounded-lg max-w-xl"
-          :class="
-            message.userId === user.id
-              ? 'bg-custom-blue text-white'
-              : 'bg-gray-100 text-gray-800'
-          "
+        <p
+          v-if="message.system"
+          class="text-xs text-gray-400 text-center w-full"
         >
-          <div class="flex items-start justify-between gap-2 mb-1">
-            <p class="text-xs font-semibold">
-              {{ message.userName || "Anonyme" }}
+          {{ message.content }}
+        </p>
+        <template v-else>
+          <div
+            class="px-4 py-2 rounded-lg max-w-xl"
+            :class="
+              message.userId === user.id
+                ? 'bg-custom-blue text-white'
+                : 'bg-gray-100 text-gray-800'
+            "
+          >
+            <div class="flex items-start justify-between gap-2 mb-1">
+              <p class="text-xs font-semibold">
+                {{ message.userName || "Anonyme" }}
+              </p>
+              <button
+                v-if="message.userId === user.id && message.id"
+                type="button"
+                class="text-[10px] opacity-80 hover:opacity-100 hover:cursor-pointer text-white underline-offset-2"
+                @click="deleteMessage(message)"
+              >
+                Supprimer
+              </button>
+            </div>
+            <p class="whitespace-pre-wrap">{{ message.content }}</p>
+            <p class="text-[10px] mt-1 opacity-80">
+              {{ formatTime(message.createdAt) }}
+              <span v-if="message.userId === user.id">
+                • {{ hasSeenByOthers(message) ? "Vu" : "Envoyé" }}
+              </span>
             </p>
-            <button
-              v-if="message.userId === user.id && message.id"
-              type="button"
-              class="text-[10px] opacity-80 hover:opacity-100 hover:cursor-pointer text-white underline-offset-2"
-              @click="deleteMessage(message)"
-            >
-              Supprimer
-            </button>
           </div>
-          <p class="whitespace-pre-wrap">{{ message.content }}</p>
-          <p class="text-[10px] mt-1 opacity-80">
-            {{ formatTime(message.createdAt) }}
-            <span v-if="message.userId === user.id">
-              • {{ message.seenBy?.length ? "Vu" : "Envoyé" }}
-            </span>
-          </p>
-        </div>
-        <div
-          v-if="message.userId === user.id && message.seenBy?.length"
-          class="text-[10px] text-gray-500 mt-0.5"
-        >
-          Vu par {{ message.seenBy.length }} participant(s)
-        </div>
+          <div
+            v-if="message.userId === user.id && getSeenLabel(message)"
+            class="text-[10px] text-gray-500 mt-0.5"
+          >
+            {{ getSeenLabel(message) }}
+          </div>
+        </template>
       </div>
       <p class="text-sm text-gray-700" v-if="typingUsersLabel">
         {{ typingUsersLabel }}
@@ -97,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import IconSend from "@/components/atoms/icons/IconSend.vue";
 
@@ -108,6 +118,7 @@ type ChatMessage = {
   userName?: string;
   content: string;
   createdAt: string;
+  system?: boolean;
   seenBy?: number[];
 };
 
@@ -115,6 +126,7 @@ const props = defineProps<{
   activityId: number;
   user: { id: number; firstname?: string; lastname?: string; pseudo?: string };
   token?: string | null;
+  participantsIds?: number[];
 }>();
 
 const router = useRouter();
@@ -125,6 +137,7 @@ const isConnected = ref(false);
 const typingUsers = ref<Set<number>>(new Set());
 const error = ref("");
 const shouldReconnect = ref(true);
+const messagesContainerRef = ref<HTMLDivElement | null>(null);
 
 const removeMessagesByIds = (ids: (number | string)[]) => {
   if (!ids?.length) return;
@@ -232,7 +245,9 @@ const connect = () => {
               }
             }
 
-            sendSeen([incoming.id]);
+            if (!incoming.system) {
+              sendSeen([incoming.id]);
+            }
             break;
           case "delete":
           case "deleted":
@@ -362,6 +377,21 @@ const sendSeen = (messageIds: (number | string | undefined)[]) => {
   ws.value.send(JSON.stringify(payload));
 };
 
+const scrollToBottom = () => {
+  const container = messagesContainerRef.value;
+  if (!container) return;
+  container.scrollTop = container.scrollHeight;
+};
+
+watch(
+  () => messages.value.length,
+  async (newCount, oldCount) => {
+    if (newCount <= oldCount) return;
+    await nextTick();
+    scrollToBottom();
+  }
+);
+
 watch(
   () => props.activityId,
   () => {
@@ -378,6 +408,32 @@ onBeforeUnmount(() => {
   shouldReconnect.value = false;
   ws.value?.close();
 });
+
+const getSeenByOthersCount = (message: ChatMessage) => {
+  if (!message.seenBy?.length) return 0;
+  return message.seenBy.filter((id) => id !== message.userId).length;
+};
+
+const getParticipantsCountExcludingSender = (message: ChatMessage) => {
+  const participants = props.participantsIds || [];
+  if (!participants.length) return 0;
+  return participants.includes(message.userId)
+    ? Math.max(0, participants.length - 1)
+    : participants.length;
+};
+
+const getSeenLabel = (message: ChatMessage) => {
+  const seenByOthers = getSeenByOthersCount(message);
+  if (seenByOthers <= 0) return "";
+  const totalParticipants = getParticipantsCountExcludingSender(message);
+  if (totalParticipants > 0 && seenByOthers >= totalParticipants) {
+    return "Vu par tous";
+  }
+  return `Vu par ${seenByOthers} participant(s)`;
+};
+
+const hasSeenByOthers = (message: ChatMessage) =>
+  getSeenByOthersCount(message) > 0;
 
 const formatTime = (date: string) =>
   new Date(date).toLocaleTimeString("fr-FR", {
