@@ -472,7 +472,8 @@ const formatShortAddress = (activity: any) => {
     } else {
       // scan leftwards for a plausible city part
       for (let j = i - 1; j >= 0; j--) {
-        let cand = parts[j]
+        let cand = parts[j] ?? "";
+        cand = cand
           .replace(/\b\d+[a-zA-ZÀ-ÿ°eèéêçûîœ\-]*\b/gi, "")
           .replace(/arrondissement/gi, "")
           .replace(/[–—,:]/g, "")

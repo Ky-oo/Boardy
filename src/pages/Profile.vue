@@ -168,7 +168,7 @@ const handleSubmit = async () => {
   loading.value = true;
   error.value = "";
   try {
-    await authStore.updateProfile({
+    await (authStore as any).updateProfile({
       firstname: form.firstname.trim(),
       lastname: form.lastname.trim(),
       pseudo: form.pseudo.trim(),
