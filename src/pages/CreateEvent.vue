@@ -112,19 +112,20 @@
 
           <div class="flex flex-col gap-2">
             <label for="address" class="text-primary font-medium"
-              >Adresse</label
+              >Adresse*</label
             >
 
             <div class="flex gap-2">
               <div class="relative flex-1">
                 <input
                   id="address"
+                  ref="addressInputRef"
                   v-model="address"
                   type="text"
                   placeholder="Ex : 44 rue de la paix, Paris, 75001 France"
                   required
                   class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
-                  @input="handleAddressInput"
+                  @input="handleAddressInputWithValidation"
                   @focus="showAddressSuggestions = true"
                   @blur="handleAddressBlur"
                 />
@@ -148,7 +149,7 @@
                     :key="suggestion.place_id"
                     type="button"
                     class="w-full text-left hover:cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    @mousedown.prevent="selectAddressSuggestion(suggestion)"
+                    @mousedown.prevent="handleSelectAddressSuggestion(suggestion)"
                   >
                     {{ suggestion.display_name }}
                   </button>
@@ -347,6 +348,7 @@ const isEditMode = ref(false);
 const editId = ref<number | null>(null);
 const latitude = ref<number | null>(null);
 const longitude = ref<number | null>(null);
+const addressInputRef = ref<HTMLInputElement | null>(null);
 const {
   addressSuggestions,
   addressLoading,
@@ -361,6 +363,26 @@ const {
   latitude,
   longitude,
 });
+
+const clearAddressValidity = () => {
+  addressInputRef.value?.setCustomValidity("");
+};
+
+const handleAddressInputWithValidation = () => {
+  clearAddressValidity();
+  handleAddressInput();
+};
+
+const handleSelectAddressSuggestion = (suggestion: any) => {
+  clearAddressValidity();
+  selectAddressSuggestion(suggestion);
+};
+
+const setAddressInvalid = (message: string) => {
+  if (!addressInputRef.value) return;
+  addressInputRef.value.setCustomValidity(message);
+  addressInputRef.value.reportValidity();
+};
 
 const creatorName = computed(() => {
   const user = authStore.getUser;
@@ -420,6 +442,7 @@ onMounted(async () => {
 const handleSubmit = async () => {
   loading.value = true;
   error.value = "";
+  clearAddressValidity();
   try {
     if (!authStore.user) {
       throw new Error("Vous devez être connecté pour créer un évènement");
@@ -432,7 +455,10 @@ const handleSubmit = async () => {
     const coords = await geocodeLocation();
 
     if (!coords && (!latitude.value || !longitude.value)) {
-      throw new Error("Adresse introuvable. Verifiez le lieu ou l'adresse.");
+      const message = "Adresse introuvable. Verifiez le lieu ou l'adresse.";
+      setAddressInvalid(message);
+      error.value = message;
+      return;
     }
 
     const payload: Partial<Activity> = {
