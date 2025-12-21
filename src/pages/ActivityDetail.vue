@@ -68,9 +68,10 @@
               <button
                 v-else-if="!isPending && authStore.isLogged"
                 @click="handleParticipate"
-                class="bg-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full"
+                :disabled="paymentLoading"
+                class="bg-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Je participe à cet événement
+                {{ participateLabel }}
               </button>
 
               <button
@@ -384,12 +385,17 @@ import IconDe from "@/components/atoms/icons/IconDe.vue";
 import ActivityCard from "@/components/molecules/ActivityCard.vue";
 import ChatPanel from "@/components/organisms/ChatPanel.vue";
 import { useAuth } from "@/stores/authStore";
+import { useToastStore } from "@/stores/toastStore";
+import { confirmPayment, createCheckoutSession } from "@/utils/payment";
 
 const route = useRoute();
 const router = useRouter();
 const activityStore = useActivityStore();
 const authStore = useAuth();
 const isPending = ref(false);
+const paymentLoading = ref(false);
+const toastStore = useToastStore();
+const isPaidActivity = computed(() => priceNumber.value > 0);
 
 const isParticipating = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
@@ -435,6 +441,23 @@ const formatPriceValue = (price?: string | number | null) => {
   if (!num) return "Gratuit";
   return `${num.toFixed(2)} €`;
 };
+
+const priceNumber = computed(() => {
+  if (!activityStore.currentActivity) return 0;
+  const raw = activityStore.currentActivity.price ?? 0;
+  const num = Number(raw);
+  return Number.isFinite(num) ? num : 0;
+});
+
+const participateLabel = computed(() => {
+  if (paymentLoading.value) {
+    return "Redirection vers le paiement...";
+  }
+  if (isPaidActivity.value) {
+    return `Participer pour ${priceNumber.value.toFixed(2)} euro`;
+  }
+  return "Je participe à cet événement";
+});
 
 const formatShortAddress = (activity: any) => {
   if (!activity) return "";
@@ -518,6 +541,10 @@ const formatShortAddress = (activity: any) => {
 
 const handleParticipate = async () => {
   if (!activityStore.currentActivity) return;
+  if (isPaidActivity.value) {
+    await startPayment();
+    return;
+  }
   try {
     const updated = await activityStore.joinActivity(
       activityStore.currentActivity.id
@@ -531,6 +558,48 @@ const handleParticipate = async () => {
     }
   } catch (err) {
     console.error("Erreur lors de la participation:", err);
+  }
+};
+
+const startPayment = async () => {
+  if (!activityStore.currentActivity) return;
+  paymentLoading.value = true;
+  try {
+    const response = await createCheckoutSession(
+      activityStore.currentActivity.id
+    );
+    window.location.href = response.url;
+  } catch (err: any) {
+    const message = err?.message || "Erreur lors du paiement.";
+    toastStore.addToast(message, { type: "error" });
+  } finally {
+    paymentLoading.value = false;
+  }
+};
+
+const handlePaymentConfirm = async (sessionId: string) => {
+  if (!sessionId || !activityStore.currentActivity) return;
+  paymentLoading.value = true;
+  try {
+    await confirmPayment(sessionId);
+    const refreshed = await activityStore.fetchActivity(
+      activityStore.currentActivity.id
+    );
+    if (refreshed?.private) {
+      isPending.value = true;
+    } else {
+      router.push("/participation-confirmed");
+    }
+    const nextQuery = { ...route.query };
+    delete nextQuery.session_id;
+    delete nextQuery.payment;
+    router.replace({ query: nextQuery });
+    toastStore.addToast("Paiement confirme.", { type: "success" });
+  } catch (err: any) {
+    const message = err?.message || "Paiement non confirme.";
+    toastStore.addToast(message, { type: "error" });
+  } finally {
+    paymentLoading.value = false;
   }
 };
 
@@ -584,7 +653,21 @@ onMounted(async () => {
     if (activityStore.activities.length === 0) {
       await activityStore.fetchActivities();
     }
-    activityStore.fetchActivity(id);
+    await activityStore.fetchActivity(id);
+    const sessionId =
+      typeof route.query.session_id === "string"
+        ? route.query.session_id
+        : null;
+    const paymentStatus =
+      typeof route.query.payment === "string" ? route.query.payment : null;
+    if (sessionId) {
+      await handlePaymentConfirm(sessionId);
+    } else if (paymentStatus === "cancel") {
+      toastStore.addToast("Paiement annule.", { type: "info" });
+      const nextQuery = { ...route.query };
+      delete nextQuery.payment;
+      router.replace({ query: nextQuery });
+    }
   }
 });
 
