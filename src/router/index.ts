@@ -12,6 +12,7 @@ import ParticipationConfirmed from "@/pages/ParticipationConfirmed.vue";
 import Register from "@/pages/Register.vue";
 import MyEvent from "@/pages/MyEvent.vue";
 import Category from "@/pages/Category.vue";
+import Profile from "@/pages/Profile.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -62,6 +63,11 @@ const routes: RouteRecordRaw[] = [
     path: "/register",
     name: "register",
     component: Register,
+  },
+  {
+    path: "/profile",
+    name: "profile",
+    component: Profile,
   },
 ];
 

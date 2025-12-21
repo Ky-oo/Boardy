@@ -138,12 +138,7 @@
                       {{ activityStore.currentActivity.city }}
                     </div>
                     <div v-else>
-                      {{ activityStore.currentActivity.place_name }},
-                      <br />
-                      {{ activityStore.currentActivity.address }},
-                      <br />
-                      {{ activityStore.currentActivity.postalCode }}
-                      {{ activityStore.currentActivity.city }}
+                      {{ formatShortAddress(activityStore.currentActivity) }}
                     </div>
                   </div>
                 </div>
@@ -319,12 +314,7 @@
                       {{ activityStore.currentActivity.city }}
                     </div>
                     <div v-else>
-                      {{ activityStore.currentActivity.place_name }},
-                      <br />
-                      {{ activityStore.currentActivity.address }},
-                      <br />
-                      {{ activityStore.currentActivity.postalCode }}
-                      {{ activityStore.currentActivity.city }}
+                      {{ formatShortAddress(activityStore.currentActivity) }}
                     </div>
                   </div>
                 </div>
@@ -444,6 +434,85 @@ const formatPriceValue = (price?: string | number | null) => {
   const num = price !== null && price !== undefined ? Number(price) : 0;
   if (!num) return "Gratuit";
   return `${num.toFixed(2)} €`;
+};
+
+const formatShortAddress = (activity: any) => {
+  if (!activity) return "";
+
+  const placeName = activity.place_name
+    ? String(activity.place_name).trim()
+    : "";
+  const address = activity.address ? String(activity.address).trim() : "";
+
+  if (!address) return placeName || "";
+
+  const parts = address
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+
+  let postal = "";
+  let city = "";
+  let postalIndex = -1;
+
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    if (!p) continue;
+    const m = p.match(/(\b\d{5}\b)/);
+    if (!m) continue;
+    // postal code found
+    postal = m[1] ?? "";
+    // try same part (e.g. "75008 Paris" or "75008, Paris")
+    const samePartCity = p
+      .replace(m[1] ?? "", "")
+      .replace(/[-–—,:]/g, "")
+      .trim();
+    if (samePartCity && !/france/i.test(samePartCity)) {
+      city = samePartCity;
+    } else {
+      // scan leftwards for a plausible city part
+      for (let j = i - 1; j >= 0; j--) {
+        let cand = parts[j]
+          .replace(/\b\d+[a-zA-ZÀ-ÿ°eèéêçûîœ\-]*\b/gi, "")
+          .replace(/arrondissement/gi, "")
+          .replace(/[–—,:]/g, "")
+          .trim();
+        if (cand && /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(cand) && !/france/i.test(cand)) {
+          city = cand;
+          break;
+        }
+      }
+    }
+    postalIndex = i;
+    break;
+  }
+
+  if (!postal && parts.length > 0) {
+    const last = parts[parts.length - 1] ?? "";
+    if (/^[^\d]+$/.test(last) && last.length < 40) {
+      city = last;
+      postalIndex = parts.length - 1;
+    }
+  }
+
+  const addrParts = parts.slice(
+    0,
+    postalIndex === -1 ? parts.length : postalIndex
+  );
+  const briefAddr = addrParts.slice(0, 2).join(", ");
+
+  const prefixParts: string[] = [];
+  if (placeName) prefixParts.push(placeName);
+  if (briefAddr) prefixParts.push(briefAddr);
+
+  const location = prefixParts.join(", ");
+
+  if (postal || city) {
+    const postalCity = [postal, city].filter(Boolean).join(" ").trim();
+    return location ? `${location}, ${postalCity}` : postalCity;
+  }
+
+  return location || briefAddr || address;
 };
 
 const handleParticipate = async () => {
