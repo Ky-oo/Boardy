@@ -72,7 +72,11 @@
   </div>
 
   <div class="mx-50 mb-35">
-    <FilterBar />
+    <FilterBar
+      @update:search="onSearchUpdate"
+      @update:date="onDateUpdate"
+      @update:city="onCityUpdate"
+    />
   </div>
 
   <!-- Section des activités à venir -->
@@ -138,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useActivityStore } from "../stores/activityStore";
 import ActivityCard from "../components/molecules/ActivityCard.vue";
 import IconBars from "../components/atoms/icons/IconBars.vue";
@@ -147,13 +151,66 @@ import IconGamers from "../components/atoms/icons/IconGamers.vue";
 import FilterBar from "@/components/molecules/FilterBar.vue";
 const activityStore = useActivityStore();
 
-// Charger les activités au montage
+const searchQuery = ref("");
+const selectedDate = ref("");
+const selectedCity = ref("");
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+let cityTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const fetchFiltered = (append = false) => {
+  const page = append ? activityStore.currentPage + 1 : 1;
+  activityStore.fetchActivities(page, append, {
+    search: searchQuery.value,
+    date: selectedDate.value,
+    city: selectedCity.value,
+  });
+};
+
+const onSearchUpdate = (value: string) => {
+  searchQuery.value = value;
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchFiltered(false);
+  }, 300);
+};
+
+const onDateUpdate = (value: string) => {
+  selectedDate.value = value;
+  const isValidIsoDate = (s: string) => {
+    if (!s) return false;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    const [y, m, d] = s.split("-").map(Number);
+    const dt = new Date(s);
+    return (
+      !isNaN(dt.getTime()) &&
+      dt.getUTCFullYear() === y &&
+      dt.getUTCMonth() + 1 === m &&
+      dt.getUTCDate() === d &&
+      new Date(y, m - 1, d).getTime() > new Date().setHours(0, 0, 0, 0)
+    );
+  };
+
+  if (value !== "" && isValidIsoDate(value)) {
+    selectedDate.value = "";
+  }
+
+  fetchFiltered(false);
+};
+
+const onCityUpdate = (value: string) => {
+  selectedCity.value = value;
+  if (cityTimeout) clearTimeout(cityTimeout);
+  cityTimeout = setTimeout(() => {
+    fetchFiltered(false);
+  }, 300);
+};
+
 onMounted(() => {
-  activityStore.fetchActivities(1);
+  fetchFiltered(false);
 });
 
 const loadMore = () => {
   if (activityStore.loading || !activityStore.hasMore) return;
-  activityStore.fetchActivities(activityStore.currentPage + 1, true);
+  fetchFiltered(true);
 };
 </script>

@@ -235,6 +235,7 @@ import { useAuth } from "@/stores/authStore";
 import IconGoogle from "@/components/atoms/icons/IconGoogle.vue";
 import IconApple from "@/components/atoms/icons/IconApple.vue";
 import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
+import { getUserLocation as fetchUserLocation, UserLocationError } from "@/utils/userLocation";
 
 const router = useRouter();
 const authStore = useAuth();
@@ -249,66 +250,43 @@ const error = ref("");
 const loading = ref(false);
 const locationLoading = ref(false);
 
-const getUserLocation = async () => {
-  if (!navigator.geolocation) {
-    error.value = "La géolocalisation n'est pas supportée par votre navigateur";
-    return;
+const getLocationErrorMessage = (err: unknown) => {
+  if (err instanceof UserLocationError) {
+    switch (err.code) {
+      case "unsupported":
+        return "La g??olocalisation n'est pas support??e par votre navigateur";
+      case "permission_denied":
+        return "Vous avez refus?? l'acc??s ?? votre position";
+      case "position_unavailable":
+        return "Position non disponible";
+      case "timeout":
+        return "D??lai d'attente d??pass??";
+      case "city_not_found":
+        return "Impossible de d??terminer votre ville";
+      case "reverse_geocode_failed":
+        return "Impossible de r??cup??rer la ville";
+      default:
+        return "Erreur lors de la r??cup??ration de la position";
+    }
   }
+  return "Erreur lors de la r??cup??ration de la position";
+};
 
+const getUserLocation = async () => {
   locationLoading.value = true;
   error.value = "";
-
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      const { latitude, longitude } = position.coords;
-
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=fr`
-        );
-
-        if (!response.ok) {
-          throw new Error("Impossible de récupérer la ville");
-        }
-
-        const data = await response.json();
-
-        city.value =
-          data.address?.city ||
-          data.address?.town ||
-          data.address?.village ||
-          data.address?.municipality ||
-          "";
-
-        if (!city.value) {
-          error.value = "Impossible de déterminer votre ville";
-        }
-      } catch (e: any) {
-        console.error("Fetch error:", e);
-        error.value = e.message || "Erreur lors de la récupération de la ville";
-      } finally {
-        locationLoading.value = false;
-      }
-    },
-    (err) => {
-      console.error("Geolocation error:", err);
-      locationLoading.value = false;
-      if (err.code === 1) {
-        error.value = "Vous avez refusé l'accès à votre position";
-      } else if (err.code === 2) {
-        error.value = "Position non disponible";
-      } else if (err.code === 3) {
-        error.value = "Délai d'attente dépassé";
-      } else {
-        error.value = "Erreur lors de la récupération de la position";
-      }
-    },
-    {
-      enableHighAccuracy: false,
-      timeout: 15000,
-      maximumAge: 0,
-    }
-  );
+  try {
+    const { city: resolvedCity } = await fetchUserLocation({
+      language: "fr",
+      geolocation: { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 },
+    });
+    city.value = resolvedCity;
+  } catch (err) {
+    console.error("User location error:", err);
+    error.value = getLocationErrorMessage(err);
+  } finally {
+    locationLoading.value = false;
+  }
 };
 
 const handleRegister = async () => {

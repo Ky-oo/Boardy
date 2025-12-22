@@ -144,11 +144,38 @@ export const useActivityStore = defineStore("activity", {
       };
     },
 
-    async fetchActivities(page = 1, append = false) {
+    async fetchActivities(
+      page = 1,
+      append = false,
+      filters: {
+        search?: string;
+        date?: string;
+        city?: string;
+        hostOrganisationId?: number;
+        hostUserId?: number;
+      } = {}
+    ) {
       this.loading = true;
       this.error = null;
       try {
-        const response = await get(`/activity`, { page });
+        const params: Record<string, unknown> = { page };
+        if (filters.search?.trim()) {
+          params.search = filters.search.trim();
+        }
+        if (filters.date) {
+          params.date = filters.date;
+        }
+        const city = filters.city?.trim();
+        if (city) {
+          params.city = city;
+        }
+        if (Number.isInteger(filters.hostOrganisationId)) {
+          params.hostOrganisationId = filters.hostOrganisationId;
+        }
+        if (Number.isInteger(filters.hostUserId)) {
+          params.hostUserId = filters.hostUserId;
+        }
+        const response = await get(`/activity`, params);
         const activities: Activity[] = Array.isArray(response)
           ? response
           : (response?.rows as Activity[]) ||

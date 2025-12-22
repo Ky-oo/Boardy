@@ -35,43 +35,56 @@
       />
     </div>
 
-    <!-- Dropdown des villes -->
+    <!-- Recherche de villes -->
     <div class="relative">
-      <select
+      <input
         v-model="selectedCity"
-        class="px-4 py-2 border border-custom-blue rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary cursor-pointer appearance-none pr-10"
-        @change="$emit('update:city', selectedCity)"
-      >
-        <option value="0">Toutes les villes</option>
-        <option value="Lyon">Lyon</option>
-        <option value="Annecy">Annecy</option>
-        <option value="Grenoble">Grenoble</option>
-        <option value="Chambery">Chambery</option>
-        <option value="Thonons-les-bains">Thonons-les-bains</option>
-        <option value="Les Clefs">Les Clefs</option>
-      </select>
+        type="text"
+        placeholder="Toutes les villes"
+        class="px-4 py-2 border border-custom-blue rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary pr-10"
+        @focus="showCitySuggestions = true"
+        @blur="handleCityBlur"
+      />
+
       <div
-        class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+        v-if="
+          showCitySuggestions &&
+          (cityLoading ||
+            citySuggestions.length ||
+            selectedCity.trim().length >= 2)
+        "
+        class="absolute left-0 right-0 mt-1 bg-custom-white border border-custom-blue rounded-xl shadow-lg max-h-48 overflow-y-auto z-20"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          class="w-5 h-5 text-custom-primary"
+        <div v-if="cityLoading" class="px-3 py-2 text-xs text-gray-500">
+          Recherche ville...
+        </div>
+        <button
+          v-for="suggestion in citySuggestions"
+          :key="suggestion.place_id"
+          type="button"
+          class="w-full text-left hover:cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          @mousedown.prevent="selectCitySuggestion(suggestion)"
         >
-          <path
-            fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clip-rule="evenodd"
-          />
-        </svg>
+          {{ getCityLabel(suggestion) }}
+        </button>
+        <div
+          v-if="
+            !cityLoading &&
+            citySuggestions.length === 0 &&
+            selectedCity.trim().length >= 2
+          "
+          class="px-3 py-2 text-xs text-gray-500"
+        >
+          Aucune ville trouvee
+        </div>
       </div>
     </div>
 
     <!-- Bouton localisation auto -->
     <button
-      @click="$emit('auto-location')"
-      class="flex items-center gap-2 px-6 py-2 bg-custom-blue text-white rounded-lg hover:bg-custom-primary transition-colors font-bold whitespace-nowrap hover:cursor-pointer"
+      @click="handleAutoLocation"
+      :disabled="locationLoading"
+      class="flex items-center gap-2 px-6 py-2 bg-custom-blue text-white rounded-lg hover:bg-custom-primary transition-colors font-bold whitespace-nowrap hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -91,11 +104,197 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { useToastStore } from "@/stores/toastStore";
+import {
+  fetchAddressSuggestions,
+  type AddressSuggestion,
+} from "@/utils/api/geocoding";
+import { getUserLocation, UserLocationError } from "@/utils/userLocation";
+
+const emit = defineEmits([
+  "update:search",
+  "update:date",
+  "update:city",
+  "auto-location",
+]);
 
 const searchQuery = ref("");
 const selectedDate = ref("");
-const selectedCity = ref("0");
+const selectedCity = ref("");
+const citySuggestions = ref<AddressSuggestion[]>([]);
+const cityLoading = ref(false);
+const showCitySuggestions = ref(false);
+const isCityValid = ref(false);
+const lastConfirmedCity = ref("");
+const locationLoading = ref(false);
 
-defineEmits(["update:search", "update:date", "update:city", "auto-location"]);
+const toastStore = useToastStore();
+
+let citySearchTimeout: number | null = null;
+let lastCityQuery = "";
+
+const getCityName = (suggestion: AddressSuggestion) =>
+  suggestion.address?.city ||
+  suggestion.address?.town ||
+  suggestion.address?.village ||
+  suggestion.address?.municipality ||
+  suggestion.address?.county ||
+  suggestion.address?.state ||
+  suggestion.display_name.split(",")[0]?.trim() ||
+  "";
+
+const getCityLabel = (suggestion: AddressSuggestion) => {
+  const name = getCityName(suggestion);
+  return name || suggestion.display_name;
+};
+
+const fetchCitySuggestions = async (raw: string) => {
+  const query = raw.trim();
+  if (!query) {
+    lastCityQuery = "";
+    citySuggestions.value = [];
+    cityLoading.value = false;
+    return;
+  }
+
+  lastCityQuery = query;
+  cityLoading.value = true;
+
+  try {
+    const results = await fetchAddressSuggestions(query, 6);
+    if (lastCityQuery !== query) return;
+    const unique = new Map<string, AddressSuggestion>();
+    results.forEach((result) => {
+      const name = getCityName(result);
+      if (!name) return;
+      if (!unique.has(name)) {
+        unique.set(name, result);
+      }
+    });
+    citySuggestions.value = Array.from(unique.values());
+  } catch {
+    if (lastCityQuery === query) {
+      citySuggestions.value = [];
+    }
+  } finally {
+    if (lastCityQuery === query) {
+      cityLoading.value = false;
+    }
+  }
+};
+
+watch(
+  () => selectedCity.value,
+  () => {
+    showCitySuggestions.value = true;
+    const trimmed = selectedCity.value.trim();
+
+    if (!trimmed) {
+      if (lastConfirmedCity.value) {
+        emit("update:city", "");
+      }
+      isCityValid.value = true;
+      lastConfirmedCity.value = "";
+      lastCityQuery = "";
+      citySuggestions.value = [];
+      cityLoading.value = false;
+      return;
+    }
+
+    if (trimmed !== lastConfirmedCity.value) {
+      if (isCityValid.value) {
+        emit("update:city", "");
+      }
+      isCityValid.value = false;
+    }
+
+    if (citySearchTimeout !== null) {
+      window.clearTimeout(citySearchTimeout);
+    }
+
+    if (trimmed.length < 2) {
+      lastCityQuery = "";
+      citySuggestions.value = [];
+      cityLoading.value = false;
+      return;
+    }
+
+    citySearchTimeout = window.setTimeout(() => {
+      fetchCitySuggestions(selectedCity.value);
+    }, 300);
+  }
+);
+
+const handleCityBlur = () => {
+  window.setTimeout(() => {
+    showCitySuggestions.value = false;
+    if (isCityValid.value) return;
+    const trimmed = selectedCity.value.trim();
+    if (!trimmed) return;
+    const match = citySuggestions.value.find(
+      (suggestion) =>
+        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase()
+    );
+    if (match) {
+      selectCitySuggestion(match);
+    }
+  }, 150);
+};
+
+const selectCitySuggestion = (suggestion: AddressSuggestion) => {
+  const name = getCityName(suggestion) || suggestion.display_name;
+  selectedCity.value = name;
+  isCityValid.value = true;
+  lastConfirmedCity.value = name;
+  citySuggestions.value = [];
+  cityLoading.value = false;
+  showCitySuggestions.value = false;
+  emit("update:city", selectedCity.value.trim());
+};
+
+const getLocationErrorMessage = (err: unknown) => {
+  if (err instanceof UserLocationError) {
+    switch (err.code) {
+      case "permission_denied":
+        return "Vous avez refusÃ© l'accÃ¨s Ã  votre position";
+      case "position_unavailable":
+        return "Position non disponible";
+      case "timeout":
+        return "DÃ©lai d'attente dÃ©passÃ©";
+      case "city_not_found":
+        return "Impossible de dÃ©terminer votre ville";
+      case "reverse_geocode_failed":
+        return "Impossible de rÃ©cupÃ©rer la ville";
+      case "unsupported":
+        return "La gÃ©olocalisation n'est pas supportÃ©e par votre navigateur";
+      default:
+        return "Erreur lors de la rÃ©cupÃ©ration de la position";
+    }
+  }
+  return "Erreur lors de la rÃ©cupÃ©ration de la position";
+};
+
+const handleAutoLocation = async () => {
+  if (locationLoading.value) return;
+  locationLoading.value = true;
+  try {
+    const { city } = await getUserLocation({
+      language: "fr",
+      geolocation: { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 },
+    });
+    selectedCity.value = city;
+    isCityValid.value = true;
+    lastConfirmedCity.value = city;
+    citySuggestions.value = [];
+    showCitySuggestions.value = false;
+    emit("update:city", selectedCity.value);
+    emit("auto-location");
+  } catch (err) {
+    console.error("Auto location error:", err);
+    toastStore.addToast(getLocationErrorMessage(err), { type: "error" });
+  } finally {
+    locationLoading.value = false;
+  }
+};
 </script>

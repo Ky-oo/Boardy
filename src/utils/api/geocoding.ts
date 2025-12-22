@@ -3,6 +3,16 @@ export type AddressSuggestion = {
   display_name: string;
   lat: string;
   lon: string;
+  address?: {
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    county?: string;
+    state?: string;
+  };
+  type?: string;
+  class?: string;
 };
 
 export type GeocodeResult = {
