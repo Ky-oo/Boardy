@@ -25,15 +25,21 @@ export class UserLocationError extends Error {
 
 type UserLocationOptions = {
   language?: string;
-  geolocation?: GeolocationPositionOptions;
+  geolocation?: PositionOptions;
 };
 
-const buildReverseUrl = (latitude: number, longitude: number, language: string) =>
+const buildReverseUrl = (
+  latitude: number,
+  longitude: number,
+  language: string
+) =>
   `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=${encodeURIComponent(
     language
   )}`;
 
-const mapGeolocationErrorCode = (error: GeolocationPositionError) => {
+const mapGeolocationErrorCode = (
+  error: GeolocationPositionError
+): UserLocationErrorCode => {
   switch (error.code) {
     case 1:
       return "permission_denied";
@@ -46,7 +52,7 @@ const mapGeolocationErrorCode = (error: GeolocationPositionError) => {
   }
 };
 
-const getPosition = (options?: GeolocationPositionOptions) =>
+const getPosition = (options?: PositionOptions) =>
   new Promise<GeolocationPosition>((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new UserLocationError("unsupported", "Geolocation not supported"));
