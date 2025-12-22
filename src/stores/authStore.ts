@@ -24,6 +24,20 @@ interface RegisterResponse {
   token: string;
 }
 
+type GoogleProfile = {
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  picture?: string;
+};
+
+interface GoogleAuthResponse {
+  user?: UserWithoutPassword;
+  token?: string;
+  needsCompletion?: boolean;
+  profile?: GoogleProfile;
+}
+
 export const useAuth = defineStore("auth", {
   state: (): AuthState => ({
     user: null as UserWithoutPassword | null,
@@ -106,6 +120,98 @@ export const useAuth = defineStore("auth", {
           status: 400,
         };
         console.error("Erreur lors de l'inscription:", apiError);
+        throw new Error(apiError.message);
+      }
+    },
+
+    async handleGoogleAuth(
+      idToken: string,
+      options?: { redirectOnSuccess?: boolean }
+    ): Promise<{
+      needsCompletion: boolean;
+      profile?: GoogleProfile;
+      idToken: string;
+    }> {
+      try {
+        const response: GoogleAuthResponse = await post(`/auth/google`, {
+          idToken,
+        });
+
+        if (response.needsCompletion) {
+          return {
+            needsCompletion: true,
+            profile: response.profile,
+            idToken,
+          };
+        }
+
+        const { user, token } = response;
+        if (!user || !token) {
+          throw new Error("Réponse Google invalide");
+        }
+
+        this.isLogged = true;
+        this.user = user;
+        this.tokens.accessToken = token;
+        setAuthToken(token);
+        const toastStore = useToastStore();
+        toastStore.addToast("Vous Ǧtes connecté.", { type: "success" });
+        if (options?.redirectOnSuccess !== false) {
+          router.push("/");
+        }
+        return { needsCompletion: false, idToken };
+      } catch (error: unknown) {
+        const apiError = {
+          message:
+            error instanceof Error
+              ? error.message
+              : "Erreur de connexion Google",
+          status: 401,
+        };
+        console.error("Erreur lors de la connexion Google:", apiError);
+        throw new Error(apiError.message);
+      }
+    },
+
+    async completeGoogleRegistration(payload: {
+      idToken: string;
+      firstname: string;
+      lastname: string;
+      pseudo: string;
+      city: string;
+    }): Promise<void> {
+      try {
+        const response: RegisterResponse = await post(`/auth/google/complete`, {
+          idToken: payload.idToken,
+          firstname: payload.firstname,
+          lastname: payload.lastname,
+          pseudo: payload.pseudo,
+          city: payload.city,
+        });
+
+        const { user, token } = response;
+        if (!user || !token) {
+          throw new Error("Réponse d'inscription Google invalide");
+        }
+
+        this.isLogged = true;
+        this.user = user;
+        this.tokens.accessToken = token;
+        setAuthToken(token);
+        const toastStore = useToastStore();
+        toastStore.addToast("Inscription réussie. Bienvenue !", {
+          type: "success",
+        });
+        router.push("/");
+      } catch (error: unknown) {
+        const apiError = {
+          message:
+            error instanceof Error
+              ? error.message
+              : "Erreur d'inscription Google",
+          status: 400,
+        };
+        console.error("Erreur lors de l'inscription Google:", apiError);
         throw new Error(apiError.message);
       }
     },

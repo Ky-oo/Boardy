@@ -77,12 +77,13 @@
               autocomplete="username"
               type="email"
               placeholder="Entrez votre email"
+              :disabled="isGoogleRegistration"
               required
-              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white disabled:opacity-70 disabled:cursor-not-allowed"
             />
           </div>
 
-          <div class="flex flex-col gap-2">
+          <div v-if="!isGoogleRegistration" class="flex flex-col gap-2">
             <label for="password" class="text-custom-white font-medium"
               >Mot de passe</label
             >
@@ -185,13 +186,11 @@
             <div class="flex-1 h-px bg-custom-white/50"></div>
           </div>
 
-          <div class="flex justify-center gap-10">
-            <button
-              type="button"
-              class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
-            >
-              <IconGoogle class="text-custom-white w-10 h-10" />
-            </button>
+          <div class="flex justify-center gap-6 flex-wrap">
+            <div
+              ref="googleButtonRef"
+              class="flex items-center justify-center"
+            ></div>
             <button
               type="button"
               class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
@@ -229,13 +228,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/stores/authStore";
-import IconGoogle from "@/components/atoms/icons/IconGoogle.vue";
 import IconApple from "@/components/atoms/icons/IconApple.vue";
 import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
-import { getUserLocation as fetchUserLocation, UserLocationError } from "@/utils/userLocation";
+import {
+  consumeGooglePrefill,
+  initGoogleButton,
+  type GoogleCredentialResponse,
+  type GoogleProfile,
+} from "@/utils/googleAuthFlow";
+import {
+  getUserLocation as fetchUserLocation,
+  UserLocationError,
+} from "@/utils/userLocation";
 
 const router = useRouter();
 const authStore = useAuth();
@@ -249,6 +256,20 @@ const city = ref("");
 const error = ref("");
 const loading = ref(false);
 const locationLoading = ref(false);
+const googleButtonRef = ref<HTMLDivElement | null>(null);
+const googleIdToken = ref<string | null>(null);
+
+const isGoogleRegistration = computed(() => !!googleIdToken.value);
+
+const applyGoogleProfile = (profile?: GoogleProfile) => {
+  if (!profile) return;
+  if (profile.firstname) firstname.value = profile.firstname;
+  if (profile.lastname) lastname.value = profile.lastname;
+  if (profile.email) email.value = profile.email;
+  if (!pseudo.value && profile.email) {
+    pseudo.value = profile.email.split("@")[0] || "";
+  }
+};
 
 const getLocationErrorMessage = (err: unknown) => {
   if (err instanceof UserLocationError) {
@@ -289,16 +310,62 @@ const getUserLocation = async () => {
   }
 };
 
+const handleGoogleCredential = async (response: GoogleCredentialResponse) => {
+  try {
+    const result = await authStore.handleGoogleAuth(response.credential, {
+      redirectOnSuccess: true,
+    });
+    if (result.needsCompletion) {
+      googleIdToken.value = response.credential;
+      applyGoogleProfile(result.profile);
+    }
+  } catch (e: any) {
+    error.value = e.message || "Erreur de connexion Google";
+  }
+};
+
 const handleRegister = async () => {
   loading.value = true;
   error.value = "";
   try {
-    await authStore.register(firstname.value, lastname.value, pseudo.value, email.value, password.value, city.value);
+    if (googleIdToken.value) {
+      await authStore.completeGoogleRegistration({
+        idToken: googleIdToken.value,
+        firstname: firstname.value,
+        lastname: lastname.value,
+        pseudo: pseudo.value,
+        city: city.value,
+      });
+    } else {
+      await authStore.register(
+        firstname.value,
+        lastname.value,
+        pseudo.value,
+        email.value,
+        password.value,
+        city.value
+      );
+    }
   } catch (e: any) {
     error.value = e.message || "Erreur d'inscription";
   } finally {
     loading.value = false;
   }
 };
+
+onMounted(() => {
+  const prefill = consumeGooglePrefill();
+  if (prefill?.idToken) {
+    googleIdToken.value = prefill.idToken;
+    applyGoogleProfile(prefill.profile);
+  }
+  initGoogleButton({
+    element: googleButtonRef.value,
+    onCredential: handleGoogleCredential,
+    onError: () => {
+      error.value = "Impossible de charger Google Auth";
+    },
+  });
+});
 </script>
 

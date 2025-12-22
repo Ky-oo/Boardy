@@ -76,13 +76,11 @@
             <div class="flex-1 h-px bg-custom-white/50"></div>
           </div>
 
-          <div class="flex justify-center gap-10">
-            <button
-              type="button"
-              class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
-            >
-              <IconGoogle class="text-custom-white w-10 h-10" />
-            </button>
+          <div class="flex justify-center gap-6 flex-wrap">
+            <div
+              ref="googleButtonRef"
+              class="flex items-center justify-center"
+            ></div>
             <button
               type="button"
               class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
@@ -111,12 +109,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/stores/authStore";
-import IconGoogle from "@/components/atoms/icons/IconGoogle.vue";
 import IconApple from "@/components/atoms/icons/IconApple.vue";
 import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
+import {
+  initGoogleButton,
+  saveGooglePrefill,
+  type GoogleCredentialResponse,
+} from "@/utils/googleAuthFlow";
 
 const router = useRouter();
 const authStore = useAuth();
@@ -125,6 +127,7 @@ const email = ref("alice@example.com");
 const password = ref("azerty");
 const error = ref("");
 const loading = ref(false);
+const googleButtonRef = ref<HTMLDivElement | null>(null);
 
 const handleLogin = async () => {
   loading.value = true;
@@ -137,4 +140,29 @@ const handleLogin = async () => {
     loading.value = false;
   }
 };
+
+const handleGoogleCredential = async (response: GoogleCredentialResponse) => {
+  try {
+    const result = await authStore.handleGoogleAuth(response.credential);
+    if (result.needsCompletion) {
+      saveGooglePrefill({
+        idToken: response.credential,
+        profile: result.profile,
+      });
+      router.push("/register");
+    }
+  } catch (e: any) {
+    error.value = e.message || "Erreur de connexion Google";
+  }
+};
+
+onMounted(() => {
+  initGoogleButton({
+    element: googleButtonRef.value,
+    onCredential: handleGoogleCredential,
+    onError: () => {
+      error.value = "Impossible de charger Google Auth";
+    },
+  });
+});
 </script>
