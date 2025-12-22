@@ -257,22 +257,22 @@ const getLocationErrorMessage = (err: unknown) => {
   if (err instanceof UserLocationError) {
     switch (err.code) {
       case "permission_denied":
-        return "Vous avez refusÃ© l'accÃ¨s Ã  votre position";
+        return "Vous avez refusé l'accès à votre position";
       case "position_unavailable":
         return "Position non disponible";
       case "timeout":
-        return "DÃ©lai d'attente dÃ©passÃ©";
+        return "Délai d'attente dépassé";
       case "city_not_found":
-        return "Impossible de dÃ©terminer votre ville";
+        return "Impossible de déterminer votre ville";
       case "reverse_geocode_failed":
-        return "Impossible de rÃ©cupÃ©rer la ville";
+        return "Impossible de récupérer la ville";
       case "unsupported":
-        return "La gÃ©olocalisation n'est pas supportÃ©e par votre navigateur";
+        return "La géolocalisation n'est pas supportée par votre navigateur";
       default:
-        return "Erreur lors de la rÃ©cupÃ©ration de la position";
+        return "Erreur lors de la récupération de la position";
     }
   }
-  return "Erreur lors de la rÃ©cupÃ©ration de la position";
+  return "Erreur lors de la récupération de la position";
 };
 
 const handleAutoLocation = async () => {

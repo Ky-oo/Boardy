@@ -38,6 +38,17 @@ interface GoogleAuthResponse {
   profile?: GoogleProfile;
 }
 
+const getApiErrorMessage = (error: unknown, fallback: string) => {
+  if (error && typeof error === "object" && "response" in error) {
+    const responseMessage = (error as any)?.response?.data?.error;
+    if (typeof responseMessage === "string" && responseMessage.trim()) {
+      return responseMessage;
+    }
+  }
+  if (error instanceof Error) return error.message;
+  return fallback;
+};
+
 export const useAuth = defineStore("auth", {
   state: (): AuthState => ({
     user: null as UserWithoutPassword | null,
@@ -72,8 +83,7 @@ export const useAuth = defineStore("auth", {
       } catch (error: unknown) {
         console.log(error);
         const apiError = {
-          message:
-            error instanceof Error ? error.message : "Erreur de connexion",
+          message: getApiErrorMessage(error, "Erreur de connexion"),
           status: 401,
         };
         console.error("Erreur lors de la connexion:", apiError);
@@ -115,8 +125,7 @@ export const useAuth = defineStore("auth", {
         router.push("/");
       } catch (error: unknown) {
         const apiError = {
-          message:
-            error instanceof Error ? error.message : "Erreur d'inscription",
+          message: getApiErrorMessage(error, "Erreur d'inscription"),
           status: 400,
         };
         console.error("Erreur lors de l'inscription:", apiError);
@@ -162,10 +171,7 @@ export const useAuth = defineStore("auth", {
         return { needsCompletion: false, idToken };
       } catch (error: unknown) {
         const apiError = {
-          message:
-            error instanceof Error
-              ? error.message
-              : "Erreur de connexion Google",
+          message: getApiErrorMessage(error, "Erreur de connexion Google"),
           status: 401,
         };
         console.error("Erreur lors de la connexion Google:", apiError);
@@ -205,10 +211,7 @@ export const useAuth = defineStore("auth", {
         router.push("/");
       } catch (error: unknown) {
         const apiError = {
-          message:
-            error instanceof Error
-              ? error.message
-              : "Erreur d'inscription Google",
+          message: getApiErrorMessage(error, "Erreur d'inscription Google"),
           status: 400,
         };
         console.error("Erreur lors de l'inscription Google:", apiError);

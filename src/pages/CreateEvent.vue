@@ -59,10 +59,12 @@
 
             <input
               id="date"
+              ref="dateInputRef"
               v-model="date"
               type="date"
               required
               class="w-full h-10 px-4 py-3 hover:cursor-text rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              @input="clearDateValidity"
             />
           </div>
 
@@ -98,6 +100,10 @@
               />
             </div>
           </div>
+          <p v-if="isOvernight" class="text-xs text-gray-500">
+            L'heure de fin est plus tot que l'heure de debut : la soiree dure
+            apres minuit.
+          </p>
 
           <div class="flex flex-col gap-2">
             <label for="location" class="text-primary font-medium"
@@ -407,6 +413,7 @@ const editId = ref<number | null>(null);
 const latitude = ref<number | null>(null);
 const longitude = ref<number | null>(null);
 const addressInputRef = ref<HTMLInputElement | null>(null);
+const dateInputRef = ref<HTMLInputElement | null>(null);
 const editOrganisationId = ref<number | null>(null);
 
 const {
@@ -427,6 +434,39 @@ const {
 const clearAddressValidity = () => {
   addressInputRef.value?.setCustomValidity("");
 };
+
+const clearDateValidity = () => {
+  dateInputRef.value?.setCustomValidity("");
+};
+
+const setDateInvalid = (message: string) => {
+  if (!dateInputRef.value) return;
+  dateInputRef.value.setCustomValidity(message);
+  dateInputRef.value.reportValidity();
+};
+
+const formatLocalDate = (value: Date) => {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const todayDate = computed(() => formatLocalDate(new Date()));
+
+const isDateBeforeToday = (value: string) => {
+  if (!value) return false;
+  const selected = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(selected.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return selected < today;
+};
+
+const isOvernight = computed(() => {
+  if (!startTime.value || !endTime.value) return false;
+  return endTime.value < startTime.value;
+});
 
 const handleAddressInputWithValidation = () => {
   clearAddressValidity();
@@ -553,9 +593,17 @@ const handleSubmit = async () => {
   loading.value = true;
   error.value = "";
   clearAddressValidity();
+  clearDateValidity();
   try {
     if (!authStore.user) {
       throw new Error("Vous devez être connecté pour créer un évènement");
+    }
+
+    if (isDateBeforeToday(date.value)) {
+      const message = "L'activite doit avoir lieu au plus tot ce soir.";
+      setDateInvalid(message);
+      error.value = message;
+      return;
     }
 
     const isoDate = new Date(

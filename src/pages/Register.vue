@@ -103,15 +103,53 @@
               >Ville</label
             >
             <div class="flex gap-2">
-              <input
-                id="city"
-                v-model="city"
-                autocomplete="address-level2"
-                type="text"
-                placeholder="Entrez votre ville"
-                required
-                class="flex-1 h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
-              />
+              <div class="relative flex-1">
+                <input
+                  id="city"
+                  ref="cityInputRef"
+                  v-model="city"
+                  autocomplete="address-level2"
+                  type="text"
+                  placeholder="Entrez votre ville"
+                  required
+                  class="w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+                  @input="handleCityInput"
+                  @focus="showCitySuggestions = true"
+                  @blur="handleCityBlur"
+                />
+                <div
+                  v-if="
+                    showCitySuggestions &&
+                    (cityLoading ||
+                      citySuggestions.length ||
+                      city.trim().length >= 2)
+                  "
+                  class="absolute left-0 right-0 mt-1 bg-custom-white border border-custom-blue rounded-xl shadow-lg max-h-48 overflow-y-auto z-20"
+                >
+                  <div v-if="cityLoading" class="px-3 py-2 text-xs text-gray-500">
+                    Recherche ville...
+                  </div>
+                  <button
+                    v-for="suggestion in citySuggestions"
+                    :key="suggestion.place_id"
+                    type="button"
+                    class="w-full text-left hover:cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    @mousedown.prevent="selectCitySuggestion(suggestion)"
+                  >
+                    {{ getCityLabel(suggestion) }}
+                  </button>
+                  <div
+                    v-if="
+                      !cityLoading &&
+                      citySuggestions.length === 0 &&
+                      city.trim().length >= 2
+                    "
+                    class="px-3 py-2 text-xs text-gray-500"
+                  >
+                    Aucune ville trouvee
+                  </div>
+                </div>
+              </div>
               <button
                 type="button"
                 @click="getUserLocation"
@@ -234,6 +272,10 @@ import { useAuth } from "@/stores/authStore";
 import IconApple from "@/components/atoms/icons/IconApple.vue";
 import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
 import {
+  fetchAddressSuggestions,
+  type AddressSuggestion,
+} from "@/utils/api/geocoding";
+import {
   consumeGooglePrefill,
   initGoogleButton,
   type GoogleCredentialResponse,
@@ -253,6 +295,12 @@ const pseudo = ref("");
 const email = ref("");
 const password = ref("");
 const city = ref("");
+const cityInputRef = ref<HTMLInputElement | null>(null);
+const citySuggestions = ref<AddressSuggestion[]>([]);
+const cityLoading = ref(false);
+const showCitySuggestions = ref(false);
+const isCityValid = ref(false);
+const lastConfirmedCity = ref("");
 const error = ref("");
 const loading = ref(false);
 const locationLoading = ref(false);
@@ -260,6 +308,8 @@ const googleButtonRef = ref<HTMLDivElement | null>(null);
 const googleIdToken = ref<string | null>(null);
 
 const isGoogleRegistration = computed(() => !!googleIdToken.value);
+let citySearchTimeout: number | null = null;
+let lastCityQuery = "";
 
 const applyGoogleProfile = (profile?: GoogleProfile) => {
   if (!profile) return;
@@ -268,6 +318,168 @@ const applyGoogleProfile = (profile?: GoogleProfile) => {
   if (profile.email) email.value = profile.email;
   if (!pseudo.value && profile.email) {
     pseudo.value = profile.email.split("@")[0] || "";
+  }
+};
+
+const clearCityValidity = () => {
+  cityInputRef.value?.setCustomValidity("");
+};
+
+const setCityInvalid = (message: string) => {
+  if (!cityInputRef.value) return;
+  cityInputRef.value.setCustomValidity(message);
+  cityInputRef.value.reportValidity();
+};
+
+const getCityName = (suggestion: AddressSuggestion) =>
+  suggestion.address?.city ||
+  suggestion.address?.town ||
+  suggestion.address?.village ||
+  suggestion.address?.municipality ||
+  suggestion.address?.county ||
+  suggestion.address?.state ||
+  suggestion.display_name.split(",")[0]?.trim() ||
+  "";
+
+const getCityLabel = (suggestion: AddressSuggestion) => {
+  const name = getCityName(suggestion);
+  return name || suggestion.display_name;
+};
+
+const fetchCitySuggestions = async (raw: string) => {
+  const query = raw.trim();
+  if (!query) {
+    lastCityQuery = "";
+    citySuggestions.value = [];
+    cityLoading.value = false;
+    return;
+  }
+
+  lastCityQuery = query;
+  cityLoading.value = true;
+
+  try {
+    const results = await fetchAddressSuggestions(query, 6);
+    if (lastCityQuery !== query) return;
+    const unique = new Map<string, AddressSuggestion>();
+    results.forEach((result) => {
+      const name = getCityName(result);
+      if (!name) return;
+      if (!unique.has(name)) {
+        unique.set(name, result);
+      }
+    });
+    citySuggestions.value = Array.from(unique.values());
+  } catch {
+    if (lastCityQuery === query) {
+      citySuggestions.value = [];
+    }
+  } finally {
+    if (lastCityQuery === query) {
+      cityLoading.value = false;
+    }
+  }
+};
+
+const handleCityInput = () => {
+  clearCityValidity();
+  showCitySuggestions.value = true;
+  const trimmed = city.value.trim();
+
+  if (!trimmed) {
+    isCityValid.value = true;
+    lastConfirmedCity.value = "";
+    lastCityQuery = "";
+    citySuggestions.value = [];
+    cityLoading.value = false;
+    return;
+  }
+
+  if (trimmed !== lastConfirmedCity.value) {
+    isCityValid.value = false;
+  }
+
+  if (citySearchTimeout !== null) {
+    window.clearTimeout(citySearchTimeout);
+  }
+
+  if (trimmed.length < 2) {
+    lastCityQuery = "";
+    citySuggestions.value = [];
+    cityLoading.value = false;
+    return;
+  }
+
+  citySearchTimeout = window.setTimeout(() => {
+    fetchCitySuggestions(trimmed);
+  }, 300);
+};
+
+const handleCityBlur = () => {
+  window.setTimeout(() => {
+    showCitySuggestions.value = false;
+    if (isCityValid.value) return;
+    const trimmed = city.value.trim();
+    if (!trimmed) return;
+    const match = citySuggestions.value.find(
+      (suggestion) =>
+        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase()
+    );
+    if (match) {
+      selectCitySuggestion(match);
+    }
+  }, 150);
+};
+
+const selectCitySuggestion = (suggestion: AddressSuggestion) => {
+  const name = getCityName(suggestion) || suggestion.display_name;
+  city.value = name;
+  isCityValid.value = true;
+  lastConfirmedCity.value = name;
+  citySuggestions.value = [];
+  cityLoading.value = false;
+  showCitySuggestions.value = false;
+  clearCityValidity();
+};
+
+const validateCity = async () => {
+  const trimmed = city.value.trim();
+  if (!trimmed) {
+    const message = "Veuillez renseigner une ville.";
+    setCityInvalid(message);
+    error.value = message;
+    return false;
+  }
+
+  if (isCityValid.value && trimmed === lastConfirmedCity.value) {
+    return true;
+  }
+
+  cityLoading.value = true;
+  try {
+    const results = await fetchAddressSuggestions(trimmed, 5);
+    const cityResults = results.filter((suggestion) => getCityName(suggestion));
+    const match = cityResults.find(
+      (suggestion) =>
+        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase()
+    );
+    const candidate = match || cityResults[0];
+    if (!candidate) {
+      const message = "Ville introuvable. Choisissez une ville valide.";
+      setCityInvalid(message);
+      error.value = message;
+      return false;
+    }
+    selectCitySuggestion(candidate);
+    return true;
+  } catch (err) {
+    console.error("City lookup error:", err);
+    const message = "Impossible de valider la ville.";
+    setCityInvalid(message);
+    error.value = message;
+    return false;
+  } finally {
+    cityLoading.value = false;
   }
 };
 
@@ -302,6 +514,11 @@ const getUserLocation = async () => {
       geolocation: { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 },
     });
     city.value = resolvedCity;
+    isCityValid.value = true;
+    lastConfirmedCity.value = resolvedCity;
+    showCitySuggestions.value = false;
+    citySuggestions.value = [];
+    clearCityValidity();
   } catch (err) {
     console.error("User location error:", err);
     error.value = getLocationErrorMessage(err);
@@ -328,6 +545,10 @@ const handleRegister = async () => {
   loading.value = true;
   error.value = "";
   try {
+    clearCityValidity();
+    const isValidCity = await validateCity();
+    if (!isValidCity) return;
+
     if (googleIdToken.value) {
       await authStore.completeGoogleRegistration({
         idToken: googleIdToken.value,
