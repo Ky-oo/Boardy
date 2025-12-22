@@ -231,6 +231,13 @@
         <h2 class="text-2xl font-black text-custom-primary mb-12">
           Vous êtes inscrit à cet événement
         </h2>
+        <button
+          v-if="canCancelParticipation"
+          @click="handleCancelParticipation"
+          class="mb-10 px-6 py-3 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
+        >
+          Annuler ma participation
+        </button>
         <div class="grid grid-cols-2 gap-24 mb-16">
           <div class="red-border">
             <img
@@ -403,6 +410,26 @@ const isParticipating = computed(() => {
   return activityStore.currentActivity.playersId.includes(authStore.user.id);
 });
 
+const isCreator = computed(() => {
+  if (!activityStore.currentActivity || !authStore.user) return false;
+  if (activityStore.currentActivity.hostType === "user") {
+    return (
+      activityStore.currentActivity.hostId === authStore.user.id ||
+      activityStore.currentActivity.hostUserId === authStore.user.id
+    );
+  }
+  if (activityStore.currentActivity.hostType === "organisation") {
+    return (
+      activityStore.currentActivity.organisation?.ownerId === authStore.user.id
+    );
+  }
+  return false;
+});
+
+const canCancelParticipation = computed(
+  () => isParticipating.value && !isCreator.value
+);
+
 const canEdit = computed(() => {
   if (!authStore.user || !activityStore.currentActivity) return false;
   return (
@@ -559,6 +586,24 @@ const handleParticipate = async () => {
     }
   } catch (err) {
     console.error("Erreur lors de la participation:", err);
+  }
+};
+
+const handleCancelParticipation = async () => {
+  if (!activityStore.currentActivity || !authStore.user) return;
+  if (isCreator.value) return;
+  const confirmed = window.confirm("Voulez-vous annuler votre participation ?");
+  if (!confirmed) return;
+  try {
+    await activityStore.leaveActivity(activityStore.currentActivity.id);
+    isPending.value = false;
+    toastStore.addToast("Participation annulee.", { type: "info" });
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'annuler la participation.";
+    toastStore.addToast(message, { type: "error" });
   }
 };
 
