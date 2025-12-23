@@ -62,6 +62,7 @@
               ref="dateInputRef"
               v-model="date"
               type="date"
+              :min="todayDate"
               required
               class="w-full h-10 px-4 py-3 hover:cursor-text rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
               @input="clearDateValidity"

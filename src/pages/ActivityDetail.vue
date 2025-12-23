@@ -562,6 +562,22 @@ const formatPriceValue = (price?: string | number | null) => {
   return `${num.toFixed(2)} €`;
 };
 
+const formatShortAddress = (activity: {
+  place_name?: string | null;
+  address?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+}) => {
+  const place = activity.place_name?.trim();
+  if (place) return place;
+  const address = activity.address?.trim();
+  const city = activity.city?.trim();
+  const postalCode = activity.postalCode?.trim();
+  const parts = [address, postalCode, city].filter(Boolean);
+  if (parts.length) return parts.join(" ");
+  return "Adresse indisponible";
+};
+
 const priceNumber = computed(() => {
   if (!activityStore.currentActivity) return 0;
   const raw = activityStore.currentActivity.price ?? 0;
@@ -749,7 +765,7 @@ const handleCancelParticipation = async () => {
   if (!confirmed) return;
   try {
     await activityStore.leaveActivity(activityStore.currentActivity.id);
-    await loadRequestStatus();
+    await refreshRequestData();
     toastStore.addToast("Participation annulee.", { type: "info" });
   } catch (err: any) {
     const message =
