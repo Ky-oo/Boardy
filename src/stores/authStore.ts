@@ -81,7 +81,7 @@ export const useAuth = defineStore("auth", {
         toastStore.addToast("Vous êtes connecté.", { type: "success" });
         router.push("/");
       } catch (error: unknown) {
-        console.log(error);
+        console.error(error);
         const apiError = {
           message: getApiErrorMessage(error, "Erreur de connexion"),
           status: 401,

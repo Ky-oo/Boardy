@@ -95,7 +95,6 @@ router.beforeEach((to, _from, next) => {
     next({ name: "login" });
     return;
   }
-  console.log(authStore.user?.role);
   if (to.meta.requiresAdmin && authStore.user?.role !== "admin") {
     next({ name: "home" });
     return;

@@ -31,6 +31,72 @@
         </button>
       </div>
 
+      <div v-if="showRequestPanel" class="bg-custom-blue p-8 rounded-xl mb-10">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl text-custom-white font-black">
+            Demandes de participation
+          </h2>
+          <button
+            class="px-4 py-2 hover:cursor-pointer bg-custom-white text-custom-primary rounded-lg hover:bg-custom-green font-bold"
+            @click="loadRequests"
+          >
+            Rafraichir
+          </button>
+        </div>
+        <div v-if="requestsLoading" class="text-custom-white">
+          Chargement des demandes...
+        </div>
+        <div v-else-if="requests.length === 0" class="text-custom-white">
+          Aucune demande pour le moment.
+        </div>
+        <div v-else class="space-y-4">
+          <div
+            v-for="request in requests"
+            :key="request.id"
+            class="bg-custom-white rounded-lg p-4"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-custom-primary font-bold">
+                  {{ request.user?.pseudo || "Utilisateur" }}
+                </p>
+                <p class="text-sm text-gray-600">
+                  {{ request.user?.firstname }} {{ request.user?.lastname }}
+                </p>
+                <p class="text-sm text-gray-600">{{ request.user?.email }}</p>
+              </div>
+              <span
+                class="text-sm font-semibold"
+                :class="{
+                  'text-yellow-600': request.status === 'pending',
+                  'text-green-600': request.status === 'approved',
+                  'text-red-600': request.status === 'rejected',
+                }"
+              >
+                {{ formatRequestStatus(request.status) }}
+              </span>
+            </div>
+            <p v-if="request.payment" class="text-sm text-gray-600 mt-2">
+              Paiement: {{ formatPaymentStatus(request.payment?.status) }}
+            </p>
+            <div v-if="request.status === 'pending'" class="flex gap-2 mt-3">
+              <button
+                class="px-4 py-2 hover:cursor-pointer bg-custom-blue text-white rounded-lg hover:bg-blue-600 font-bold"
+                @click="approveRequest(request.id)"
+              >
+                Accepter
+              </button>
+              <button
+                class="px-4 py-2 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
+                @click="rejectRequest(request.id)"
+              >
+                Refuser
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div v-if="!isParticipating">
         <div class="green-bloc grid grid-cols-2 gap-24 mb-16">
           <div class="red-border">
@@ -66,20 +132,19 @@
                 Connectez-vous pour participer
               </button>
               <button
-                v-else-if="!isPending && authStore.isLogged"
+                v-else-if="canRequestParticipation"
                 @click="handleParticipate"
                 :disabled="paymentLoading"
                 class="bg-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {{ participateLabel }}
               </button>
-
               <button
-                v-else
+                v-else-if="isRequestPending"
                 disabled
-                class="bg-gray-400 text-custom-white px-6 py-3 rounded-lg cursor-not-allowed font-bold w-full"
+                class="bg-gray-400 text-custom-white hover:cursor-pointer px-6 py-3 rounded-lg cursor-not-allowed font-bold w-full"
               >
-                En attente de l'hôte
+                Demande en attente
               </button>
             </div>
 
@@ -395,15 +460,23 @@ import ChatPanel from "@/components/organisms/ChatPanel.vue";
 import { useAuth } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
 import { confirmPayment, createCheckoutSession } from "@/utils/payment";
+import { get as apiGet, post as apiPost } from "@/utils/api/api";
+import type {
+  ParticipationRequest,
+  ParticipationRequestStatus,
+} from "@/types/ParticipationRequest";
 
 const route = useRoute();
 const router = useRouter();
 const activityStore = useActivityStore();
 const authStore = useAuth();
-const isPending = ref(false);
+const requestStatus = ref<ParticipationRequestStatus | "none">("none");
+const requests = ref<ParticipationRequest[]>([]);
+const requestsLoading = ref(false);
 const paymentLoading = ref(false);
 const toastStore = useToastStore();
 const isPaidActivity = computed(() => priceNumber.value > 0);
+const isRequestPending = computed(() => requestStatus.value === "pending");
 
 const isParticipating = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
@@ -437,6 +510,25 @@ const canEdit = computed(() => {
     (activityStore.currentActivity.hostId === authStore.user.id ||
       activityStore.currentActivity.hostUserId === authStore.user.id)
   );
+});
+
+const canManageRequests = computed(() => {
+  if (!activityStore.currentActivity || !authStore.user) return false;
+  if (authStore.user.role === "admin") return true;
+  return isCreator.value;
+});
+
+const showRequestPanel = computed(
+  () => canManageRequests.value && !!activityStore.currentActivity?.private
+);
+
+const canRequestParticipation = computed(() => {
+  if (!activityStore.currentActivity || !authStore.isLogged) return false;
+  if (isCreator.value) return false;
+  if (isParticipating.value) return false;
+  if (requestStatus.value === "pending") return false;
+  if (requestStatus.value === "approved") return false;
+  return true;
 });
 
 const daysRemaining = computed(() => {
@@ -481,94 +573,157 @@ const participateLabel = computed(() => {
   if (paymentLoading.value) {
     return "Redirection vers le paiement...";
   }
+  if (activityStore.currentActivity?.private) {
+    if (requestStatus.value === "rejected") {
+      return "Redemander a rejoindre";
+    }
+    if (isPaidActivity.value) {
+      return `Demander a rejoindre (pre-autorisation ${priceNumber.value.toFixed(
+        2
+      )} euro)`;
+    }
+    return "Demander a rejoindre";
+  }
   if (isPaidActivity.value) {
     return `Participer pour ${priceNumber.value.toFixed(2)} euro`;
   }
-  return "Je participe à cet événement";
+  return "Je participe a cet evenement";
 });
 
-const formatShortAddress = (activity: any) => {
-  if (!activity) return "";
+const formatRequestStatus = (status: ParticipationRequestStatus) => {
+  if (status === "pending") return "En attente";
+  if (status === "approved") return "Acceptee";
+  if (status === "rejected") return "Refusee";
+  return status;
+};
 
-  const placeName = activity.place_name
-    ? String(activity.place_name).trim()
-    : "";
-  const address = activity.address ? String(activity.address).trim() : "";
+const formatPaymentStatus = (status?: string | null) => {
+  if (!status) return "inconnu";
+  if (status === "authorized") return "pre-autorise";
+  if (status === "paid") return "paye";
+  if (status === "canceled") return "annule";
+  if (status === "refunded") return "rembourse";
+  return status;
+};
 
-  if (!address) return placeName || "";
-
-  const parts = address
-    .split(",")
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0);
-
-  let postal = "";
-  let city = "";
-  let postalIndex = -1;
-
-  for (let i = parts.length - 1; i >= 0; i--) {
-    const p = parts[i];
-    if (!p) continue;
-    const m = p.match(/(\b\d{5}\b)/);
-    if (!m) continue;
-    // postal code found
-    postal = m[1] ?? "";
-    // try same part (e.g. "75008 Paris" or "75008, Paris")
-    const samePartCity = p
-      .replace(m[1] ?? "", "")
-      .replace(/[-–—,:]/g, "")
-      .trim();
-    if (samePartCity && !/france/i.test(samePartCity)) {
-      city = samePartCity;
+const loadRequestStatus = async () => {
+  if (!activityStore.currentActivity || !authStore.isLogged) {
+    requestStatus.value = "none";
+    return;
+  }
+  if (!activityStore.currentActivity.private) {
+    requestStatus.value = "none";
+    return;
+  }
+  try {
+    const response = await apiGet(
+      `/activity/${activityStore.currentActivity.id}/request`
+    );
+    const status = response?.status;
+    if (
+      status === "pending" ||
+      status === "approved" ||
+      status === "rejected"
+    ) {
+      requestStatus.value = status;
     } else {
-      // scan leftwards for a plausible city part
-      for (let j = i - 1; j >= 0; j--) {
-        let cand = parts[j] ?? "";
-        cand = cand
-          .replace(/\b\d+[a-zA-ZÀ-ÿ°eèéêçûîœ\-]*\b/gi, "")
-          .replace(/arrondissement/gi, "")
-          .replace(/[–—,:]/g, "")
-          .trim();
-        if (cand && /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(cand) && !/france/i.test(cand)) {
-          city = cand;
-          break;
-        }
-      }
+      requestStatus.value = "none";
     }
-    postalIndex = i;
-    break;
+  } catch (err) {
+    console.error("Erreur chargement demande:", err);
   }
+};
 
-  if (!postal && parts.length > 0) {
-    const last = parts[parts.length - 1] ?? "";
-    if (/^[^\d]+$/.test(last) && last.length < 40) {
-      city = last;
-      postalIndex = parts.length - 1;
-    }
+const loadRequests = async () => {
+  if (!activityStore.currentActivity || !showRequestPanel.value) {
+    requests.value = [];
+    return;
   }
-
-  const addrParts = parts.slice(
-    0,
-    postalIndex === -1 ? parts.length : postalIndex
-  );
-  const briefAddr = addrParts.slice(0, 2).join(", ");
-
-  const prefixParts: string[] = [];
-  if (placeName) prefixParts.push(placeName);
-  if (briefAddr) prefixParts.push(briefAddr);
-
-  const location = prefixParts.join(", ");
-
-  if (postal || city) {
-    const postalCity = [postal, city].filter(Boolean).join(" ").trim();
-    return location ? `${location}, ${postalCity}` : postalCity;
+  requestsLoading.value = true;
+  try {
+    const response = await apiGet(
+      `/activity/${activityStore.currentActivity.id}/requests`
+    );
+    requests.value = Array.isArray(response) ? response : [];
+  } catch (err) {
+    console.error("Erreur chargement demandes:", err);
+  } finally {
+    requestsLoading.value = false;
   }
+};
 
-  return location || briefAddr || address;
+const refreshRequestData = async () => {
+  await loadRequestStatus();
+  if (showRequestPanel.value) {
+    await loadRequests();
+  } else {
+    requests.value = [];
+  }
+};
+
+const requestParticipation = async () => {
+  if (!activityStore.currentActivity) return;
+  try {
+    const response = await apiPost(
+      `/activity/${activityStore.currentActivity.id}/request`
+    );
+    const status = response?.status;
+    requestStatus.value = status || "pending";
+    toastStore.addToast("Demande envoyee.", { type: "info" });
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'envoyer la demande.";
+    toastStore.addToast(message, { type: "error" });
+  }
+};
+
+const approveRequest = async (requestId: number) => {
+  if (!activityStore.currentActivity) return;
+  try {
+    await apiPost(
+      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/approve`
+    );
+    toastStore.addToast("Demande acceptee.", { type: "success" });
+    await activityStore.fetchActivity(activityStore.currentActivity.id);
+    await loadRequests();
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'accepter la demande.";
+    toastStore.addToast(message, { type: "error" });
+  }
+};
+
+const rejectRequest = async (requestId: number) => {
+  if (!activityStore.currentActivity) return;
+  try {
+    await apiPost(
+      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/reject`
+    );
+    toastStore.addToast("Demande refusee.", { type: "info" });
+    await loadRequests();
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible de refuser la demande.";
+    toastStore.addToast(message, { type: "error" });
+  }
 };
 
 const handleParticipate = async () => {
   if (!activityStore.currentActivity) return;
+  if (activityStore.currentActivity.private) {
+    if (isPaidActivity.value) {
+      await startPayment();
+    } else {
+      await requestParticipation();
+    }
+    return;
+  }
   if (isPaidActivity.value) {
     await startPayment();
     return;
@@ -577,9 +732,7 @@ const handleParticipate = async () => {
     const updated = await activityStore.joinActivity(
       activityStore.currentActivity.id
     );
-    if (updated.private) {
-      isPending.value = true;
-    } else {
+    if (!updated.private) {
       setTimeout(() => {
         router.push("/participation-confirmed");
       }, 500);
@@ -596,7 +749,7 @@ const handleCancelParticipation = async () => {
   if (!confirmed) return;
   try {
     await activityStore.leaveActivity(activityStore.currentActivity.id);
-    isPending.value = false;
+    await loadRequestStatus();
     toastStore.addToast("Participation annulee.", { type: "info" });
   } catch (err: any) {
     const message =
@@ -616,8 +769,15 @@ const startPayment = async () => {
     );
     window.location.href = response.url;
   } catch (err: any) {
-    const message = err?.message || "Erreur lors du paiement.";
+    const message =
+      err?.response?.data?.error || err?.message || "Erreur lors du paiement.";
     toastStore.addToast(message, { type: "error" });
+    if (
+      message === "Payment already started" ||
+      message === "Request already pending"
+    ) {
+      await loadRequestStatus();
+    }
   } finally {
     paymentLoading.value = false;
   }
@@ -632,17 +792,19 @@ const handlePaymentConfirm = async (sessionId: string) => {
       activityStore.currentActivity.id
     );
     if (refreshed?.private) {
-      isPending.value = true;
+      await loadRequestStatus();
+      toastStore.addToast("Demande envoyee.", { type: "info" });
     } else {
       router.push("/participation-confirmed");
+      toastStore.addToast("Paiement confirme.", { type: "success" });
     }
     const nextQuery = { ...route.query };
     delete nextQuery.session_id;
     delete nextQuery.payment;
     router.replace({ query: nextQuery });
-    toastStore.addToast("Paiement confirme.", { type: "success" });
   } catch (err: any) {
-    const message = err?.message || "Paiement non confirme.";
+    const message =
+      err?.response?.data?.error || err?.message || "Paiement non confirme.";
     toastStore.addToast(message, { type: "error" });
   } finally {
     paymentLoading.value = false;
@@ -687,7 +849,7 @@ const getHost = computed(() => {
   ) {
     return `${activityStore.currentActivity.organisation.name}`;
   } else if (activityStore.currentActivity.hostType === "event") {
-    return `Meeples`;
+    return `Boardy`;
   }
   return "";
 });
@@ -695,7 +857,6 @@ const getHost = computed(() => {
 onMounted(async () => {
   const id = Number(route.params.id);
   if (id) {
-    // Charger toutes les activités si elles ne sont pas déjà chargées
     if (activityStore.activities.length === 0) {
       await activityStore.fetchActivities();
     }
@@ -714,22 +875,23 @@ onMounted(async () => {
       delete nextQuery.payment;
       router.replace({ query: nextQuery });
     }
+    await refreshRequestData();
   }
 });
 
-// Écouter les changements d'ID dans l'URL pour recharger l'activité
 watch(
   () => route.params.id,
   async (newId) => {
     const id = Number(newId);
     if (id) {
-      isPending.value = false; // Réinitialiser l'état
-      // Charger toutes les activités si elles ne sont pas déjà chargées
+      requestStatus.value = "none";
+      requests.value = [];
       if (activityStore.activities.length === 0) {
         await activityStore.fetchActivities();
       }
-      activityStore.fetchActivity(id);
-      window.scrollTo(0, 0); // Remonter en haut de la page
+      await activityStore.fetchActivity(id);
+      await refreshRequestData();
+      window.scrollTo(0, 0);
     }
   }
 );
