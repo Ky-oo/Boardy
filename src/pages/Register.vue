@@ -126,7 +126,10 @@
                   "
                   class="absolute left-0 right-0 mt-1 bg-custom-white border border-custom-blue rounded-xl shadow-lg max-h-48 overflow-y-auto z-20"
                 >
-                  <div v-if="cityLoading" class="px-3 py-2 text-xs text-gray-500">
+                  <div
+                    v-if="cityLoading"
+                    class="px-3 py-2 text-xs text-gray-500"
+                  >
                     Recherche ville...
                   </div>
                   <button
@@ -487,22 +490,22 @@ const getLocationErrorMessage = (err: unknown) => {
   if (err instanceof UserLocationError) {
     switch (err.code) {
       case "unsupported":
-        return "La g??olocalisation n'est pas support??e par votre navigateur";
+        return "La géolocalisation n'est pas supportée par votre navigateur";
       case "permission_denied":
-        return "Vous avez refus?? l'acc??s ?? votre position";
+        return "Vous avez refusé l'accès à votre position";
       case "position_unavailable":
         return "Position non disponible";
       case "timeout":
-        return "D??lai d'attente d??pass??";
+        return "Délai d'attente dépassé";
       case "city_not_found":
-        return "Impossible de d??terminer votre ville";
+        return "Impossible de déterminer votre ville";
       case "reverse_geocode_failed":
-        return "Impossible de r??cup??rer la ville";
+        return "Impossible de récupérer la ville";
       default:
-        return "Erreur lors de la r??cup??ration de la position";
+        return "Erreur lors de la récupération de la position";
     }
   }
-  return "Erreur lors de la r??cup??ration de la position";
+  return "Erreur lors de la récupération de la position";
 };
 
 const getUserLocation = async () => {
@@ -589,4 +592,3 @@ onMounted(() => {
   });
 });
 </script>
-
