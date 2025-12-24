@@ -10,8 +10,10 @@
       <div v-else>
         <h1 class="text-5xl font-family-urban text-primary my-6">
           {{
-            effectiveOrganisationId
+            isOrganisationHost
               ? "Créer une soirée pour votre établissement"
+              : isBoardyHost
+              ? "Créer une soirée pour Boardy"
               : "Créer votre partie idéale"
           }}
         </h1>
@@ -181,7 +183,7 @@
             </div>
           </div>
 
-          <div v-if="!effectiveOrganisationId" class="flex items-start gap-3">
+          <div v-if="showHomeAddress" class="flex items-start gap-3">
             <input
               id="isHomeAddress"
               v-model="isHomeAddress"
@@ -269,14 +271,14 @@
                 v-model.number="participants"
                 type="number"
                 min="2"
-                :max="effectiveOrganisationId ? 100 : 20"
+                :max="maxParticipants"
                 required
                 class="w-16 bg-transparent text-gray-700 focus:outline-none"
               />
             </div>
           </div>
 
-          <div v-if="effectiveOrganisationId" class="flex flex-col gap-2">
+          <div v-if="showPriceFields" class="flex flex-col gap-2">
             <label class="text-primary font-medium">Tarif*</label>
             <div class="flex flex-wrap items-center gap-4">
               <label class="flex items-center gap-2 text-sm text-primary">
@@ -340,6 +342,10 @@
             Organisé par
             <span class="font-semibold">{{ organisationName }}</span
             >.
+          </p>
+
+          <p v-else-if="isBoardyHost" class="text-primary text-sm">
+            Organisé par <span class="font-semibold">Boardy</span>.
           </p>
 
           <p v-else class="text-primary text-sm">
@@ -416,6 +422,7 @@ const longitude = ref<number | null>(null);
 const addressInputRef = ref<HTMLInputElement | null>(null);
 const dateInputRef = ref<HTMLInputElement | null>(null);
 const editOrganisationId = ref<number | null>(null);
+const editIsBoardy = ref(false);
 
 const {
   addressSuggestions,
@@ -491,6 +498,15 @@ const handlePriceTypeChange = () => {
   }
 };
 
+const isAdmin = computed(() => authStore.user?.role === "admin");
+
+const boardyQuery = computed(() => {
+  const raw = route.query.boardy;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (!value) return false;
+  return value === "1" || value === "true" || value === "boardy";
+});
+
 const routeOrganisationId = computed(() => {
   const raw = route.query.organisationId;
   const value = Array.isArray(raw) ? raw[0] : raw;
@@ -500,6 +516,26 @@ const routeOrganisationId = computed(() => {
 
 const effectiveOrganisationId = computed(
   () => routeOrganisationId.value ?? editOrganisationId.value
+);
+
+const isOrganisationHost = computed(() => !!effectiveOrganisationId.value);
+
+const isBoardyHost = computed(
+  () =>
+    !isOrganisationHost.value &&
+    ((isAdmin.value && boardyQuery.value) || editIsBoardy.value)
+);
+
+const showHomeAddress = computed(
+  () => !isOrganisationHost.value && !isBoardyHost.value
+);
+
+const showPriceFields = computed(
+  () => isOrganisationHost.value || isBoardyHost.value
+);
+
+const maxParticipants = computed(() =>
+  boardyQuery.value ? Infinity : editOrganisationId.value ? 100 : 20
 );
 
 const organisationName = computed(() => {
@@ -528,6 +564,7 @@ const populateForm = (activity: any) => {
   latitude.value = activity.latitude ?? null;
   longitude.value = activity.longitude ?? null;
   editOrganisationId.value = activity.hostOrganisationId ?? null;
+  editIsBoardy.value = activity.hostType === "event";
   isHomeAddress.value = Boolean(activity.homeHost);
   games.value = Array.isArray(activity.gameId)
     ? activity.gameId.join(", ")
@@ -633,13 +670,26 @@ const handleSubmit = async () => {
       longitude: longitude.value,
       seats: participants.value,
       type: "Par des joueurs",
-      homeHost: isHomeAddress.value,
+      homeHost: showHomeAddress.value ? isHomeAddress.value : false,
       private: isPrivate.value,
     };
 
-    if (effectiveOrganisationId.value) {
+    if (isOrganisationHost.value) {
       payload.hostOrganisationId = effectiveOrganisationId.value;
       payload.hostType = "organisation";
+      if (priceType.value === "paid") {
+        const numericPrice = Number(priceValue.value);
+        if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+          error.value = "Veuillez renseigner un prix valide.";
+          return;
+        }
+        payload.price = numericPrice;
+      } else {
+        payload.price = 0;
+      }
+    } else if (isBoardyHost.value) {
+      payload.hostUserId = authStore.user.id;
+      payload.hostType = "event";
       if (priceType.value === "paid") {
         const numericPrice = Number(priceValue.value);
         if (!Number.isFinite(numericPrice) || numericPrice <= 0) {

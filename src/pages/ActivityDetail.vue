@@ -425,16 +425,17 @@
           </div>
         </div>
 
-        <ChatPanel
-          v-if="authStore.user && activityStore.currentActivity"
-          :activityId="activityStore.currentActivity.id"
-          :user="authStore.user"
-          :token="authStore.tokens?.accessToken || null"
-          :participants-ids="activityStore.currentActivity.playersId"
-          class="mt-8"
-        />
       </div>
     </div>
+
+    <ChatPanel
+      v-if="canAccessChat && activityStore.currentActivity"
+      :activityId="activityStore.currentActivity.id"
+      :user="authStore.user!"
+      :token="authStore.tokens?.accessToken || null"
+      :participants-ids="activityStore.currentActivity.playersId"
+      class="mt-8"
+    />
 
     <div v-else class="text-center py-8">
       <p class="text-gray-600">Activité non trouvée</p>
@@ -485,11 +486,8 @@ const isParticipating = computed(() => {
 
 const isCreator = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
-  if (activityStore.currentActivity.hostType === "user") {
-    return (
-      activityStore.currentActivity.hostId === authStore.user.id ||
-      activityStore.currentActivity.hostUserId === authStore.user.id
-    );
+  if (activityStore.currentActivity.hostUserId === authStore.user.id) {
+    return true;
   }
   if (activityStore.currentActivity.hostType === "organisation") {
     return (
@@ -505,11 +503,8 @@ const canCancelParticipation = computed(
 
 const canEdit = computed(() => {
   if (!authStore.user || !activityStore.currentActivity) return false;
-  return (
-    activityStore.currentActivity.hostType === "user" &&
-    (activityStore.currentActivity.hostId === authStore.user.id ||
-      activityStore.currentActivity.hostUserId === authStore.user.id)
-  );
+  if (authStore.user.role === "admin") return true;
+  return isCreator.value;
 });
 
 const canManageRequests = computed(() => {
@@ -517,6 +512,10 @@ const canManageRequests = computed(() => {
   if (authStore.user.role === "admin") return true;
   return isCreator.value;
 });
+
+const canAccessChat = computed(
+  () => !!authStore.user && (isParticipating.value || isCreator.value)
+);
 
 const showRequestPanel = computed(
   () => canManageRequests.value && !!activityStore.currentActivity?.private

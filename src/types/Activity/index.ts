@@ -4,7 +4,7 @@ import type { Organisation } from "../Organisation/index";
 export type ActivityUser = Pick<
   User,
   "id" | "firstname" | "lastname" | "pseudo" | "email"
->;
+> & { role?: User["role"] };
 
 export type ActivityHostType = "organisation" | "user" | "event";
 

@@ -9,6 +9,16 @@
       </p>
     </div>
 
+    <div class="flex justify-center mb-10">
+      <button
+        type="button"
+        class="h-10 px-6 hover:cursor-pointer bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors"
+        @click="goToBoardyCreate"
+      >
+        Creer un evenement Boardy
+      </button>
+    </div>
+
     <div
       class="max-w-4xl mx-auto bg-custom-white border border-custom-blue/30 rounded-3xl shadow-lg p-8"
     >
@@ -115,11 +125,13 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { get, post } from "@/utils/api/api";
 import type { Organisation } from "@/types/Organisation";
 import type { UserWithoutPassword } from "@/types/User";
 import { useToastStore } from "@/stores/toastStore";
 
+const router = useRouter();
 const users = ref<UserWithoutPassword[]>([]);
 const organisations = ref<Organisation[]>([]);
 const loading = ref(false);
@@ -138,6 +150,10 @@ const resetForm = () => {
   form.address = "";
   form.ownerId = "";
   error.value = "";
+};
+
+const goToBoardyCreate = () => {
+  router.push({ path: "/create_event", query: { boardy: "1" } });
 };
 
 const loadUsers = async () => {

@@ -11,10 +11,13 @@ import { useToastStore } from "./toastStore";
 const deriveHostType = (
   hostOrganisation?: unknown,
   hostUserId?: number | null,
-  hostType?: ActivityHostType
+  hostType?: ActivityHostType,
+  hostUserRole?: string | null,
+  activityType?: string | null
 ): ActivityHostType => {
   if (hostType) return hostType;
   if (hostOrganisation) return "organisation";
+  if (hostUserRole === "admin" && activityType === "Festival") return "event";
   if (hostUserId) return "user";
   return "event";
 };
@@ -116,11 +119,14 @@ export const useActivityStore = defineStore("activity", {
     normalizeActivity(activity: Activity): ActivityWithHost {
       const hostOrganisation = activity.hostOrganisation ?? null;
       const hostUser = activity.hostUser ?? null;
+      const hostUserRole = hostUser?.role ?? null;
 
       const hostType: ActivityHostType = deriveHostType(
         hostOrganisation,
         activity.hostUserId,
-        activity.hostType
+        activity.hostType,
+        hostUserRole,
+        activity.type ?? null
       );
 
       const hostId =

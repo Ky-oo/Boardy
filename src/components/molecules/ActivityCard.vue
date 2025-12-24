@@ -133,7 +133,7 @@ const getHost = computed(() => {
     props.activity.organisation
   ) {
     return `Par ${props.activity.organisation.name}`;
-  } else if (props.activity.hostType === "event" && props.activity.host) {
+  } else if (props.activity.hostType === "event") {
     return "Par Boardy";
   }
 });
