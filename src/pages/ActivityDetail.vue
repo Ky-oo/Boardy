@@ -97,7 +97,18 @@
         </div>
       </div>
 
-      <div class="container rounded-xl mx-auto relative z-0">
+      <h2 class="text-2xl font-black text-custom-primary mb-5 mx-5">
+          Vous êtes inscrit à cet événement
+        </h2>
+        <button
+          v-if="canCancelParticipation"
+          @click="handleCancelParticipation"
+          class="mb-10 px-6 py-3 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
+        >
+          Annuler ma participation
+        </button>
+
+      <div class="container rounded-xl mx-auto relative z-0 bandeau">
         <img
               :src="`/img/home/img-${activityStore.currentActivity.hostType}.png`"
               :alt="activityStore.currentActivity.title"

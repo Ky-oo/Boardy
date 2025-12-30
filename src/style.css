@@ -261,4 +261,9 @@ body {
   .bloc-bandeau {
     height: 240px;
   }
+  .bandeau {
+    img {
+      height: 300px;
+    }
+  }
 }
