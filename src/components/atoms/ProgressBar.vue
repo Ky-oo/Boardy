@@ -23,7 +23,7 @@ const percentage = computed(() => {
 });
 
 const barColor = computed(() => {
-  return "#ffffff";
+  return "#1468e5";
 });
 </script>
 
@@ -35,7 +35,7 @@ const barColor = computed(() => {
 .progress-bar-bg {
   width: 100%;
   height: 20px;
-  background-color: #000000;
+  background-color: #F8F8F8;
   border-radius: 15px;
   overflow: hidden;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);

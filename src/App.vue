@@ -14,7 +14,7 @@ const isFooterVisible =
 </script>
 
 <template>
-  <Navbar class="mx-30 rounded-b-2xl" />
+  <Navbar/>
 
   <main class="">
     <RouterView />

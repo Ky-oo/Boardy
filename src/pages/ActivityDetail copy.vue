@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-20">
+  <div class="pt-30">
     <div v-if="activityStore.loading" class="text-center py-8">
       <p class="text-gray-600">Chargement de l'activité...</p>
     </div>
@@ -8,7 +8,7 @@
       <p class="text-red-600">{{ activityStore.error }}</p>
     </div>
 
-    <div v-else-if="activityStore.currentActivity" class=" lg:mx-30 py-6">
+    <div v-else-if="activityStore.currentActivity" class="mx-30 py-6">
       <button
         @click="$router.back()"
         class="flex items-center text-custom-primary text-2xl py-3 hover:cursor-pointer mb-6"
@@ -97,254 +97,155 @@
         </div>
       </div>
 
-      <div class="container rounded-xl mx-auto relative z-0">
-        <img
+      <div v-if="!isParticipating">
+        <div class="green-bloc grid grid-cols-2 gap-24 mb-16">
+          <div class="red-border">
+            <img
               :src="`/img/home/img-${activityStore.currentActivity.hostType}.png`"
               :alt="activityStore.currentActivity.title"
-              class="w-full h-100 object-cover rounded-lg z-10 relative"
+              class="w-full h-full object-cover rounded-lg z-10 relative"
             />
-      </div>
+          </div>
+          <div class="flex flex-col gap-6 h-full">
+            <div class="bg-custom-red p-8 rounded-xl flex-1">
+              <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-black text-custom-white">
+                  Places restantes
+                </h2>
+                <p class="text-custom-white text-2xl font-black">
+                  {{
+                    activityStore.currentActivity.seats -
+                    activityStore.currentActivity.playersId.length
+                  }}
+                </p>
+              </div>
+              <ProgressBar
+                :current="activityStore.currentActivity.playersId.length"
+                :max="activityStore.currentActivity.seats"
+                class="py-8"
+              />
+              <button
+                v-if="!authStore.isLogged"
+                @click="$router.push('/login')"
+                class="bg-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full"
+              >
+                Connectez-vous pour participer
+              </button>
+              <button
+                v-else-if="canRequestParticipation"
+                @click="handleParticipate"
+                :disabled="paymentLoading"
+                class="bg-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {{ participateLabel }}
+              </button>
+              <button
+                v-else-if="isRequestPending"
+                disabled
+                class="bg-gray-400 text-custom-white hover:cursor-pointer px-6 py-3 rounded-lg cursor-not-allowed font-bold w-full"
+              >
+                Demande en attente
+              </button>
+            </div>
 
-      <div class="container mx-auto">
-        <div class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-green rounded-xl">
-          <h1 class="text-2xl text-primary font-black pb-4">
-            {{ activityStore.currentActivity.title }}
-          </h1>
-          <div class="flex w-full lg:flex-row flex-col">
-            <div class="w-full lg:w-2/3 border-solid border-b lg:border-b-0 lg:border-r border-custom-blue me-8 pb-6 mb-6 lg:mb-0">
-              <div class="flex justify-between pb-4">
+            <div class="bg-custom-blue p-8 rounded-xl flex-1">
+              <h2 class="text-2xl font-black text-custom-white mb-4">
+                Bon à savoir
+              </h2>
+
+              <ul class="text-custom-white list-disc list-inside space-y-2">
+                <li>Confirmation immédiate de votre participation</li>
+                <li>Rappel envoyé 24h avant l’événement</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-custom-blue p-8 rounded-xl mb-6">
+          <div class="grid grid-cols-2 gap-24">
+            <div class="div">
+              <h2 class="text-2xl text-custom-white font-black">
+                {{ activityStore.currentActivity.title }}
+              </h2>
+              <p class="text-xl text-custom-white mt-4">
+                {{ activityStore.currentActivity.description }}
+              </p>
+            </div>
+            <div class="grid grid-cols-2 gap-24">
+              <div class="flex flex-col gap-4">
                 <div class="flex items-center">
-                    <div class="bg-custom-white p-2 rounded-lg me-3">
-                      <IconAgenda class="text-custom-blue w-5 h-5" />
-                    </div>
-                    <div class="text-primary">
-                      <p class="text-sm text-primary">Date</p>
-                      {{ formatDate(activityStore.currentActivity.date) }} à {{ formatTime(activityStore.currentActivity.date) }}
-                    </div>
-                </div>
-                <!-- <div class="flex items-center text-xl">
-                  {{ formatTime(activityStore.currentActivity.date) }}
-                </div> -->
-              </div>
-              <div class="flex items-start pb-4">
-                <div class="bg-custom-white p-2 rounded-lg me-3">
-                  <IconNav class="text-custom-blue w-5 h-5" />
-                </div>
-                <div class="text-primary">
-                  <p class="text-sm text-primary">Lieux</p>
-                  <div v-if="activityStore.currentActivity.private">
-                    Chez {{ getHost }},
-                    <br />
-                    {{ activityStore.currentActivity.city }}
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconAgenda class="text-custom-red w-5 h-5" />
                   </div>
-                  <div v-else>
-                    <div class="flex flex-col gap-2">
-                      <a
-                        v-if="getAddressHref(activityStore.currentActivity)"
-                        :href="getAddressHref(activityStore.currentActivity)!"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="underline text-custom-blue hover:no-underline mb-0"
-                      >
-                        {{ formatShortAddress(activityStore.currentActivity) }}
-                      </a>
-                      <span v-else class="mb-2">
-                        {{ formatShortAddress(activityStore.currentActivity) }}
-                      </span>
-                    </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Date</p>
+                    {{ formatDate(activityStore.currentActivity.date) }}
                   </div>
                 </div>
-              </div>
-              <!-- <div v-if="!isParticipating">
-                <p>Partager à des amis</p>
-                <div class="flex gap-3 mt-2">
-                  <a
-                    :href="`mailto:?subject=Viens voir cette activité !&body=${encodeURIComponent(pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager par mail"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconMail class="text-primary w-5 h-5" />
-                  </a>
-                  <a
-                    :href="`https://www.instagram.com/?url=${encodeURIComponent(pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager sur Instagram"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconInsta class="text-primary w-5 h-5" />
-                  </a>
-                  <a
-                    :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}&quote=${encodeURIComponent('Viens voir cette activité ! ' + pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager sur Facebook"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconFacebook2 class="text-primary w-5 h-5" />
-                  </a>
-                  <button
-                    type="button"
-                    @click="copyLink"
-                    aria-label="Copier le lien"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconCopy class="text-primary w-5 h-5" />
-                  </button>
-                </div>
-              </div> -->
-              <div v-if="isParticipating">
                 <div class="flex items-center">
-                  <div class="bg-custom-white p-2 rounded-lg me-3">
-                    <IconParticipant class="text-custom-blue w-5 h-5" />
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconParticipant class="text-custom-red w-5 h-5" />
                   </div>
-                  <div class="text-primary">
-                    <p class="text-sm text-primary">Participants</p>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Participants</p>
                     {{ activityStore.currentActivity.playersId.length }} /
                     {{ activityStore.currentActivity.seats }}
                   </div>
                 </div>
-              </div>
-            </div>
-            <div class="w-1/3">
-
-              <div v-if="!isParticipating">
-                <div class="flex justify-between items-center">
-                  <h2 class="text-xl text-primary">
-                    Places restantes
-                  </h2>
-                  <p class="text-primary text-2xl font-black">
-                    {{
-                      activityStore.currentActivity.seats -
-                      activityStore.currentActivity.playersId.length
-                    }} / {{ activityStore.currentActivity.seats }}
-                  </p>
-                </div>
-                <ProgressBar
-                  :current="activityStore.currentActivity.playersId.length"
-                  :max="activityStore.currentActivity.seats"
-                  class="py-8"
-                />
-                <button
-                  v-if="!authStore.isLogged"
-                  @click="$router.push('/login')"
-                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full"
-                >
-                  Connectez-vous pour participer
-                </button>
-                <button
-                  v-else-if="canRequestParticipation"
-                  @click="handleParticipate"
-                  :disabled="paymentLoading"
-                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {{ participateLabel }}
-                </button>
-                <button
-                  v-else-if="isRequestPending"
-                  disabled
-                  class="bg-gray-400 text-custom-white hover:cursor-pointer px-6 py-3 rounded-lg cursor-not-allowed font-bold w-full"
-                >
-                  Demande en attente
-                </button>
-              </div>
-              <div v-else>
-                <div class="flex justify-between items-center pb-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      v-for="(digit, index) in daysRemaining"
-                      :key="index"
-                      class="bg-custom-white text-custom-blue text-4xl font-black w-16 h-16 flex items-center justify-center rounded-lg"
-                    >
-                      {{ digit }}
+                <div class="flex items-start">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconNav class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Lieux</p>
+                    <div v-if="activityStore.currentActivity.private">
+                      Chez {{ getHost }},
+                      <br />
+                      {{ activityStore.currentActivity.city }}
                     </div>
-                    <p class="text-xl font-black text-custom-blue ml-4">
-                      jours avant l'événement
-                    </p>
+                    <div v-else>
+                      {{ formatShortAddress(activityStore.currentActivity) }}
+                    </div>
                   </div>
                 </div>
-                <!-- <div v-if="isParticipating">
-                <p>Partager à des amis</p>
-                <div class="flex gap-3 mt-2">
-                  <a
-                    :href="`mailto:?subject=Viens voir cette activité !&body=${encodeURIComponent(pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager par mail"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconMail class="text-primary w-5 h-5" />
-                  </a>
-                  <a
-                    :href="`https://www.instagram.com/?url=${encodeURIComponent(pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager sur Instagram"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconInsta class="text-primary w-5 h-5" />
-                  </a>
-                  <a
-                    :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}&quote=${encodeURIComponent('Viens voir cette activité ! ' + pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager sur Facebook"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconFacebook2 class="text-primary w-5 h-5" />
-                  </a>
-                  <button
-                    type="button"
-                    @click="copyLink"
-                    aria-label="Copier le lien"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconCopy class="text-primary w-5 h-5" />
-                  </button>
+              </div>
+              <div class="flex flex-col gap-4">
+                <div class="flex items-center">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconTime class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Heure</p>
+                    {{ formatTime(activityStore.currentActivity.date) }}
+                  </div>
                 </div>
-              </div> -->
+                <div class="flex items-center">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconDollar class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Prix</p>
+                    {{ formatPriceValue(activityStore.currentActivity.price) }}
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconPerson class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Organisateur</p>
+                    {{ getHost }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="container mx-auto">
-        <div class="flex lg:flex-row flex-col w-full px-5 md:px-15">
-            <div class="w-full lg:w-2/3 pb-4 lg:pb-0">
-              <h2 class="text-2xl text-custom-blue">Description</h2>
-              <p class="text-lg lg:text-xl text-primary mt-4">
-                {{ activityStore.currentActivity.description }}
-              </p>
-            </div>
-            <div class="w-full lg:w-1/3  flex flex-col gap-6 lg:ms-24">
-              <div class="card w-full py-4 px-8 rounded-2xl">
-                <div class="flex items-center ">
-                  <div class="bg-custom-green p-2 rounded-lg me-3">
-                      <IconPerson class="text-custom-blue w-5 h-5" />
-                    </div>
-                    <div class="text-primary">
-                      <p class="text-sm text-primary">Organisateur</p>
-                      {{ getHost }}
-                    </div>
-                </div>
-              </div>
-              <div class="card w-full py-4 px-8 rounded-2xl">
-                <h2 class="text-xl text-custom-blue ">Bon à savoir</h2>
-                <ul class="list-disc list-inside mt-4 text-md">
-                  <li>Confirmation immédiate de votre participation</li>
-                  <li>Rappel envoyé 24h avant l’événement</li>
-                </ul>
-              </div>              
-            </div>
-        </div>
-      </div>
-
-      <div class="container mx-auto pt-8">
-        <div class="maps px-5 md:px-15">
-          <iframe
+        <div class="grid grid-cols-2 gap-24 mb-16">
+          <div class="bg-custom-green rounded-2xl p-8">
+            <h2 class="text-2xl text-custom-primary mb-4">Localisation</h2>
+            <iframe
               :src="`https://www.google.com/maps?q=${activityStore.currentActivity.latitude},${activityStore.currentActivity.longitude}&hl=fr&z=14&output=embed`"
               width="100%"
               height="300"
@@ -352,24 +253,15 @@
               allowfullscreen="false"
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"
-              class="rounded-2xl"
             ></iframe>
+          </div>
+          <div class="flex justify-center items-center">
+            <IconDe class="text-custom-green" />
+          </div>
         </div>
-      </div>
 
-      <div class="container mx-auto">
-        <ChatPanel
-          v-if="canAccessChat && activityStore.currentActivity"
-          :activityId="activityStore.currentActivity.id"
-          :user="authStore.user!"
-          :token="authStore.tokens?.accessToken || null"
-          :participants-ids="activityStore.currentActivity.playersId"
-          class="mt-8"
-        />
-      </div>
-
-      <div class="container mx-auto pb-16 pt-8 px-5">
-          <h2 class="text-2xl font-bold mb-6">Événements similaires</h2>
+        <div class="pb-16">
+          <h2 class="text-md font-bold mb-6">Événements similaires</h2>
 
           <div v-if="activityStore.loading" class="text-center py-8">
             <p class="text-gray-600">Chargement des activités...</p>
@@ -399,9 +291,151 @@
             />
           </div>
         </div>
+      </div>
+      <div v-else class="pb-8">
+        <h2 class="text-2xl font-black text-custom-primary mb-12">
+          Vous êtes inscrit à cet événement
+        </h2>
+        <button
+          v-if="canCancelParticipation"
+          @click="handleCancelParticipation"
+          class="mb-10 px-6 py-3 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
+        >
+          Annuler ma participation
+        </button>
+        <div class="grid grid-cols-2 gap-24 mb-16">
+          <div class="red-border">
+            <img
+              :src="`/img/home/img-${activityStore.currentActivity.hostType}.png`"
+              :alt="activityStore.currentActivity.title"
+              class="w-full h-full object-cover rounded-lg z-10 relative"
+            />
+          </div>
+          <div class="flex flex-col gap-6 h-full">
+            <div class="bg-custom-red p-8 rounded-xl">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                  <div
+                    v-for="(digit, index) in daysRemaining"
+                    :key="index"
+                    class="bg-custom-white text-custom-red text-4xl font-black w-16 h-16 flex items-center justify-center rounded-lg"
+                  >
+                    {{ digit }}
+                  </div>
+                  <p class="text-2xl font-black text-custom-white ml-4">
+                    jours avant l'événement
+                  </p>
+                </div>
+              </div>
+            </div>
 
-      
+            <div class="bg-custom-green rounded-2xl p-8">
+              <h2 class="text-2xl text-custom-primary mb-4">Localisation</h2>
+              <iframe
+                :src="`https://www.google.com/maps?q=${activityStore.currentActivity.latitude},${activityStore.currentActivity.longitude}&hl=fr&z=14&output=embed`"
+                width="100%"
+                height="300"
+                style="border: 0"
+                allowfullscreen="false"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-custom-blue p-8 rounded-xl mb-6">
+          <div class="grid grid-cols-2 gap-24">
+            <div class="div">
+              <h2 class="text-2xl text-custom-white font-black">
+                {{ activityStore.currentActivity.title }}
+              </h2>
+              <p class="text-xl text-custom-white mt-4">
+                {{ activityStore.currentActivity.description }}
+              </p>
+            </div>
+            <div class="grid grid-cols-2 gap-24">
+              <div class="flex flex-col gap-4">
+                <div class="flex items-center">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconAgenda class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Date</p>
+                    {{ formatDate(activityStore.currentActivity.date) }}
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconParticipant class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Participants</p>
+                    {{ activityStore.currentActivity.playersId.length }} /
+                    {{ activityStore.currentActivity.seats }}
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconNav class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Lieux</p>
+                    <div v-if="activityStore.currentActivity.private">
+                      Chez {{ getHost }},
+                      <br />
+                      {{ activityStore.currentActivity.city }}
+                    </div>
+                    <div v-else>
+                      {{ formatShortAddress(activityStore.currentActivity) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-4">
+                <div class="flex items-center">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconTime class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Heure</p>
+                    {{ formatTime(activityStore.currentActivity.date) }}
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconDollar class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Prix</p>
+                    {{ formatPriceValue(activityStore.currentActivity.price) }}
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <div class="bg-custom-white p-4 rounded-lg me-3">
+                    <IconPerson class="text-custom-red w-5 h-5" />
+                  </div>
+                  <div class="text-custom-white">
+                    <p class="text-sm text-custom-green">Organisateur</p>
+                    {{ getHost }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
+
+    <ChatPanel
+      v-if="canAccessChat && activityStore.currentActivity"
+      :activityId="activityStore.currentActivity.id"
+      :user="authStore.user!"
+      :token="authStore.tokens?.accessToken || null"
+      :participants-ids="activityStore.currentActivity.playersId"
+      class="mt-8"
+    />
 
     <div v-else class="text-center py-8">
       <p class="text-gray-600">Activité non trouvée</p>
@@ -411,20 +445,6 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from "vue";
-
-const pageUrl = window.location.href;
-// const smsUrl = `sms:?body=Viens voir cette activité ! ${pageUrl}`;
-// const instagramUrl = `https://www.instagram.com/?url=${encodeURIComponent(pageUrl)}`;
-// const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
-
-const copyLink = async () => {
-  try {
-    await navigator.clipboard.writeText(pageUrl);
-    alert("Lien copié !");
-  } catch {
-    alert("Impossible de copier le lien.");
-  }
-};
 import { useRoute, useRouter } from "vue-router";
 import { useActivityStore } from "../stores/activityStore";
 import IconChevronLeft from "../components/atoms/icons/IconChevronLeft.vue";
@@ -446,10 +466,6 @@ import type {
   ParticipationRequest,
   ParticipationRequestStatus,
 } from "@/types/ParticipationRequest";
-import IconMail from "@/components/atoms/icons/IconMail.vue";
-import IconInsta from "@/components/atoms/icons/IconInsta.vue";
-import IconFacebook2 from "@/components/atoms/icons/IconFacebook2.vue";
-import IconCopy from "@/components/atoms/icons/IconCopy.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -545,99 +561,20 @@ const formatPriceValue = (price?: string | number | null) => {
   return `${num.toFixed(2)} €`;
 };
 
-const normalizeAddressDisplay = (value: string) => {
-  const parts = value
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  const secondPart = parts[1] ?? "";
-  if (parts.length >= 2 && /^\d/.test(secondPart)) {
-    parts.shift();
-  }
-
-  const cleaned = parts.filter((p) => {
-    const lower = p.toLowerCase();
-    if (lower === "france") return false;
-    if (lower.includes("france")) return false;
-    if (lower.includes("métropolitaine") || lower.includes("metropolitaine")) {
-      return false;
-    }
-    return true;
-  });
-
-  const postcodeIndex = cleaned.findIndex((p) => /^\d{5}$/.test(p));
-  const postcode = postcodeIndex >= 0 ? cleaned.splice(postcodeIndex, 1)[0] : "";
-
-  const kept = cleaned.slice(0, 3);
-  if (postcode && !kept.includes(postcode)) {
-    kept.push(postcode);
-  }
-
-  return kept.join(", ");
-};
-
-const removeTrailingCity = (value: string, city: string) => {
-  const trimmedCity = city.trim();
-  if (!trimmedCity) return value;
-
-  const parts = value
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  const last = parts[parts.length - 1];
-  if (last && last.localeCompare(trimmedCity, undefined, { sensitivity: "base" }) === 0) {
-    parts.pop();
-  }
-
-  return parts.join(", ");
-};
-
 const formatShortAddress = (activity: {
   place_name?: string | null;
   address?: string | null;
   city?: string | null;
   postalCode?: string | null;
 }) => {
-  const address = activity.address?.trim() || "";
-  const city = activity.city?.trim() || "";
-  const postalCodeRaw = activity.postalCode?.trim() || "";
-
-  const postalCode = postalCodeRaw === "00000" ? "" : postalCodeRaw;
-
-  let addressDisplay = address ? normalizeAddressDisplay(address) : "";
-  if (addressDisplay && city) {
-    addressDisplay = removeTrailingCity(addressDisplay, city);
-  }
-
-  if (addressDisplay) return addressDisplay;
-
-  const parts = [postalCode, city].filter(Boolean);
+  const place = activity.place_name?.trim();
+  if (place) return place;
+  const address = activity.address?.trim();
+  const city = activity.city?.trim();
+  const postalCode = activity.postalCode?.trim();
+  const parts = [address, postalCode, city].filter(Boolean);
   if (parts.length) return parts.join(" ");
   return "Adresse indisponible";
-};
-
-const getAddressHref = (activity: {
-  latitude?: number | null;
-  longitude?: number | null;
-  address?: string | null;
-  city?: string | null;
-  place_name?: string | null;
-}) => {
-  const lat = activity.latitude;
-  const lon = activity.longitude;
-  if (typeof lat === "number" && typeof lon === "number") {
-    return `https://www.google.com/maps?q=${lat},${lon}`;
-  }
-
-  const parts = [activity.address]
-    .map((p) => p?.trim())
-    .filter(Boolean) as string[];
-
-  if (!parts.length) return null;
-  const query = encodeURIComponent(parts.join(", "));
-  return `https://www.google.com/maps/search/?api=1&query=${query}`;
 };
 
 const priceNumber = computed(() => {
@@ -665,7 +602,7 @@ const participateLabel = computed(() => {
   if (isPaidActivity.value) {
     return `Participer pour ${priceNumber.value.toFixed(2)} euro`;
   }
-  return "Je participe à l'événement";
+  return "Je participe a cet evenement";
 });
 
 const formatRequestStatus = (status: ParticipationRequestStatus) => {

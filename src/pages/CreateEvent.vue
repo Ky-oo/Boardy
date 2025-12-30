@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-custom-white mx-50 bloc-cat-create_event">
+  <div class="min-h-screen bg-custom-bg w-full lg:mx-50 bloc-cat-create_event">
     <div class="text-center pt-30 pb-8">
       <h1
         v-if="isEditMode"
@@ -8,7 +8,7 @@
         Editez votre partie
       </h1>
       <div v-else>
-        <h1 class="text-5xl font-family-urban text-primary my-6">
+        <h1 class="text-5xl font-family-urban text-primary my-6 px-5">
           {{
             isOrganisationHost
               ? "Créer une soirée pour votre établissement"
@@ -17,7 +17,7 @@
               : "Créer votre partie idéale"
           }}
         </h1>
-        <p class="text-primary text-lg font-family-red-hat">
+        <p class="text-primary text-lg font-family-red-hat px-5">
           Avec votre compte joueur vous pouvez organiser une partie pour
           chercher des joueurs.
         </p>
@@ -25,7 +25,7 @@
     </div>
 
     <div class="flex justify-center w-full items-start gap-16 px-8 pb-16">
-      <div class="relative pt-6 w-full">
+      <div class="relative pt-6 w-full hidden lg:block">
         <img
           src="/img/createEvent/stepper.svg"
           alt="Étapes de création d'événement"

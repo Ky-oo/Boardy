@@ -1,16 +1,17 @@
 <template>
   <router-link
     :to="`/activity/${activity.id}`"
-    class="bg-custom-blue rounded-lg shadow-md p-6 text-custom-white flex justify-between h-full flex-col hover:shadow-xl transition-shadow cursor-pointer"
+    class="rounded-2xl shadow-md text-custom-white flex justify-between h-full flex-col cursor-pointer"
   >
     <div class="relative">
       <div
         :class="[
           'flag',
           'absolute',
-          'top-2',
-          'left-2',
-          'p-2',
+          'top-4',
+          'left-4',
+          'py-2',
+          'px-4',
           getTypeColor,
           'rounded-3xl',
         ]"
@@ -20,41 +21,49 @@
       <img
         :src="getImagePath"
         :alt="activity.title"
-        class="w-full object-cover rounded-md mb-4"
+        class="w-full object-cover rounded-t-xl mb-4"
       />
-      <div>
-        <h3 class="text-xl font-bold mb-2">{{ activity.title }}</h3>
-        <p class="text-sm font-regular mb-4">{{ activity.description }}</p>
-        <div class="px-3">
+      <div class="px-8">
+        <h3
+          class="text-xl font-black mb-2 text-custom-blue truncate"
+        >
+          {{ activity.title }}
+        </h3>
+        <p
+          class="text-sm font-regular mb-4 text-primary whitespace-normal overflow-hidden wrap-break-word [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+        >
+          {{ activity.description }}
+        </p>
+        <div class="px-3 text-primary">
           <div class="flex items-center mb-0.5">
-            <IconAgenda class="text-custom-white me-1" />
-            <p class="text-sm font-bold">{{ dateFormatted }}</p>
+            <IconAgenda class="text-custom-primary me-1" />
+            <p class="text-sm font-black">{{ dateFormatted }}</p>
           </div>
           <div class="flex items-center mb-0.5">
-            <IconTime class="text-custom-white me-1" />
-            <p class="text-sm font-bold">{{ timeFormatted }}</p>
+            <IconTime class="text-custom-primary me-1" />
+            <p class="text-sm font-black">{{ timeFormatted }}</p>
           </div>
           <div class="flex items-center mb-0.5">
-            <IconNav class="text-custom-white me-1" />
-            <p class="text-sm font-bold">{{ getAddress }}</p>
+            <IconNav class="text-custom-blue me-1" />
+            <p class="text-sm font-black text-custom-blue">{{ getAddress }}</p>
           </div>
           <div class="flex items-center mb-0.5">
-            <IconParticipant class="text-custom-white me-1" />
-            <p class="text-sm font-bold">
-              {{ activity.playersId.length }} / {{ activity.seats }}
+            <IconParticipant class="text-custom-primary me-1" />
+            <p class="text-sm font-black">
+              {{ activity.playersId.length }} / {{ activity.seats }} participants
             </p>
           </div>
         </div>
       </div>
     </div>
-    <div>
-      <div class="flex justify-between items-center mt-4">
+    <div class="px-8 pb-6">
+      <div class="flex justify-between items-center mt-4 text-primary">
         <div>
-          <p>{{ getPrice }}</p>
+          <p class="text-custom-blue font-black">{{ getPrice }}</p>
         </div>
         <div class="flex items-center">
           <p>{{ getHost }}</p>
-          <IconMeeple class="text-custom-white ms-1" />
+          <IconMeeple class="text-primary ms-1" />
         </div>
       </div>
     </div>

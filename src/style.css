@@ -28,7 +28,8 @@
   --color-custom-red: #f7001f;
   --color-custom-green: #acebab;
   --color-custom-green-hover: #aaebdd;
-  --color-custom-white: #f4fffd;
+  --color-custom-white: #FFFFFF;
+  --color-custom-bg: #F8F8F8;
   --color-primary: #101930;
 
   --font-family-red-hat: "Red Hat Display", sans-serif;
@@ -37,6 +38,7 @@
 
 body {
   font-family: "Red Hat Display", sans-serif;
+  background-color: var(--color-custom-bg);
 }
 
 /***** Home Page *****/
@@ -51,9 +53,18 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
+  height: 400px;
+  margin-top: 82px;
 }
 
-.bloc-bandeau::before {
+.filter-bar {
+  margin-top: -40px;
+  margin-bottom: 20px;
+  z-index: 2;
+  position: relative;
+}
+
+/* .bloc-bandeau::before {
   content: "";
   position: absolute;
   width: 100%;
@@ -66,7 +77,7 @@ body {
     rgba(255, 255, 255, 0) 30%,
     rgba(255, 255, 255, 1) 100%
   );
-}
+} */
 
 .logo-footer {
   margin-top: -300px;
@@ -99,13 +110,13 @@ body {
   transform: translate(24px, -20px);
 }
 
-.bloc-cat {
+/* .bloc-cat {
   position: relative;
   margin-top: -100px;
   padding-bottom: 80px;
-}
+} */
 
-.bloc-cat::before {
+/* .bloc-cat::before {
   content: "";
   position: absolute;
   top: -60px;
@@ -114,9 +125,9 @@ body {
   height: 260px;
   background: var(--color-custom-green);
   border-radius: 0 12px 12px 0;
-}
+} */
 
-.bloc-cat-login::before {
+/* .bloc-cat-login::before {
   content: "";
   position: absolute;
   top: 500px;
@@ -125,7 +136,7 @@ body {
   height: 260px;
   background: var(--color-custom-green);
   border-radius: 0 10px 10px 0;
-}
+} */
 
 .bloc-cat-register::before {
   content: "";
@@ -149,12 +160,12 @@ body {
   border-radius: 0 10px 10px 0;
 }
 
-.bloc-activites {
+/* .bloc-activites {
   position: relative;
   margin-top: -100px;
-}
+} */
 
-.bloc-activites.has-activities::before {
+/* .bloc-activites.has-activities::before {
   content: "";
   position: absolute;
   top: 20%;
@@ -164,9 +175,9 @@ body {
   background: var(--color-custom-green);
   border-radius: 12px 0 0 12px;
   z-index: -1;
-}
+} */
 
-.bloc-activites::after {
+/* .bloc-activites::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -177,7 +188,7 @@ body {
   background: var(--color-custom-green);
   border-radius: 12px;
   z-index: -1;
-}
+} */
 
 .bloc-cat-event {
   position: relative;
@@ -240,4 +251,14 @@ body {
 .toast-leave-from {
   opacity: 1;
   transform: translateY(0);
+}
+
+.card {
+  box-shadow: 0 0 8.5px 0 rgba(0,0,0, 0.15);
+}
+
+@media (max-width : 768px) {
+  .bloc-bandeau {
+    height: 240px;
+  }
 }

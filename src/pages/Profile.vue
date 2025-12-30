@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-custom-white mx-20 pt-32 pb-16">
+  <div class="min-h-screen bg-custom-bg mx-5 lg:mx-20 pt-32 pb-16">
     <div class="text-center mb-10">
       <h1 class="text-5xl font-family-urban text-primary my-6">Mon profil</h1>
       <p class="text-primary text-lg font-family-red-hat">
@@ -8,7 +8,7 @@
     </div>
 
     <div
-      class="max-w-3xl mx-auto bg-custom-white border border-custom-blue/30 rounded-3xl shadow-lg p-8"
+      class="max-w-3xl mx-auto bg-custom-bg border border-custom-blue/30 rounded-3xl shadow-lg p-8"
     >
       <div v-if="!authStore.user" class="text-center text-gray-500">
         Chargement du profil...

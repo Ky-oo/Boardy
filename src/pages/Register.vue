@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-custom-white mx-20 bloc-cat-register">
+  <div class="min-h-screen bg-custom-bg mx-4 bloc-cat-register sm:mx-20">
     <div class="text-center pt-30 pb-8">
       <h1 class="text-5xl font-family-urban text-primary my-6">
         Créer un compte
@@ -9,8 +9,8 @@
       </p>
     </div>
 
-    <div class="flex justify-center items-center gap-16 px-8 pb-16">
-      <div class="relative w-full pt-6">
+    <div class="flex justify-center items-center gap-16 px-2 pb-16 xs:px-8">
+      <div class="relative w-full pt-6 hidden lg:block">
         <div
           class="absolute -top-1 -right-6 w-full h-full border-2 border-red-500 rounded-lg"
         ></div>
@@ -220,7 +220,7 @@
           <div v-if="error" class="text-red-200 text-sm text-center">
             {{ error }}
           </div>
-
+<!-- 
           <div class="flex items-center gap-4 mt-2">
             <div class="flex-1 h-px bg-custom-white/50"></div>
             <span class="text-custom-white text-sm">Ou continuer avec</span>
@@ -244,7 +244,7 @@
             >
               <IconFacebook class="text-custom-white w-10 h-10" />
             </button>
-          </div>
+          </div> -->
 
           <div class="flex justify-between mt-4">
             <a
@@ -254,13 +254,13 @@
             >
               J'ai déjà un compte
             </a>
-            <a
+            <!-- <a
               href="/register-organisation"
               @click.prevent="router.push('/register-organisation')"
               class="text-custom-white underline hover:no-underline cursor-pointer"
             >
               Je suis une entreprise/organisateur
-            </a>
+            </a> -->
           </div>
         </form>
       </div>

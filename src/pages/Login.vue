@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-custom-white mx-20 bloc-cat-login">
+  <div class="min-h-screen bg-custom-bg mx-4 bloc-cat-login sm:mx-20">
     <div class="text-center pt-30 pb-8">
       <h1 class="text-5xl font-family-urban text-primary my-6">Connexion</h1>
       <p class="text-primary text-lg font-family-red-hat">
@@ -7,8 +7,8 @@
       </p>
     </div>
 
-    <div class="flex justify-center items-center gap-16 px-8 pb-16">
-      <div class="relative w-full pt-6">
+    <div class="flex justify-center items-center gap-16 px-2 pb-16 xs:px-8">
+      <div class="relative w-full pt-6 hidden lg:block">
         <div
           class="absolute -top-1 -right-6 w-full h-full border-2 border-red-500 rounded-lg"
         ></div>
@@ -50,13 +50,13 @@
             />
           </div>
 
-          <div class="text-right">
+          <!-- <div class="text-right">
             <a
               href="#"
               class="text-custom-white text-sm underline hover:no-underline"
               >Mot de passe oublié ?</a
             >
-          </div>
+          </div> -->
 
           <div v-if="error" class="text-red-200 text-sm text-center">
             {{ error }}
@@ -70,7 +70,7 @@
             {{ loading ? "Connexion..." : "Se connecter" }}
           </button>
 
-          <div class="flex items-center gap-4 mt-2">
+         <!--<div class="flex items-center gap-4 mt-2">
             <div class="flex-1 h-px bg-custom-white/50"></div>
             <span class="text-custom-white text-sm">Ou se connecter avec</span>
             <div class="flex-1 h-px bg-custom-white/50"></div>
@@ -93,8 +93,8 @@
             >
               <IconFacebook class="text-custom-white w-10 h-10" />
             </button>
-          </div>
-
+          </div>-->
+          
           <button
             type="button"
             class="w-full bg-custom-white text-primary font-semibold rounded-xl h-10 hover:cursor-pointer hover:bg-gray-200 transition-colors mt-2"

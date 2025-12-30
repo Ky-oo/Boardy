@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-custom-white mx-20 pt-32 pb-16">
+  <div class="min-h-screen bg-custom-bg mx-20 pt-32 pb-16">
     <div class="text-center mb-10">
       <h1 class="text-5xl font-family-urban text-primary my-6">
         Mon organisation

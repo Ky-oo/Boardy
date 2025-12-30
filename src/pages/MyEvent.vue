@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-40 mx-30 py-8">
+  <div class="pt-40 mx-5 lg:mx-30 py-8">
     <h1
       class="text-4xl text-center font-family-urban font-black text-custom-primary mb-8"
     >
