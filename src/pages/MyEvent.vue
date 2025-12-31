@@ -33,7 +33,7 @@
             v-if="canLoadMoreUpcoming"
             @click="loadMoreUpcoming"
             :disabled="activityStore.loading"
-            class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-3 hover:cursor-pointer hover:bg-custom-blue-hover bg-custom-blue text-custom-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ activityStore.loading ? "Chargement..." : "Charger plus" }}
           </button>
@@ -68,7 +68,7 @@
             v-if="canLoadMoreCreated"
             @click="loadMoreCreated"
             :disabled="activityStore.loading"
-            class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-custom-blue-hover disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ activityStore.loading ? "Chargement..." : "Charger plus" }}
           </button>
@@ -103,7 +103,7 @@
             v-if="canLoadMoreJoined"
             @click="loadMoreJoined"
             :disabled="activityStore.loading"
-            class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-custom-blue-hover disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ activityStore.loading ? "Chargement..." : "Charger plus" }}
           </button>

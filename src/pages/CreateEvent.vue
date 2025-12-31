@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-custom-bg w-full lg:mx-50 bloc-cat-create_event">
+  <div class="min-h-screen bg-custom-bg w-full lg:px-50 bloc-cat-create_event">
     <div class="text-center pt-30 pb-8">
       <h1
         v-if="isEditMode"
@@ -52,7 +52,7 @@
               type="text"
               placeholder="Ex: soirée Catan, ..."
               required
-              class="border-[1.5px] hover:cursor-text border-custom-blue w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              class="border-[1.5px] hover:cursor-text border-custom-blue w-full h-10 px-4 py-3 rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -66,7 +66,7 @@
               type="date"
               :min="todayDate"
               required
-              class="w-full h-10 px-4 py-3 hover:cursor-text rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              class="w-full h-10 px-4 py-3 hover:cursor-text rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary"
               @input="clearDateValidity"
             />
           </div>
@@ -83,7 +83,7 @@
                 type="time"
                 placeholder="Entrez votre heure de début"
                 required
-                class="w-full px-4 py-3 h-10 hover:cursor-text border-[1.5px] border-custom-blue rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+                class="w-full px-4 py-3 h-10 hover:cursor-text border-[1.5px] border-custom-blue rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary"
               />
             </div>
 
@@ -99,7 +99,7 @@
                 type="time"
                 placeholder="Entrez votre heure de fin"
                 required
-                class="h-10 px-4 py-3 border-[1.5px] hover:cursor-text border-custom-blue rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+                class="h-10 px-4 py-3 border-[1.5px] hover:cursor-text border-custom-blue rounded-xl bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary"
               />
             </div>
           </div>
@@ -119,7 +119,7 @@
               type="text"
               placeholder="Ex : Chez Thomas, Bar du coin,..."
               required
-              class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -137,7 +137,7 @@
                   type="text"
                   placeholder="Ex : 44 rue de la paix, Paris, 75001 France"
                   required
-                  class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+                  class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary"
                   @input="handleAddressInputWithValidation"
                   @focus="showAddressSuggestions = true"
                   @blur="handleAddressBlur"
@@ -217,7 +217,7 @@
               v-model="description"
               placeholder="Décrivez l'événement, l'ambiance, les attendus, ce qui est prévu,..."
               rows="4"
-              class="w-full px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white resize-none"
+              class="w-full px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary resize-none"
             ></textarea>
           </div>
 
@@ -227,7 +227,7 @@
             >
 
             <div
-              class="flex items-center h-10 gap-2 border-[1.5px] border-custom-blue rounded-xl px-4 py-2"
+              class="flex items-center h-10 gap-2 border-[1.5px] border-custom-blue rounded-xl px-4 py-2 "
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -249,7 +249,7 @@
                 v-model="games"
                 type="text"
                 placeholder="Ex : Catan, Trio, Seven wonders,..."
-                class="flex-1 h-10 bg-transparent text-gray-700 placeholder-gray-500 focus:outline-none"
+                class="flex-1 h-10 bg-transparent text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary"
               />
             </div>
           </div>
@@ -262,7 +262,7 @@
             </label>
 
             <div
-              class="flex items-center gap-2 border-[1.5px] border-custom-blue rounded-xl px-4 py-2 w-fit"
+              class="flex items-center gap-2 border-[1.5px] border-custom-blue focus:border-primary rounded-xl px-4 py-2 w-fit"
             >
               <IconParticipants class="w-5 h-5 text-gray-400 z" />
 
@@ -273,7 +273,7 @@
                 min="2"
                 :max="maxParticipants"
                 required
-                class="w-16 bg-transparent text-gray-700 focus:outline-none"
+                class="w-16 bg-transparent text-gray-700 focus:outline-none focus:border-primary"
               />
             </div>
           </div>
@@ -313,7 +313,7 @@
                   :disabled="priceType === 'free'"
                   :required="priceType === 'paid'"
                   placeholder="0.00"
-                  class="w-24 h-10 px-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white disabled:opacity-60"
+                  class="w-24 h-10 px-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary disabled:opacity-60"
                 />
                 <span class="text-sm text-gray-500">EUR</span>
               </div>
@@ -368,7 +368,7 @@
 
             <button
               type="submit"
-              class="h-10 hover:cursor-pointer w-full bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors"
+              class="h-10 hover:cursor-pointer w-full bg-custom-blue hover:bg-custom-blue-hover text-custom-white font-semibold rounded-xl transition-colors"
               :disabled="loading"
             >
               {{ loading ? "Enregistrement..." : submitLabel }}

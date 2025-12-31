@@ -91,7 +91,7 @@
 
             <button
               type="submit"
-              class="h-10 px-6 hover:cursor-pointer bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-10 px-6 hover:cursor-pointer bg-custom-blue hover:bg-custom-blue-hover text-custom-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="loading || !isDirty"
             >
               {{ loading ? "Enregistrement..." : "Enregistrer" }}

@@ -18,7 +18,7 @@
 
       <div v-if="canEdit" class="flex justify-end gap-3 mb-6">
         <button
-          class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-blue-600"
+          class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover"
           @click="handleEdit"
         >
           Modifier
@@ -81,7 +81,7 @@
             </p>
             <div v-if="request.status === 'pending'" class="flex gap-2 mt-3">
               <button
-                class="px-4 py-2 hover:cursor-pointer bg-custom-blue text-white rounded-lg hover:bg-blue-600 font-bold"
+                class="px-4 py-2 hover:cursor-pointer bg-custom-blue text-white rounded-lg hover:bg-custom-blue-hover font-bold"
                 @click="approveRequest(request.id)"
               >
                 Accepter
@@ -241,7 +241,7 @@
                 <button
                   v-if="!authStore.isLogged"
                   @click="$router.push('/login')"
-                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full"
+                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-blue-hover font-bold w-full"
                 >
                   Connectez-vous pour participer
                 </button>
@@ -249,7 +249,7 @@
                   v-else-if="canRequestParticipation"
                   @click="handleParticipate"
                   :disabled="paymentLoading"
-                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
+                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-blue-hover font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {{ participateLabel }}
                 </button>

@@ -72,7 +72,7 @@
         <li>
           <router-link
             :to="authStore.isLogged ? '/create_event' : '/login'"
-            class="hover:cursor-pointer hover:bg-custom-green-hover bg-custom-blue text-custom-white px-6 py-3 rounded-2xl"
+            class="hover:cursor-pointer hover:bg-custom-blue-hover bg-custom-blue text-custom-white px-6 py-3 rounded-2xl"
             >Créer un événement
           </router-link>
         </li>
@@ -172,7 +172,7 @@
         <li>
           <router-link
             :to="authStore.isLogged ? '/create_event' : '/login'"
-            class="inline-flex w-fit hover:cursor-pointer hover:bg-custom-green-hover bg-custom-blue text-custom-white px-6 py-3 rounded-2xl"
+            class="inline-flex w-fit hover:cursor-pointer hover:bg-custom-blue-hover bg-custom-blue text-custom-white px-6 py-3 rounded-2xl"
             @click="closeMobileMenu"
           >
             Créer un événement

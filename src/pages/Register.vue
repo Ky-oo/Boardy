@@ -21,7 +21,7 @@
         />
       </div>
 
-      <div class="bg-custom-blue rounded-3xl p-8 w-full z-10">
+      <div class="bg-custom-blue hover:bg-custom-blue-hover rounded-3xl p-8 w-full z-10">
         <form @submit.prevent="handleRegister" class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
             <label for="lastname" class="text-custom-white font-medium"
