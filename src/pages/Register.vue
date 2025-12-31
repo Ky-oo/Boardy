@@ -272,8 +272,8 @@
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/stores/authStore";
-import IconApple from "@/components/atoms/icons/IconApple.vue";
-import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
+// import IconApple from "@/components/atoms/icons/IconApple.vue";
+// import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
 import {
   fetchAddressSuggestions,
   type AddressSuggestion,

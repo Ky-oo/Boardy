@@ -423,19 +423,19 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from "vue";
 
-const pageUrl = window.location.href;
+// const pageUrl = window.location.href;
 // const smsUrl = `sms:?body=Viens voir cette activité ! ${pageUrl}`;
 // const instagramUrl = `https://www.instagram.com/?url=${encodeURIComponent(pageUrl)}`;
 // const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
 
-const copyLink = async () => {
-  try {
-    await navigator.clipboard.writeText(pageUrl);
-    alert("Lien copié !");
-  } catch {
-    alert("Impossible de copier le lien.");
-  }
-};
+// const copyLink = async () => {
+//   try {
+//     await navigator.clipboard.writeText(pageUrl);
+//     alert("Lien copié !");
+//   } catch {
+//     alert("Impossible de copier le lien.");
+//   }
+// };
 import { useRoute, useRouter } from "vue-router";
 import { useActivityStore } from "../stores/activityStore";
 import IconChevronLeft from "../components/atoms/icons/IconChevronLeft.vue";
@@ -443,10 +443,7 @@ import ProgressBar from "../components/atoms/ProgressBar.vue";
 import IconAgenda from "../components/atoms/icons/IconAgenda.vue";
 import IconParticipant from "@/components/atoms/icons/IconParticipant.vue";
 import IconNav from "@/components/atoms/icons/IconNav.vue";
-import IconTime from "@/components/atoms/icons/IconTime.vue";
-import IconDollar from "@/components/atoms/icons/IconDollar.vue";
 import IconPerson from "@/components/atoms/icons/IconPerson.vue";
-import IconDe from "@/components/atoms/icons/IconDe.vue";
 import ActivityCard from "@/components/molecules/ActivityCard.vue";
 import ChatPanel from "@/components/organisms/ChatPanel.vue";
 import { useAuth } from "@/stores/authStore";
@@ -457,10 +454,10 @@ import type {
   ParticipationRequest,
   ParticipationRequestStatus,
 } from "@/types/ParticipationRequest";
-import IconMail from "@/components/atoms/icons/IconMail.vue";
-import IconInsta from "@/components/atoms/icons/IconInsta.vue";
-import IconFacebook2 from "@/components/atoms/icons/IconFacebook2.vue";
-import IconCopy from "@/components/atoms/icons/IconCopy.vue";
+// import IconMail from "@/components/atoms/icons/IconMail.vue";
+// import IconInsta from "@/components/atoms/icons/IconInsta.vue";
+// import IconFacebook2 from "@/components/atoms/icons/IconFacebook2.vue";
+// import IconCopy from "@/components/atoms/icons/IconCopy.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -550,11 +547,11 @@ const formatTime = (date: string) => {
   });
 };
 
-const formatPriceValue = (price?: string | number | null) => {
-  const num = price !== null && price !== undefined ? Number(price) : 0;
-  if (!num) return "Gratuit";
-  return `${num.toFixed(2)} €`;
-};
+// const formatPriceValue = (price?: string | number | null) => {
+//   const num = price !== null && price !== undefined ? Number(price) : 0;
+//   if (!num) return "Gratuit";
+//   return `${num.toFixed(2)} €`;
+// };
 
 const normalizeAddressDisplay = (value: string) => {
   const parts = value
