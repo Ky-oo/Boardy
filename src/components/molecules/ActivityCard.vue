@@ -120,10 +120,12 @@ const getAddress = computed(() => {
       "ain","aisne","allier","alpes-de-haute-provence","hautes-alpes","alpes-maritimes","ardèche","ardennes","ariege","aube","aude","aveyron","bouches-du-rhône","calvados","cantal","charente","charente-maritime","cher","corrèze","corse-du-sud","haute-corse","côte-d'or","côtes-d'armor","creuse","dordogne","doubs","drôme","eure","eure-et-loir","finistère","gard","haute-garonne","gers","gironde","hérault","ille-et-vilaine","indre","indre-et-loire","isère","jura","landes","loir-et-cher","loire","haute-loire","loire-atlantique","loiret","lot","lot-et-garonne","lozère","maine-et-loire","manche","marne","haute-marne","mayenne","meurthe-et-moselle","meuse","morbihan","moselle","nièvre","nord","oise","orne","pas-de-calais","puy-de-dôme","pyrenees-atlantiques","hautes-pyrenees","pyrenees-orientales","bas-rhin","haut-rhin","rhône","haute-saône","saône-et-loire","sarthe","savoie","haute-savoie","paris","seine-maritime","seine-et-marne","yvelines","deux-sèvres","somme","tarn","tarn-et-garonne","var","vaucluse","vendée","vienne","haute-vienne","vosges","yonne","territoire de belfort","essonne","hauts-de-seine","seine-saint-denis","val-de-marne","val-d'oise"
     ];
     for (let i = parts.length - 1; i >= 0; i--) {
-      let dep = parts[i].toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-      if (departements.includes(dep)) {
-        departement = parts[i];
-        break;
+      if (typeof parts[i] === "string") {
+        let dep = parts[i]!.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+        if (departements.includes(dep)) {
+          departement = parts[i]!;
+          break;
+        }
       }
     }
     // Ville = segment juste avant le département (qui n'est pas un code postal, ni un pays, ni vide)
@@ -131,15 +133,17 @@ const getAddress = computed(() => {
       for (let i = parts.length - 1; i >= 0; i--) {
         if (parts[i] === departement && i > 0) {
           for (let j = i - 1; j >= 0; j--) {
-            const part = parts[j].toLowerCase();
-            if (
-              !part.includes("france") &&
-              !part.includes("métropolitaine") &&
-              !/^\d{5}$/.test(part) &&
-              part !== ""
-            ) {
-              ville = parts[j];
-              break;
+            if (typeof parts[j] === "string") {
+              const part = parts[j]!.toLowerCase();
+              if (
+                !part.includes("france") &&
+                !part.includes("métropolitaine") &&
+                !/^\d{5}$/.test(part) &&
+                part !== ""
+              ) {
+                ville = parts[j]!;
+                break;
+              }
             }
           }
           break;
