@@ -123,8 +123,10 @@ import {
 const router = useRouter();
 const authStore = useAuth();
 
-const email = ref("alice@example.com");
-const password = ref("azerty");
+// const email = ref("alice@example.com");
+// const password = ref("azerty");
+const email = ref("");
+const password = ref("");
 const error = ref("");
 const loading = ref(false);
 const googleButtonRef = ref<HTMLDivElement | null>(null);

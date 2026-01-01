@@ -97,7 +97,8 @@
         </div>
       </div>
 
-      <h2 class="text-2xl font-black text-custom-primary mb-5 mx-5">
+      <div v-if="isParticipating">
+        <h2 class="text-2xl font-black text-custom-primary mb-5 mx-5">
           Vous êtes inscrit à cet événement
         </h2>
         <button
@@ -107,6 +108,7 @@
         >
           Annuler ma participation
         </button>
+      </div>
 
       <div class="container rounded-xl mx-auto relative z-0 bandeau">
         <img
@@ -219,7 +221,7 @@
                 </div>
               </div>
             </div>
-            <div class="w-1/3">
+            <div class="w-full lg:w-1/3">
 
               <div v-if="!isParticipating">
                 <div class="flex justify-between items-center">
@@ -346,7 +348,7 @@
                 <h2 class="text-xl text-custom-blue ">Bon à savoir</h2>
                 <ul class="list-disc list-inside mt-4 text-md">
                   <li>Confirmation immédiate de votre participation</li>
-                  <li>Rappel envoyé 24h avant l’événement</li>
+                  <!-- <li>Rappel envoyé 24h avant l’événement</li> -->
                 </ul>
               </div>              
             </div>
