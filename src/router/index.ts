@@ -95,9 +95,13 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
+
 export const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior() {
+    return { top: 0 };
+  },
 });
 
 router.beforeEach((to, _from, next) => {

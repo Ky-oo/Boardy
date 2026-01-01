@@ -100,93 +100,91 @@ const timeFormatted = new Date(props.activity.date).toLocaleTimeString(
   }
 );
 
+
 const getImagePath = computed(() => {
   return `/img/home/img-${props.activity.hostType}.png`;
 });
 
+const getPrice = computed(() => {
+  if (typeof props.activity.price === "number") {
+    return props.activity.price === 0 ? "Gratuit" : props.activity.price + " €";
+  }
+  return "";
+});
+
 const getAddress = computed(() => {
   if (props.activity.homeHost === true && props.activity.host) {
-    return `${props.activity.city}, Chez ${props.activity.host.firstname} ${
-      props.activity.host.lastname ?? ""
-    }`;
+    return `${props.activity.city}, Chez ${props.activity.host.firstname} ${props.activity.host.lastname ?? ""}`;
   }
-  // Extraction ville et département depuis address
   let ville = "";
-  let departement = "";
   if (props.activity.address) {
     const parts = props.activity.address.split(",").map(p => p.trim()).filter(Boolean);
-    // Département = dernier segment qui correspond à un département français
-    const departements = [
-      "ain","aisne","allier","alpes-de-haute-provence","hautes-alpes","alpes-maritimes","ardèche","ardennes","ariege","aube","aude","aveyron","bouches-du-rhône","calvados","cantal","charente","charente-maritime","cher","corrèze","corse-du-sud","haute-corse","côte-d'or","côtes-d'armor","creuse","dordogne","doubs","drôme","eure","eure-et-loir","finistère","gard","haute-garonne","gers","gironde","hérault","ille-et-vilaine","indre","indre-et-loire","isère","jura","landes","loir-et-cher","loire","haute-loire","loire-atlantique","loiret","lot","lot-et-garonne","lozère","maine-et-loire","manche","marne","haute-marne","mayenne","meurthe-et-moselle","meuse","morbihan","moselle","nièvre","nord","oise","orne","pas-de-calais","puy-de-dôme","pyrenees-atlantiques","hautes-pyrenees","pyrenees-orientales","bas-rhin","haut-rhin","rhône","haute-saône","saône-et-loire","sarthe","savoie","haute-savoie","paris","seine-maritime","seine-et-marne","yvelines","deux-sèvres","somme","tarn","tarn-et-garonne","var","vaucluse","vendée","vienne","haute-vienne","vosges","yonne","territoire de belfort","essonne","hauts-de-seine","seine-saint-denis","val-de-marne","val-d'oise"
+    const regionsRaw = [
+      "auvergne-rhône-alpes","provence-alpes-côte d'azur","occitanie","bourgogne-franche-comté","grand est","hauts-de-france","normandie","nouvelle-aquitaine","bretagne","centre-val de loire","corse","île-de-france","pays de la loire"
     ];
-    for (let i = parts.length - 1; i >= 0; i--) {
-      if (typeof parts[i] === "string") {
-        let dep = parts[i]!.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-        if (departements.includes(dep)) {
-          departement = parts[i]!;
-          break;
-        }
+    const departementsRaw = [
+      "ain","aisne","allier","alpes-de-haute-provence","hautes-alpes","alpes-maritimes","ardèche","ardennes","ariege","aube","aude","aveyron","bouches-du-rhône","calvados","cantal","charente","charente-maritime","cher","corrèze","corse-du-sud","haute-corse","côte-d'or","côtes-d'armor","creuse","dordogne","doubs","drôme","eure","eure-et-loir","finistière","gard","haute-garonne","gers","gironde","hérault","ille-et-vilaine","indre","indre-et-loire","isère","jura","landes","loir-et-cher","loire","haute-loire","loire-atlantique","loiret","lot","lot-et-garonne","lozère","maine-et-loire","manche","marne","haute-marne","mayenne","meurthe-et-moselle","meuse","morbihan","moselle","nièvre","nord","oise","orne","pas-de-calais","puy-de-dôme","pyrenees-atlantiques","hautes-pyrenees","pyrenees-orientales","bas-rhin","haut-rhin","rhône","haute-saône","saône-et-loire","sarthe","savoie","haute-savoie","paris","seine-maritime","seine-et-marne","yvelines","deux-sèvres","somme","tarn","tarn-et-garonne","var","vaucluse","vendée","vienne","haute-vienne","vosges","yonne","territoire de belfort","essonne","hauts-de-seine","seine-saint-denis","val-de-marne","val-d'oise"
+    ];
+    // Normalisation accents/casse pour matching fiable
+    const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    const regions = regionsRaw.map(normalize);
+    const departements = departementsRaw.map(normalize);
+    // Chercher le premier département/région à partir de la fin
+    let villeTrouvee = false;
+    // On part de la fin, on saute tous les segments qui sont département/région/pays/code postal
+    let i = parts.length - 1;
+    while (i >= 0) {
+      const partNorm = (parts[i] ?? '').toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      if (
+        partNorm === "" ||
+        partNorm.includes("france") ||
+        partNorm.includes("métropolitaine") ||
+        /^\d{5}$/.test(partNorm) ||
+        regions.includes(partNorm) ||
+        departements.includes(partNorm)
+      ) {
+        i--;
+        continue;
       }
+      ville = parts[i] ?? '';
+      villeTrouvee = true;
+      break;
     }
-    // Ville = segment juste avant le département (qui n'est pas un code postal, ni un pays, ni vide)
-    if (departement) {
+    // Si pas trouvé, fallback sur le premier segment valide en partant de la fin
+    if (!villeTrouvee) {
       for (let i = parts.length - 1; i >= 0; i--) {
-        if (parts[i] === departement && i > 0) {
-          for (let j = i - 1; j >= 0; j--) {
-            if (typeof parts[j] === "string") {
-              const part = parts[j]!.toLowerCase();
-              if (
-                !part.includes("france") &&
-                !part.includes("métropolitaine") &&
-                !/^\d{5}$/.test(part) &&
-                part !== ""
-              ) {
-                ville = parts[j]!;
-                break;
-              }
-            }
-          }
-          break;
+        const partNorm = (parts[i] ?? '').toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+        if (
+          partNorm === "" ||
+          partNorm.includes("france") ||
+          partNorm.includes("métropolitaine") ||
+          /^\d{5}$/.test(partNorm) ||
+          regions.includes(partNorm) ||
+          departements.includes(partNorm)
+        ) {
+          continue;
         }
+        ville = parts[i] ?? '';
+        break;
       }
     }
   }
   let result = props.activity.place_name;
   if (ville) result += ", " + ville;
-  if (departement) result += ", " + departement;
   return result;
 });
 
-const getPrice = computed(() => {
-  const priceNumber =
-    props.activity.price !== null && props.activity.price !== undefined
-      ? Number(props.activity.price)
-      : 0;
-
-  if (!priceNumber) {
-    return "Gratuit";
-  }
-
-  return `${priceNumber.toFixed(2)} €`;
-});
-
 const getHost = computed(() => {
-  if (props.activity.homeHost === true && props.activity.host) {
+  if (props.activity.hostType === "user" && props.activity.host) {
     return `Par ${props.activity.host.firstname}`;
-  } else if (
-    props.activity.hostType === "user" &&
-    props.activity.homeHost === false &&
-    props.activity.host
-  ) {
-    return `Par ${props.activity.host.firstname}`;
-  } else if (
-    props.activity.hostType === "organisation" &&
-    props.activity.organisation
-  ) {
+  }
+  if (props.activity.hostType === "organisation" && props.activity.organisation) {
     return `Par ${props.activity.organisation.name}`;
-  } else if (props.activity.hostType === "event") {
+  }
+  if (props.activity.hostType === "event") {
     return "Par Boardy";
   }
+  return "";
 });
 
 const getTypeColor = computed(() => {
