@@ -8,7 +8,7 @@
       <p class="text-red-600">{{ activityStore.error }}</p>
     </div>
 
-    <div v-else-if="activityStore.currentActivity" class=" lg:mx-30 py-6">
+    <div v-else-if="activityStore.currentActivity" class="lg:mx-30 py-6">
       <button
         @click="$router.back()"
         class="flex items-center text-custom-primary text-2xl py-3 hover:cursor-pointer mb-6"
@@ -17,6 +17,12 @@
       </button>
 
       <div v-if="canEdit" class="flex justify-end gap-3 mb-6">
+        <button
+          class="px-4 py-2 bg-custom-green hover:cursor-pointer text-primary rounded-lg hover:bg-custom-green-hover"
+          @click="openGuestModal"
+        >
+          Ajouter manuellement un utilisateur
+        </button>
         <button
           class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover"
           @click="handleEdit"
@@ -29,6 +35,62 @@
         >
           Supprimer
         </button>
+      </div>
+
+      <div
+        v-if="showGuestModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+        @click.self="closeGuestModal"
+      >
+        <div class="bg-custom-white rounded-xl p-6 w-full max-w-md shadow-lg">
+          <h3 class="text-xl font-bold text-primary mb-4">
+            Ajouter un participant externe
+          </h3>
+          <form @submit.prevent="handleAddGuest">
+            <div class="flex flex-col gap-2 mb-3">
+              <label for="guest-name" class="text-primary font-medium"
+                >Prénom*</label
+              >
+              <input
+                id="guest-name"
+                v-model.trim="guestName"
+                type="text"
+                required
+                class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              />
+            </div>
+            <div class="flex flex-col gap-2 mb-4">
+              <label for="guest-email" class="text-primary font-medium"
+                >Email (optionnel)</label
+              >
+              <input
+                id="guest-email"
+                v-model.trim="guestEmail"
+                type="email"
+                class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              />
+            </div>
+            <div v-if="guestError" class="text-red-500 text-sm mb-3">
+              {{ guestError }}
+            </div>
+            <div class="flex justify-end gap-3">
+              <button
+                type="button"
+                class="px-4 py-2 bg-gray-200 hover:cursor-pointer text-gray-700 rounded-lg hover:bg-gray-300"
+                @click="closeGuestModal"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover disabled:opacity-60 disabled:cursor-not-allowed"
+                :disabled="guestLoading"
+              >
+                {{ guestLoading ? "Ajout..." : "Ajouter" }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <div v-if="showRequestPanel" class="bg-custom-blue p-8 rounded-xl mb-10">
@@ -112,28 +174,33 @@
 
       <div class="container rounded-xl mx-auto relative z-0 bandeau">
         <img
-              :src="`/img/home/img-${activityStore.currentActivity.hostType}.png`"
-              :alt="activityStore.currentActivity.title"
-              class="w-full h-100 object-cover rounded-lg z-10 relative"
-            />
+          :src="`/img/home/img-${activityStore.currentActivity.hostType}.png`"
+          :alt="activityStore.currentActivity.title"
+          class="w-full h-100 object-cover rounded-lg z-10 relative"
+        />
       </div>
 
       <div class="container mx-auto">
-        <div class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-green rounded-xl">
+        <div
+          class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-green rounded-xl"
+        >
           <h1 class="text-2xl text-primary font-black pb-4">
             {{ activityStore.currentActivity.title }}
           </h1>
           <div class="flex w-full lg:flex-row flex-col">
-            <div class="w-full lg:w-2/3 border-solid border-b lg:border-b-0 lg:border-r border-custom-blue me-8 pb-6 mb-6 lg:mb-0">
+            <div
+              class="w-full lg:w-2/3 border-solid border-b lg:border-b-0 lg:border-r border-custom-blue me-8 pb-6 mb-6 lg:mb-0"
+            >
               <div class="flex justify-between pb-4">
                 <div class="flex items-center">
-                    <div class="bg-custom-white p-2 rounded-lg me-3">
-                      <IconAgenda class="text-custom-blue w-5 h-5" />
-                    </div>
-                    <div class="text-primary">
-                      <p class="text-sm text-primary">Date</p>
-                      {{ formatDate(activityStore.currentActivity.date) }} à {{ formatTime(activityStore.currentActivity.date) }}
-                    </div>
+                  <div class="bg-custom-white p-2 rounded-lg me-3">
+                    <IconAgenda class="text-custom-blue w-5 h-5" />
+                  </div>
+                  <div class="text-primary">
+                    <p class="text-sm text-primary">Date</p>
+                    {{ formatDate(activityStore.currentActivity.date) }} à
+                    {{ formatTime(activityStore.currentActivity.date) }}
+                  </div>
                 </div>
                 <!-- <div class="flex items-center text-xl">
                   {{ formatTime(activityStore.currentActivity.date) }}
@@ -215,28 +282,23 @@
                   </div>
                   <div class="text-primary">
                     <p class="text-sm text-primary">Participants</p>
-                    {{ activityStore.currentActivity.playersId.length }} /
+                    {{ participantsCount }} /
                     {{ activityStore.currentActivity.seats }}
                   </div>
                 </div>
               </div>
             </div>
             <div class="w-full lg:w-1/3">
-
               <div v-if="!isParticipating">
                 <div class="flex justify-between items-center">
-                  <h2 class="text-xl text-primary">
-                    Places restantes
-                  </h2>
+                  <h2 class="text-xl text-primary">Places restantes</h2>
                   <p class="text-primary text-2xl font-black">
-                    {{
-                      activityStore.currentActivity.seats -
-                      activityStore.currentActivity.playersId.length
-                    }} / {{ activityStore.currentActivity.seats }}
+                    {{ remainingSeats }} /
+                    {{ activityStore.currentActivity.seats }}
                   </p>
                 </div>
                 <ProgressBar
-                  :current="activityStore.currentActivity.playersId.length"
+                  :current="participantsCount"
                   :max="activityStore.currentActivity.seats"
                   class="py-8"
                 />
@@ -326,47 +388,47 @@
 
       <div class="container mx-auto">
         <div class="flex lg:flex-row flex-col w-full px-5 md:px-15">
-            <div class="w-full lg:w-2/3 pb-4 lg:pb-0">
-              <h2 class="text-2xl text-custom-blue">Description</h2>
-              <p class="text-lg lg:text-xl text-primary mt-4">
-                {{ activityStore.currentActivity.description }}
-              </p>
-            </div>
-            <div class="w-full lg:w-1/3  flex flex-col gap-6 lg:ms-24">
-              <div class="card w-full py-4 px-8 rounded-2xl">
-                <div class="flex items-center ">
-                  <div class="bg-custom-green p-2 rounded-lg me-3">
-                      <IconPerson class="text-custom-blue w-5 h-5" />
-                    </div>
-                    <div class="text-primary">
-                      <p class="text-sm text-primary">Organisateur</p>
-                      {{ getHost }}
-                    </div>
+          <div class="w-full lg:w-2/3 pb-4 lg:pb-0">
+            <h2 class="text-2xl text-custom-blue">Description</h2>
+            <p class="text-lg lg:text-xl text-primary mt-4">
+              {{ activityStore.currentActivity.description }}
+            </p>
+          </div>
+          <div class="w-full lg:w-1/3 flex flex-col gap-6 lg:ms-24">
+            <div class="card w-full py-4 px-8 rounded-2xl">
+              <div class="flex items-center">
+                <div class="bg-custom-green p-2 rounded-lg me-3">
+                  <IconPerson class="text-custom-blue w-5 h-5" />
+                </div>
+                <div class="text-primary">
+                  <p class="text-sm text-primary">Organisateur</p>
+                  {{ getHost }}
                 </div>
               </div>
-              <div class="card w-full py-4 px-8 rounded-2xl">
-                <h2 class="text-xl text-custom-blue ">Bon à savoir</h2>
-                <ul class="list-disc list-inside mt-4 text-md">
-                  <li>Confirmation immédiate de votre participation</li>
-                  <!-- <li>Rappel envoyé 24h avant l’événement</li> -->
-                </ul>
-              </div>              
             </div>
+            <div class="card w-full py-4 px-8 rounded-2xl">
+              <h2 class="text-xl text-custom-blue">Bon à savoir</h2>
+              <ul class="list-disc list-inside mt-4 text-md">
+                <li>Confirmation immédiate de votre participation</li>
+                <li>Rappel envoyé 24h avant l'événement</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="container mx-auto pt-8">
         <div class="maps px-5 md:px-15">
           <iframe
-              :src="`https://www.google.com/maps?q=${activityStore.currentActivity.latitude},${activityStore.currentActivity.longitude}&hl=fr&z=14&output=embed`"
-              width="100%"
-              height="300"
-              style="border: 0"
-              allowfullscreen="false"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              class="rounded-2xl"
-            ></iframe>
+            :src="`https://www.google.com/maps?q=${activityStore.currentActivity.latitude},${activityStore.currentActivity.longitude}&hl=fr&z=14&output=embed`"
+            width="100%"
+            height="300"
+            style="border: 0"
+            allowfullscreen="false"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            class="rounded-2xl"
+          ></iframe>
         </div>
       </div>
 
@@ -382,38 +444,34 @@
       </div>
 
       <div class="container mx-auto pb-16 pt-8 px-5">
-          <h2 class="text-2xl font-bold mb-6">Événements similaires</h2>
+        <h2 class="text-2xl font-bold mb-6">Événements similaires</h2>
 
-          <div v-if="activityStore.loading" class="text-center py-8">
-            <p class="text-gray-600">Chargement des activités...</p>
-          </div>
-
-          <div v-else-if="activityStore.error" class="text-center py-8">
-            <p class="text-red-600">{{ activityStore.error }}</p>
-          </div>
-
-          <div
-            v-else-if="activityStore.getSimilarActivities.length === 0"
-            class="text-center py-8"
-          >
-            <p class="text-gray-600">
-              Aucune activité similaire pour le moment.
-            </p>
-          </div>
-
-          <div
-            v-else
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            <ActivityCard
-              v-for="activity in activityStore.getSimilarActivities"
-              :key="activity.id"
-              :activity="activity"
-            />
-          </div>
+        <div v-if="activityStore.loading" class="text-center py-8">
+          <p class="text-gray-600">Chargement des activités...</p>
         </div>
 
-      
+        <div v-else-if="activityStore.error" class="text-center py-8">
+          <p class="text-red-600">{{ activityStore.error }}</p>
+        </div>
+
+        <div
+          v-else-if="activityStore.getSimilarActivities.length === 0"
+          class="text-center py-8"
+        >
+          <p class="text-gray-600">Aucune activité similaire pour le moment.</p>
+        </div>
+
+        <div
+          v-else
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          <ActivityCard
+            v-for="activity in activityStore.getSimilarActivities"
+            :key="activity.id"
+            :activity="activity"
+          />
+        </div>
+      </div>
     </div>
 
     <div v-else class="text-center py-8">
@@ -469,6 +527,11 @@ const requestStatus = ref<ParticipationRequestStatus | "none">("none");
 const requests = ref<ParticipationRequest[]>([]);
 const requestsLoading = ref(false);
 const paymentLoading = ref(false);
+const showGuestModal = ref(false);
+const guestName = ref("");
+const guestEmail = ref("");
+const guestError = ref("");
+const guestLoading = ref(false);
 const toastStore = useToastStore();
 const isPaidActivity = computed(() => priceNumber.value > 0);
 const isRequestPending = computed(() => requestStatus.value === "pending");
@@ -505,6 +568,21 @@ const canManageRequests = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
   if (authStore.user.role === "admin") return true;
   return isCreator.value;
+});
+
+const guestCount = computed(
+  () => activityStore.currentActivity?.guestUsers?.length ?? 0
+);
+
+const participantsCount = computed(() => {
+  if (!activityStore.currentActivity) return 0;
+  return activityStore.currentActivity.playersId.length + guestCount.value;
+});
+
+const remainingSeats = computed(() => {
+  if (!activityStore.currentActivity) return 0;
+  const seats = Number(activityStore.currentActivity.seats || 0);
+  return Math.max(0, seats - participantsCount.value);
 });
 
 const canAccessChat = computed(
@@ -549,6 +627,61 @@ const formatTime = (date: string) => {
   });
 };
 
+const openGuestModal = () => {
+  showGuestModal.value = true;
+  guestName.value = "";
+  guestEmail.value = "";
+  guestError.value = "";
+};
+
+const closeGuestModal = () => {
+  showGuestModal.value = false;
+  guestError.value = "";
+};
+
+const isValidEmail = (value: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const handleAddGuest = async () => {
+  if (!activityStore.currentActivity) return;
+  const name = guestName.value.trim();
+  const email = guestEmail.value.trim();
+
+  if (!name) {
+    guestError.value = "Veuillez renseigner un prénom.";
+    return;
+  }
+  if (email && !isValidEmail(email)) {
+    guestError.value = "Veuillez renseigner un email valide.";
+    return;
+  }
+
+  guestLoading.value = true;
+  guestError.value = "";
+  try {
+    const payload: { name: string; email?: string } = { name };
+    if (email) {
+      payload.email = email;
+    }
+    await apiPost(
+      `/activity/${activityStore.currentActivity.id}/guest`,
+      payload
+    );
+    await activityStore.fetchActivity(activityStore.currentActivity.id);
+    toastStore.addToast("Participant ajouté.", { type: "success" });
+    closeGuestModal();
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'ajouter le participant.";
+    guestError.value = message;
+    toastStore.addToast(message, { type: "error" });
+  } finally {
+    guestLoading.value = false;
+  }
+};
+
 // const formatPriceValue = (price?: string | number | null) => {
 //   const num = price !== null && price !== undefined ? Number(price) : 0;
 //   if (!num) return "Gratuit";
@@ -577,7 +710,8 @@ const normalizeAddressDisplay = (value: string) => {
   });
 
   const postcodeIndex = cleaned.findIndex((p) => /^\d{5}$/.test(p));
-  const postcode = postcodeIndex >= 0 ? cleaned.splice(postcodeIndex, 1)[0] : "";
+  const postcode =
+    postcodeIndex >= 0 ? cleaned.splice(postcodeIndex, 1)[0] : "";
 
   const kept = cleaned.slice(0, 3);
   if (postcode && !kept.includes(postcode)) {
@@ -597,7 +731,10 @@ const removeTrailingCity = (value: string, city: string) => {
     .filter(Boolean);
 
   const last = parts[parts.length - 1];
-  if (last && last.localeCompare(trimmedCity, undefined, { sensitivity: "base" }) === 0) {
+  if (
+    last &&
+    last.localeCompare(trimmedCity, undefined, { sensitivity: "base" }) === 0
+  ) {
     parts.pop();
   }
 

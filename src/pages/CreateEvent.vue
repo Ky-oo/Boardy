@@ -586,7 +586,10 @@ const populateForm = (activity: any) => {
   const d = new Date(activity.date);
   if (!isNaN(d.getTime())) {
     date.value = d.toISOString().slice(0, 10);
-    startTime.value = d.toISOString().slice(11, 16);
+    startTime.value = d.toLocaleTimeString("fr-FR", {
+      hour: "numeric",
+      minute: "numeric",
+    });
   }
 };
 

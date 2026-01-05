@@ -120,6 +120,9 @@ export const useActivityStore = defineStore("activity", {
       const hostOrganisation = activity.hostOrganisation ?? null;
       const hostUser = activity.hostUser ?? null;
       const hostUserRole = hostUser?.role ?? null;
+      const guestUsers = Array.isArray(activity.guestUsers)
+        ? activity.guestUsers
+        : [];
 
       const hostType: ActivityHostType = deriveHostType(
         hostOrganisation,
@@ -146,6 +149,7 @@ export const useActivityStore = defineStore("activity", {
         hostId: hostId ?? null,
         host: hostUser,
         organisation: hostOrganisation,
+        guestUsers,
         playersId,
       };
     },

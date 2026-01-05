@@ -24,9 +24,7 @@
         class="w-full object-cover rounded-t-xl mb-4"
       />
       <div class="px-8">
-        <h3
-          class="text-xl font-black mb-2 text-custom-blue truncate"
-        >
+        <h3 class="text-xl font-black mb-2 text-custom-blue truncate">
           {{ activity.title }}
         </h3>
         <p
@@ -50,7 +48,7 @@
           <div class="flex items-center mb-0.5">
             <IconParticipant class="text-custom-primary me-1" />
             <p class="text-sm font-black">
-              {{ activity.playersId.length }} / {{ activity.seats }} participants
+              {{ participantsCount }} / {{ activity.seats }} participants
             </p>
           </div>
         </div>
@@ -100,9 +98,13 @@ const timeFormatted = new Date(props.activity.date).toLocaleTimeString(
   }
 );
 
-
 const getImagePath = computed(() => {
   return `/img/home/img-${props.activity.hostType}.png`;
+});
+
+const participantsCount = computed(() => {
+  const guests = props.activity.guestUsers?.length ?? 0;
+  return props.activity.playersId.length + guests;
 });
 
 const getPrice = computed(() => {
@@ -114,19 +116,135 @@ const getPrice = computed(() => {
 
 const getAddress = computed(() => {
   if (props.activity.homeHost === true && props.activity.host) {
-    return `${props.activity.city}, Chez ${props.activity.host.firstname} ${props.activity.host.lastname ?? ""}`;
+    return `${props.activity.city}, Chez ${props.activity.host.firstname} ${
+      props.activity.host.lastname ?? ""
+    }`;
   }
   let ville = "";
   if (props.activity.address) {
-    const parts = props.activity.address.split(",").map(p => p.trim()).filter(Boolean);
+    const parts = props.activity.address
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
     const regionsRaw = [
-      "auvergne-rhône-alpes","provence-alpes-côte d'azur","occitanie","bourgogne-franche-comté","grand est","hauts-de-france","normandie","nouvelle-aquitaine","bretagne","centre-val de loire","corse","île-de-france","pays de la loire"
+      "auvergne-rhône-alpes",
+      "provence-alpes-côte d'azur",
+      "occitanie",
+      "bourgogne-franche-comté",
+      "grand est",
+      "hauts-de-france",
+      "normandie",
+      "nouvelle-aquitaine",
+      "bretagne",
+      "centre-val de loire",
+      "corse",
+      "île-de-france",
+      "pays de la loire",
     ];
     const departementsRaw = [
-      "ain","aisne","allier","alpes-de-haute-provence","hautes-alpes","alpes-maritimes","ardèche","ardennes","ariege","aube","aude","aveyron","bouches-du-rhône","calvados","cantal","charente","charente-maritime","cher","corrèze","corse-du-sud","haute-corse","côte-d'or","côtes-d'armor","creuse","dordogne","doubs","drôme","eure","eure-et-loir","finistière","gard","haute-garonne","gers","gironde","hérault","ille-et-vilaine","indre","indre-et-loire","isère","jura","landes","loir-et-cher","loire","haute-loire","loire-atlantique","loiret","lot","lot-et-garonne","lozère","maine-et-loire","manche","marne","haute-marne","mayenne","meurthe-et-moselle","meuse","morbihan","moselle","nièvre","nord","oise","orne","pas-de-calais","puy-de-dôme","pyrenees-atlantiques","hautes-pyrenees","pyrenees-orientales","bas-rhin","haut-rhin","rhône","haute-saône","saône-et-loire","sarthe","savoie","haute-savoie","paris","seine-maritime","seine-et-marne","yvelines","deux-sèvres","somme","tarn","tarn-et-garonne","var","vaucluse","vendée","vienne","haute-vienne","vosges","yonne","territoire de belfort","essonne","hauts-de-seine","seine-saint-denis","val-de-marne","val-d'oise"
+      "ain",
+      "aisne",
+      "allier",
+      "alpes-de-haute-provence",
+      "hautes-alpes",
+      "alpes-maritimes",
+      "ardèche",
+      "ardennes",
+      "ariege",
+      "aube",
+      "aude",
+      "aveyron",
+      "bouches-du-rhône",
+      "calvados",
+      "cantal",
+      "charente",
+      "charente-maritime",
+      "cher",
+      "corrèze",
+      "corse-du-sud",
+      "haute-corse",
+      "côte-d'or",
+      "côtes-d'armor",
+      "creuse",
+      "dordogne",
+      "doubs",
+      "drôme",
+      "eure",
+      "eure-et-loir",
+      "finistière",
+      "gard",
+      "haute-garonne",
+      "gers",
+      "gironde",
+      "hérault",
+      "ille-et-vilaine",
+      "indre",
+      "indre-et-loire",
+      "isère",
+      "jura",
+      "landes",
+      "loir-et-cher",
+      "loire",
+      "haute-loire",
+      "loire-atlantique",
+      "loiret",
+      "lot",
+      "lot-et-garonne",
+      "lozère",
+      "maine-et-loire",
+      "manche",
+      "marne",
+      "haute-marne",
+      "mayenne",
+      "meurthe-et-moselle",
+      "meuse",
+      "morbihan",
+      "moselle",
+      "nièvre",
+      "nord",
+      "oise",
+      "orne",
+      "pas-de-calais",
+      "puy-de-dôme",
+      "pyrenees-atlantiques",
+      "hautes-pyrenees",
+      "pyrenees-orientales",
+      "bas-rhin",
+      "haut-rhin",
+      "rhône",
+      "haute-saône",
+      "saône-et-loire",
+      "sarthe",
+      "savoie",
+      "haute-savoie",
+      "paris",
+      "seine-maritime",
+      "seine-et-marne",
+      "yvelines",
+      "deux-sèvres",
+      "somme",
+      "tarn",
+      "tarn-et-garonne",
+      "var",
+      "vaucluse",
+      "vendée",
+      "vienne",
+      "haute-vienne",
+      "vosges",
+      "yonne",
+      "territoire de belfort",
+      "essonne",
+      "hauts-de-seine",
+      "seine-saint-denis",
+      "val-de-marne",
+      "val-d'oise",
     ];
     // Normalisation accents/casse pour matching fiable
-    const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    const normalize = (s: string) =>
+      s
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "");
     const regions = regionsRaw.map(normalize);
     const departements = departementsRaw.map(normalize);
     // Chercher le premier département/région à partir de la fin
@@ -134,7 +252,10 @@ const getAddress = computed(() => {
     // On part de la fin, on saute tous les segments qui sont département/région/pays/code postal
     let i = parts.length - 1;
     while (i >= 0) {
-      const partNorm = (parts[i] ?? '').toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      const partNorm = (parts[i] ?? "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "");
       if (
         partNorm === "" ||
         partNorm.includes("france") ||
@@ -146,14 +267,17 @@ const getAddress = computed(() => {
         i--;
         continue;
       }
-      ville = parts[i] ?? '';
+      ville = parts[i] ?? "";
       villeTrouvee = true;
       break;
     }
     // Si pas trouvé, fallback sur le premier segment valide en partant de la fin
     if (!villeTrouvee) {
       for (let i = parts.length - 1; i >= 0; i--) {
-        const partNorm = (parts[i] ?? '').toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+        const partNorm = (parts[i] ?? "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/\p{Diacritic}/gu, "");
         if (
           partNorm === "" ||
           partNorm.includes("france") ||
@@ -164,7 +288,7 @@ const getAddress = computed(() => {
         ) {
           continue;
         }
-        ville = parts[i] ?? '';
+        ville = parts[i] ?? "";
         break;
       }
     }
@@ -178,7 +302,10 @@ const getHost = computed(() => {
   if (props.activity.hostType === "user" && props.activity.host) {
     return `Par ${props.activity.host.firstname}`;
   }
-  if (props.activity.hostType === "organisation" && props.activity.organisation) {
+  if (
+    props.activity.hostType === "organisation" &&
+    props.activity.organisation
+  ) {
     return `Par ${props.activity.organisation.name}`;
   }
   if (props.activity.hostType === "event") {

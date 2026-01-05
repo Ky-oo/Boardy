@@ -220,7 +220,7 @@
           <div v-if="error" class="text-red-200 text-sm text-center">
             {{ error }}
           </div>
-<!-- 
+
           <div class="flex items-center gap-4 mt-2">
             <div class="flex-1 h-px bg-custom-white/50"></div>
             <span class="text-custom-white text-sm">Ou continuer avec</span>
@@ -232,7 +232,7 @@
               ref="googleButtonRef"
               class="flex items-center justify-center"
             ></div>
-            <button
+            <!-- <button
               type="button"
               class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
             >
@@ -243,8 +243,8 @@
               class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <IconFacebook class="text-custom-white w-10 h-10" />
-            </button>
-          </div> -->
+            </button> -->
+          </div>
 
           <div class="flex justify-between mt-4">
             <a
