@@ -164,7 +164,7 @@ export const useAuth = defineStore("auth", {
         this.tokens.accessToken = token;
         setAuthToken(token);
         const toastStore = useToastStore();
-        toastStore.addToast("Vous Ǧtes connecté.", { type: "success" });
+        toastStore.addToast("Vous êtes connecté.", { type: "success" });
         if (options?.redirectOnSuccess !== false) {
           router.push("/");
         }
