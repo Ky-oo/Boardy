@@ -24,7 +24,7 @@
           Ajouter manuellement un utilisateur
         </button>
         <button
-          class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-blue-600"
+          class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover"
           @click="handleEdit"
         >
           Modifier
@@ -144,7 +144,7 @@
             </p>
             <div v-if="request.status === 'pending'" class="flex gap-2 mt-3">
               <button
-                class="px-4 py-2 hover:cursor-pointer bg-custom-blue text-white rounded-lg hover:bg-blue-600 font-bold"
+                class="px-4 py-2 hover:cursor-pointer bg-custom-blue text-white rounded-lg hover:bg-custom-blue-hover font-bold"
                 @click="approveRequest(request.id)"
               >
                 Accepter
@@ -160,16 +160,18 @@
         </div>
       </div>
 
-      <h2 class="text-2xl font-black text-custom-primary mb-5 mx-5">
-        Vous êtes inscrit à cet événement
-      </h2>
-      <button
-        v-if="canCancelParticipation"
-        @click="handleCancelParticipation"
-        class="mb-10 px-6 py-3 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
-      >
-        Annuler ma participation
-      </button>
+      <div v-if="isParticipating">
+        <h2 class="text-2xl font-black text-custom-primary mb-5 mx-5">
+          Vous êtes inscrit à cet événement
+        </h2>
+        <button
+          v-if="canCancelParticipation"
+          @click="handleCancelParticipation"
+          class="mb-10 px-6 py-3 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
+        >
+          Annuler ma participation
+        </button>
+      </div>
 
       <div class="container rounded-xl mx-auto relative z-0 bandeau">
         <img
@@ -287,7 +289,7 @@
                 </div>
               </div>
             </div>
-            <div class="w-1/3">
+            <div class="w-full lg:w-1/3">
               <div v-if="!isParticipating">
                 <div class="flex justify-between items-center">
                   <h2 class="text-xl text-primary">Places restantes</h2>
@@ -304,7 +306,7 @@
                 <button
                   v-if="!authStore.isLogged"
                   @click="$router.push('/login')"
-                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full"
+                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-blue-hover font-bold w-full"
                 >
                   Connectez-vous pour participer
                 </button>
@@ -312,7 +314,7 @@
                   v-else-if="canRequestParticipation"
                   @click="handleParticipate"
                   :disabled="paymentLoading"
-                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-green font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
+                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-blue-hover font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {{ participateLabel }}
                 </button>
@@ -409,7 +411,7 @@
               <h2 class="text-xl text-custom-blue">Bon à savoir</h2>
               <ul class="list-disc list-inside mt-4 text-md">
                 <li>Confirmation immédiate de votre participation</li>
-                <li>Rappel envoyé 24h avant l’événement</li>
+                <li>Rappel envoyé 24h avant l'événement</li>
               </ul>
             </div>
           </div>

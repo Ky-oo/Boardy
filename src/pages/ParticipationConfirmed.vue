@@ -12,7 +12,7 @@
       <div class="flex gap-4 justify-center">
         <router-link
           to="/"
-          class="bg-custom-blue text-custom-white px-8 py-4 rounded-lg hover:bg-blue-600 text-xl font-bold"
+          class="bg-custom-blue text-custom-white px-8 py-4 rounded-lg hover:bg-custom-blue-hover text-xl font-bold"
         >
           Retour à l'accueil
         </router-link>

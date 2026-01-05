@@ -70,7 +70,7 @@
             {{ loading ? "Connexion..." : "Se connecter" }}
           </button>
 
-         <!--<div class="flex items-center gap-4 mt-2">
+          <div class="flex items-center gap-4 mt-2">
             <div class="flex-1 h-px bg-custom-white/50"></div>
             <span class="text-custom-white text-sm">Ou se connecter avec</span>
             <div class="flex-1 h-px bg-custom-white/50"></div>
@@ -81,7 +81,7 @@
               ref="googleButtonRef"
               class="flex items-center justify-center"
             ></div>
-            <button
+            <!-- <button
               type="button"
               class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
             >
@@ -92,9 +92,9 @@
               class="w-12 h-12 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <IconFacebook class="text-custom-white w-10 h-10" />
-            </button>
-          </div>-->
-          
+            </button> -->
+          </div>
+
           <button
             type="button"
             class="w-full bg-custom-white text-primary font-semibold rounded-xl h-10 hover:cursor-pointer hover:bg-gray-200 transition-colors mt-2"
@@ -123,8 +123,10 @@ import {
 const router = useRouter();
 const authStore = useAuth();
 
-const email = ref("alice@example.com");
-const password = ref("azerty");
+// const email = ref("alice@example.com");
+// const password = ref("azerty");
+const email = ref("");
+const password = ref("");
 const error = ref("");
 const loading = ref(false);
 const googleButtonRef = ref<HTMLDivElement | null>(null);

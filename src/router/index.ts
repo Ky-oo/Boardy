@@ -14,8 +14,20 @@ import Category from "@/pages/Category.vue";
 import Profile from "@/pages/Profile.vue";
 import Admin from "@/pages/Admin.vue";
 import Organisation from "@/pages/Organisation.vue";
+import MentionsLegales from "@/pages/MentionsLegales.vue";
+import PolitiqueConfidentialite from "@/pages/PolitiqueConfidentialite.vue";
 
 const routes: RouteRecordRaw[] = [
+      {
+        path: "/politique-confidentialite",
+        name: "politique-confidentialite",
+        component: PolitiqueConfidentialite,
+      },
+    {
+      path: "/mentions-legales",
+      name: "mentions-legales",
+      component: MentionsLegales,
+    },
   {
     path: "/",
     name: "home",
@@ -83,9 +95,13 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
+
 export const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior() {
+    return { top: 0 };
+  },
 });
 
 router.beforeEach((to, _from, next) => {
