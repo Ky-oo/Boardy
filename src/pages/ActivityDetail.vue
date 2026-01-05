@@ -8,7 +8,7 @@
       <p class="text-red-600">{{ activityStore.error }}</p>
     </div>
 
-    <div v-else-if="activityStore.currentActivity" class=" lg:mx-30 py-6">
+    <div v-else-if="activityStore.currentActivity" class="lg:mx-30 py-6">
       <button
         @click="$router.back()"
         class="flex items-center text-custom-primary text-2xl py-3 hover:cursor-pointer mb-6"
@@ -17,12 +17,6 @@
       </button>
 
       <div v-if="canEdit" class="flex justify-end gap-3 mb-6">
-        <button
-          class="px-4 py-2 bg-custom-green hover:cursor-pointer text-primary rounded-lg hover:bg-custom-green-hover"
-          @click="openGuestModal"
-        >
-          Ajouter manuellement un utilisateur
-        </button>
         <button
           class="px-4 py-2 bg-custom-green hover:cursor-pointer text-primary rounded-lg hover:bg-custom-green-hover"
           @click="openGuestModal"
@@ -167,40 +161,45 @@
       </div>
 
       <h2 class="text-2xl font-black text-custom-primary mb-5 mx-5">
-          Vous êtes inscrit à cet événement
-        </h2>
-        <button
-          v-if="canCancelParticipation"
-          @click="handleCancelParticipation"
-          class="mb-10 px-6 py-3 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
-        >
-          Annuler ma participation
-        </button>
+        Vous êtes inscrit à cet événement
+      </h2>
+      <button
+        v-if="canCancelParticipation"
+        @click="handleCancelParticipation"
+        class="mb-10 px-6 py-3 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
+      >
+        Annuler ma participation
+      </button>
 
       <div class="container rounded-xl mx-auto relative z-0 bandeau">
         <img
-              :src="`/img/home/img-${activityStore.currentActivity.hostType}.png`"
-              :alt="activityStore.currentActivity.title"
-              class="w-full h-100 object-cover rounded-lg z-10 relative"
-            />
+          :src="`/img/home/img-${activityStore.currentActivity.hostType}.png`"
+          :alt="activityStore.currentActivity.title"
+          class="w-full h-100 object-cover rounded-lg z-10 relative"
+        />
       </div>
 
       <div class="container mx-auto">
-        <div class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-green rounded-xl">
+        <div
+          class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-green rounded-xl"
+        >
           <h1 class="text-2xl text-primary font-black pb-4">
             {{ activityStore.currentActivity.title }}
           </h1>
           <div class="flex w-full lg:flex-row flex-col">
-            <div class="w-full lg:w-2/3 border-solid border-b lg:border-b-0 lg:border-r border-custom-blue me-8 pb-6 mb-6 lg:mb-0">
+            <div
+              class="w-full lg:w-2/3 border-solid border-b lg:border-b-0 lg:border-r border-custom-blue me-8 pb-6 mb-6 lg:mb-0"
+            >
               <div class="flex justify-between pb-4">
                 <div class="flex items-center">
-                    <div class="bg-custom-white p-2 rounded-lg me-3">
-                      <IconAgenda class="text-custom-blue w-5 h-5" />
-                    </div>
-                    <div class="text-primary">
-                      <p class="text-sm text-primary">Date</p>
-                      {{ formatDate(activityStore.currentActivity.date) }} à {{ formatTime(activityStore.currentActivity.date) }}
-                    </div>
+                  <div class="bg-custom-white p-2 rounded-lg me-3">
+                    <IconAgenda class="text-custom-blue w-5 h-5" />
+                  </div>
+                  <div class="text-primary">
+                    <p class="text-sm text-primary">Date</p>
+                    {{ formatDate(activityStore.currentActivity.date) }} à
+                    {{ formatTime(activityStore.currentActivity.date) }}
+                  </div>
                 </div>
                 <!-- <div class="flex items-center text-xl">
                   {{ formatTime(activityStore.currentActivity.date) }}
@@ -289,16 +288,12 @@
               </div>
             </div>
             <div class="w-1/3">
-
               <div v-if="!isParticipating">
                 <div class="flex justify-between items-center">
-                  <h2 class="text-xl text-primary">
-                    Places restantes
-                  </h2>
+                  <h2 class="text-xl text-primary">Places restantes</h2>
                   <p class="text-primary text-2xl font-black">
-                    {{
-                      remainingSeats
-                    }} / {{ activityStore.currentActivity.seats }}
+                    {{ remainingSeats }} /
+                    {{ activityStore.currentActivity.seats }}
                   </p>
                 </div>
                 <ProgressBar
@@ -392,47 +387,47 @@
 
       <div class="container mx-auto">
         <div class="flex lg:flex-row flex-col w-full px-5 md:px-15">
-            <div class="w-full lg:w-2/3 pb-4 lg:pb-0">
-              <h2 class="text-2xl text-custom-blue">Description</h2>
-              <p class="text-lg lg:text-xl text-primary mt-4">
-                {{ activityStore.currentActivity.description }}
-              </p>
-            </div>
-            <div class="w-full lg:w-1/3  flex flex-col gap-6 lg:ms-24">
-              <div class="card w-full py-4 px-8 rounded-2xl">
-                <div class="flex items-center ">
-                  <div class="bg-custom-green p-2 rounded-lg me-3">
-                      <IconPerson class="text-custom-blue w-5 h-5" />
-                    </div>
-                    <div class="text-primary">
-                      <p class="text-sm text-primary">Organisateur</p>
-                      {{ getHost }}
-                    </div>
+          <div class="w-full lg:w-2/3 pb-4 lg:pb-0">
+            <h2 class="text-2xl text-custom-blue">Description</h2>
+            <p class="text-lg lg:text-xl text-primary mt-4">
+              {{ activityStore.currentActivity.description }}
+            </p>
+          </div>
+          <div class="w-full lg:w-1/3 flex flex-col gap-6 lg:ms-24">
+            <div class="card w-full py-4 px-8 rounded-2xl">
+              <div class="flex items-center">
+                <div class="bg-custom-green p-2 rounded-lg me-3">
+                  <IconPerson class="text-custom-blue w-5 h-5" />
+                </div>
+                <div class="text-primary">
+                  <p class="text-sm text-primary">Organisateur</p>
+                  {{ getHost }}
                 </div>
               </div>
-              <div class="card w-full py-4 px-8 rounded-2xl">
-                <h2 class="text-xl text-custom-blue ">Bon à savoir</h2>
-                <ul class="list-disc list-inside mt-4 text-md">
-                  <li>Confirmation immédiate de votre participation</li>
-                  <li>Rappel envoyé 24h avant l’événement</li>
-                </ul>
-              </div>              
             </div>
+            <div class="card w-full py-4 px-8 rounded-2xl">
+              <h2 class="text-xl text-custom-blue">Bon à savoir</h2>
+              <ul class="list-disc list-inside mt-4 text-md">
+                <li>Confirmation immédiate de votre participation</li>
+                <li>Rappel envoyé 24h avant l’événement</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="container mx-auto pt-8">
         <div class="maps px-5 md:px-15">
           <iframe
-              :src="`https://www.google.com/maps?q=${activityStore.currentActivity.latitude},${activityStore.currentActivity.longitude}&hl=fr&z=14&output=embed`"
-              width="100%"
-              height="300"
-              style="border: 0"
-              allowfullscreen="false"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              class="rounded-2xl"
-            ></iframe>
+            :src="`https://www.google.com/maps?q=${activityStore.currentActivity.latitude},${activityStore.currentActivity.longitude}&hl=fr&z=14&output=embed`"
+            width="100%"
+            height="300"
+            style="border: 0"
+            allowfullscreen="false"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            class="rounded-2xl"
+          ></iframe>
         </div>
       </div>
 
@@ -448,38 +443,34 @@
       </div>
 
       <div class="container mx-auto pb-16 pt-8 px-5">
-          <h2 class="text-2xl font-bold mb-6">Événements similaires</h2>
+        <h2 class="text-2xl font-bold mb-6">Événements similaires</h2>
 
-          <div v-if="activityStore.loading" class="text-center py-8">
-            <p class="text-gray-600">Chargement des activités...</p>
-          </div>
-
-          <div v-else-if="activityStore.error" class="text-center py-8">
-            <p class="text-red-600">{{ activityStore.error }}</p>
-          </div>
-
-          <div
-            v-else-if="activityStore.getSimilarActivities.length === 0"
-            class="text-center py-8"
-          >
-            <p class="text-gray-600">
-              Aucune activité similaire pour le moment.
-            </p>
-          </div>
-
-          <div
-            v-else
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            <ActivityCard
-              v-for="activity in activityStore.getSimilarActivities"
-              :key="activity.id"
-              :activity="activity"
-            />
-          </div>
+        <div v-if="activityStore.loading" class="text-center py-8">
+          <p class="text-gray-600">Chargement des activités...</p>
         </div>
 
-      
+        <div v-else-if="activityStore.error" class="text-center py-8">
+          <p class="text-red-600">{{ activityStore.error }}</p>
+        </div>
+
+        <div
+          v-else-if="activityStore.getSimilarActivities.length === 0"
+          class="text-center py-8"
+        >
+          <p class="text-gray-600">Aucune activité similaire pour le moment.</p>
+        </div>
+
+        <div
+          v-else
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          <ActivityCard
+            v-for="activity in activityStore.getSimilarActivities"
+            :key="activity.id"
+            :activity="activity"
+          />
+        </div>
+      </div>
     </div>
 
     <div v-else class="text-center py-8">
@@ -714,7 +705,8 @@ const normalizeAddressDisplay = (value: string) => {
   });
 
   const postcodeIndex = cleaned.findIndex((p) => /^\d{5}$/.test(p));
-  const postcode = postcodeIndex >= 0 ? cleaned.splice(postcodeIndex, 1)[0] : "";
+  const postcode =
+    postcodeIndex >= 0 ? cleaned.splice(postcodeIndex, 1)[0] : "";
 
   const kept = cleaned.slice(0, 3);
   if (postcode && !kept.includes(postcode)) {
@@ -734,7 +726,10 @@ const removeTrailingCity = (value: string, city: string) => {
     .filter(Boolean);
 
   const last = parts[parts.length - 1];
-  if (last && last.localeCompare(trimmedCity, undefined, { sensitivity: "base" }) === 0) {
+  if (
+    last &&
+    last.localeCompare(trimmedCity, undefined, { sensitivity: "base" }) === 0
+  ) {
     parts.pop();
   }
 
