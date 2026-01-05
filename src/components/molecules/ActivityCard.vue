@@ -24,9 +24,7 @@
         class="w-full object-cover rounded-t-xl mb-4"
       />
       <div class="px-8">
-        <h3
-          class="text-xl font-black mb-2 text-custom-blue truncate"
-        >
+        <h3 class="text-xl font-black mb-2 text-custom-blue truncate">
           {{ activity.title }}
         </h3>
         <p
@@ -50,7 +48,7 @@
           <div class="flex items-center mb-0.5">
             <IconParticipant class="text-custom-primary me-1" />
             <p class="text-sm font-black">
-              {{ activity.playersId.length }} / {{ activity.seats }} participants
+              {{ participantsCount }} / {{ activity.seats }} participants
             </p>
           </div>
         </div>
@@ -102,6 +100,11 @@ const timeFormatted = new Date(props.activity.date).toLocaleTimeString(
 
 const getImagePath = computed(() => {
   return `/img/home/img-${props.activity.hostType}.png`;
+});
+
+const participantsCount = computed(() => {
+  const guests = props.activity.guestUsers?.length ?? 0;
+  return props.activity.playersId.length + guests;
 });
 
 const getAddress = computed(() => {

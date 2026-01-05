@@ -18,6 +18,18 @@
 
       <div v-if="canEdit" class="flex justify-end gap-3 mb-6">
         <button
+          class="px-4 py-2 bg-custom-green hover:cursor-pointer text-primary rounded-lg hover:bg-custom-green-hover"
+          @click="openGuestModal"
+        >
+          Ajouter manuellement un utilisateur
+        </button>
+        <button
+          class="px-4 py-2 bg-custom-green hover:cursor-pointer text-primary rounded-lg hover:bg-custom-green-hover"
+          @click="openGuestModal"
+        >
+          Ajouter manuellement un utilisateur
+        </button>
+        <button
           class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-blue-600"
           @click="handleEdit"
         >
@@ -29,6 +41,63 @@
         >
           Supprimer
         </button>
+      </div>
+
+      <div
+        v-if="showGuestModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+        @click.self="closeGuestModal"
+      >
+        <div class="bg-custom-white rounded-xl p-6 w-full max-w-md shadow-lg">
+          <h3 class="text-xl font-bold text-primary mb-4">
+            Ajouter un participant externe
+          </h3>
+          <form @submit.prevent="handleAddGuest">
+            <div class="flex flex-col gap-2 mb-3">
+              <label for="guest-name" class="text-primary font-medium"
+                >Prénom*</label
+              >
+              <input
+                id="guest-name"
+                v-model.trim="guestName"
+                type="text"
+                required
+                class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              />
+            </div>
+            <div class="flex flex-col gap-2 mb-4">
+              <label for="guest-email" class="text-primary font-medium"
+                >Email*</label
+              >
+              <input
+                id="guest-email"
+                v-model.trim="guestEmail"
+                type="email"
+                required
+                class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
+              />
+            </div>
+            <div v-if="guestError" class="text-red-500 text-sm mb-3">
+              {{ guestError }}
+            </div>
+            <div class="flex justify-end gap-3">
+              <button
+                type="button"
+                class="px-4 py-2 bg-gray-200 hover:cursor-pointer text-gray-700 rounded-lg hover:bg-gray-300"
+                @click="closeGuestModal"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover disabled:opacity-60 disabled:cursor-not-allowed"
+                :disabled="guestLoading"
+              >
+                {{ guestLoading ? "Ajout..." : "Ajouter" }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <div v-if="showRequestPanel" class="bg-custom-blue p-8 rounded-xl mb-10">
@@ -213,7 +282,7 @@
                   </div>
                   <div class="text-primary">
                     <p class="text-sm text-primary">Participants</p>
-                    {{ activityStore.currentActivity.playersId.length }} /
+                    {{ participantsCount }} /
                     {{ activityStore.currentActivity.seats }}
                   </div>
                 </div>
@@ -228,13 +297,12 @@
                   </h2>
                   <p class="text-primary text-2xl font-black">
                     {{
-                      activityStore.currentActivity.seats -
-                      activityStore.currentActivity.playersId.length
+                      remainingSeats
                     }} / {{ activityStore.currentActivity.seats }}
                   </p>
                 </div>
                 <ProgressBar
-                  :current="activityStore.currentActivity.playersId.length"
+                  :current="participantsCount"
                   :max="activityStore.currentActivity.seats"
                   class="py-8"
                 />
@@ -467,6 +535,11 @@ const requestStatus = ref<ParticipationRequestStatus | "none">("none");
 const requests = ref<ParticipationRequest[]>([]);
 const requestsLoading = ref(false);
 const paymentLoading = ref(false);
+const showGuestModal = ref(false);
+const guestName = ref("");
+const guestEmail = ref("");
+const guestError = ref("");
+const guestLoading = ref(false);
 const toastStore = useToastStore();
 const isPaidActivity = computed(() => priceNumber.value > 0);
 const isRequestPending = computed(() => requestStatus.value === "pending");
@@ -503,6 +576,21 @@ const canManageRequests = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
   if (authStore.user.role === "admin") return true;
   return isCreator.value;
+});
+
+const guestCount = computed(
+  () => activityStore.currentActivity?.guestUsers?.length ?? 0
+);
+
+const participantsCount = computed(() => {
+  if (!activityStore.currentActivity) return 0;
+  return activityStore.currentActivity.playersId.length + guestCount.value;
+});
+
+const remainingSeats = computed(() => {
+  if (!activityStore.currentActivity) return 0;
+  const seats = Number(activityStore.currentActivity.seats || 0);
+  return Math.max(0, seats - participantsCount.value);
 });
 
 const canAccessChat = computed(
@@ -545,6 +633,57 @@ const formatTime = (date: string) => {
     hour: "numeric",
     minute: "numeric",
   });
+};
+
+const openGuestModal = () => {
+  showGuestModal.value = true;
+  guestName.value = "";
+  guestEmail.value = "";
+  guestError.value = "";
+};
+
+const closeGuestModal = () => {
+  showGuestModal.value = false;
+  guestError.value = "";
+};
+
+const isValidEmail = (value: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const handleAddGuest = async () => {
+  if (!activityStore.currentActivity) return;
+  const name = guestName.value.trim();
+  const email = guestEmail.value.trim();
+
+  if (!name) {
+    guestError.value = "Veuillez renseigner un prénom.";
+    return;
+  }
+  if (!email || !isValidEmail(email)) {
+    guestError.value = "Veuillez renseigner un email valide.";
+    return;
+  }
+
+  guestLoading.value = true;
+  guestError.value = "";
+  try {
+    await apiPost(`/activity/${activityStore.currentActivity.id}/guest`, {
+      name,
+      email,
+    });
+    await activityStore.fetchActivity(activityStore.currentActivity.id);
+    toastStore.addToast("Participant ajouté.", { type: "success" });
+    closeGuestModal();
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'ajouter le participant.";
+    guestError.value = message;
+    toastStore.addToast(message, { type: "error" });
+  } finally {
+    guestLoading.value = false;
+  }
 };
 
 // const formatPriceValue = (price?: string | number | null) => {

@@ -1,5 +1,6 @@
 import type { User } from "../User/index";
 import type { Organisation } from "../Organisation/index";
+import type { GuestUser } from "../GuestUser/index";
 
 export type ActivityUser = Pick<
   User,
@@ -31,6 +32,7 @@ export type Activity = {
   hostId?: number | null;
   hostUser?: ActivityUser | null;
   hostOrganisation?: Organisation | null;
+  guestUsers?: GuestUser[];
   playersId: number[];
   users?: ActivityUser[];
   chatId?: number | null;
