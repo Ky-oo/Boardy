@@ -227,7 +227,7 @@
             >
 
             <div
-              class="flex items-center h-10 gap-2 border-[1.5px] border-custom-blue rounded-xl px-4 py-2 "
+              class="flex items-center h-10 gap-2 border-[1.5px] border-custom-blue rounded-xl px-4 py-2"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -586,7 +586,10 @@ const populateForm = (activity: any) => {
   const d = new Date(activity.date);
   if (!isNaN(d.getTime())) {
     date.value = d.toISOString().slice(0, 10);
-    startTime.value = d.toISOString().slice(11, 16);
+    startTime.value = d.toLocaleTimeString("fr-FR", {
+      hour: "numeric",
+      minute: "numeric",
+    });
   }
 };
 
