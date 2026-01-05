@@ -61,13 +61,12 @@
             </div>
             <div class="flex flex-col gap-2 mb-4">
               <label for="guest-email" class="text-primary font-medium"
-                >Email*</label
+                >Email (optionnel)</label
               >
               <input
                 id="guest-email"
                 v-model.trim="guestEmail"
                 type="email"
-                required
                 class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
               />
             </div>
@@ -652,7 +651,7 @@ const handleAddGuest = async () => {
     guestError.value = "Veuillez renseigner un prénom.";
     return;
   }
-  if (!email || !isValidEmail(email)) {
+  if (email && !isValidEmail(email)) {
     guestError.value = "Veuillez renseigner un email valide.";
     return;
   }
@@ -660,10 +659,11 @@ const handleAddGuest = async () => {
   guestLoading.value = true;
   guestError.value = "";
   try {
-    await apiPost(`/activity/${activityStore.currentActivity.id}/guest`, {
-      name,
-      email,
-    });
+    const payload: { name: string; email?: string } = { name };
+    if (email) {
+      payload.email = email;
+    }
+    await apiPost(`/activity/${activityStore.currentActivity.id}/guest`, payload);
     await activityStore.fetchActivity(activityStore.currentActivity.id);
     toastStore.addToast("Participant ajouté.", { type: "success" });
     closeGuestModal();
