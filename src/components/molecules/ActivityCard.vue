@@ -300,7 +300,7 @@ const getAddress = computed(() => {
 
 const getHost = computed(() => {
   if (props.activity.hostType === "user" && props.activity.host) {
-    return `Par ${props.activity.host.firstname}`;
+    return `Par ${props.activity.host.pseudo}`;
   }
   if (
     props.activity.hostType === "organisation" &&

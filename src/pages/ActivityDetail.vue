@@ -16,25 +16,29 @@
         <IconChevronLeft class="mr-2" /> Retour
       </button>
 
-      <div v-if="canEdit" class="flex justify-end gap-3 mb-6">
-        <button
-          class="px-4 py-2 bg-custom-green hover:cursor-pointer text-primary rounded-lg hover:bg-custom-green-hover"
-          @click="openGuestModal"
-        >
-          Ajouter manuellement un utilisateur
-        </button>
-        <button
-          class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover"
-          @click="handleEdit"
-        >
-          Modifier
-        </button>
-        <button
-          class="px-4 py-2 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600"
-          @click="handleDelete"
-        >
-          Supprimer
-        </button>
+      <div v-if="canEdit" class="container mx-auto ">
+        <div class="relative m-4 sm:m-0">
+        <div class="w-full flex flex-col sm:flex-row sm:justify-end gap-4 sm:gap-3 sm:mb-6">
+          <button
+            class="px-4 py-2 bg-custom-green hover:cursor-pointer text-primary rounded-lg hover:bg-custom-green-hover"
+            @click="openGuestModal"
+          >
+            Ajouter manuellement un utilisateur
+          </button>
+          <button
+            class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover"
+            @click="handleEdit"
+          >
+            Modifier
+          </button>
+          <button
+            class="hidden sm:inline-block px-4 py-2 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600"
+            @click="handleDelete"
+          >
+            Supprimer
+          </button>
+        </div>
+        </div>
       </div>
 
       <div
@@ -442,6 +446,16 @@
           class="mt-8"
         />
       </div>
+      <div v-if="canEdit" class="relative m-8">
+        <button
+          class="sm:hidden inline-block px-4 py-2 w-full bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600"
+          @click="handleDelete"
+        >
+          Supprimer
+        </button>
+        
+      </div>
+       
 
       <div class="container mx-auto pb-16 pt-8 px-5">
         <h2 class="text-2xl font-bold mb-6">Événements similaires</h2>
@@ -1061,13 +1075,13 @@ const getHost = computed(() => {
     activityStore.currentActivity.homeHost === true &&
     activityStore.currentActivity.host
   ) {
-    return `${activityStore.currentActivity.host.firstname}`;
+    return `${activityStore.currentActivity.host.pseudo}`;
   } else if (
     activityStore.currentActivity.hostType === "user" &&
     activityStore.currentActivity.homeHost === false &&
     activityStore.currentActivity.host
   ) {
-    return `${activityStore.currentActivity.host.firstname}`;
+    return `${activityStore.currentActivity.host.pseudo}`;
   } else if (
     activityStore.currentActivity.hostType === "organisation" &&
     activityStore.currentActivity.organisation
