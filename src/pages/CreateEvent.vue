@@ -43,7 +43,7 @@
         <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
             <label for="event-title" class="text-primary font-medium"
-              >Titre de l'événements*</label
+              >Titre de l'événement*</label
             >
 
             <input
