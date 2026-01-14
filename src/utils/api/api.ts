@@ -6,6 +6,23 @@ const api = axios.create({
   baseURL,
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      const { useAuth } = await import("@/stores/authStore");
+      const { router } = await import("@/router/index");
+
+      const authStore = useAuth();
+      authStore.logout();
+      if (router.currentRoute.value.name !== "login") {
+        router.push("/login");
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const setAuthToken = (token?: string | null) => {
   if (token) {
     api.defaults.headers.common.Authorization = `Bearer ${token}`;

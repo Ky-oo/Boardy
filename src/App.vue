@@ -4,8 +4,11 @@ import Navbar from "./components/organisms/navbar/Navbar.vue";
 import ToastContainer from "./components/organisms/ToastContainer.vue";
 
 import { useRoute } from "vue-router";
+import { useTokenExpirationCheck } from "./composables/useTokenExpirationCheck";
 
 const route = useRoute();
+
+useTokenExpirationCheck();
 
 const isFooterVisible =
   route.name != "login" &&
@@ -14,7 +17,7 @@ const isFooterVisible =
 </script>
 
 <template>
-  <Navbar/>
+  <Navbar />
 
   <main class="">
     <RouterView />
