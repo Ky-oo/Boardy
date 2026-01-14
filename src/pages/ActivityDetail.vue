@@ -291,9 +291,9 @@
             <div class="w-full lg:w-1/3">
               <div v-if="!isParticipating">
                 <div class="flex justify-between items-center">
-                  <h2 class="text-xl text-primary">Places restantes</h2>
+                  <h2 class="text-xl text-primary">Participants</h2>
                   <p class="text-primary text-2xl font-black">
-                    {{ remainingSeats }} /
+                    {{ activityStore.currentActivity.seats - remainingSeats }} /
                     {{ activityStore.currentActivity.seats }}
                   </p>
                 </div>
