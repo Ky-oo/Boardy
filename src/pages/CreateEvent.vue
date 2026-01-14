@@ -43,7 +43,7 @@
         <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
             <label for="event-title" class="text-primary font-medium"
-              >Titre de l'événements*</label
+              >Titre de l'événement*</label
             >
 
             <input
@@ -183,7 +183,7 @@
             </div>
           </div>
 
-          <div v-if="showHomeAddress" class="flex items-start gap-3">
+          <!-- <div v-if="showHomeAddress" class="flex items-start gap-3">
             <input
               id="isHomeAddress"
               v-model="isHomeAddress"
@@ -202,7 +202,7 @@
               Si c'est le cas nous cacherons l'adresse précise et la partagerons
               aux participants seulement 24h avant l'événement.
             </label>
-          </div>
+          </div> -->
 
           <div class="flex flex-col gap-2">
             <label
@@ -221,7 +221,7 @@
             ></textarea>
           </div>
 
-          <div class="flex flex-col gap-2">
+          <!-- <div class="flex flex-col gap-2">
             <label for="games" class="text-primary font-medium"
               >Jeux proposés*</label
             >
@@ -252,7 +252,7 @@
                 class="flex-1 h-10 bg-transparent text-gray-700 placeholder-gray-500 focus:outline-none focus:border-primary"
               />
             </div>
-          </div>
+          </div> -->
 
           <div class="flex flex-col gap-2">
             <label for="participants" class="text-primary font-medium">
@@ -320,7 +320,7 @@
             </div>
           </div>
 
-          <div class="flex items-start gap-3">
+          <!-- <div class="flex items-start gap-3">
             <input
               id="isPrivate"
               v-model="isPrivate"
@@ -336,7 +336,7 @@
               pas besoin de valider la demande et ils seront immédiatement
               acceptés.
             </label>
-          </div>
+          </div> -->
 
           <p v-if="organisationName" class="text-primary text-sm">
             Organisé par
