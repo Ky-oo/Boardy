@@ -9,6 +9,8 @@ export type ActivityUser = Pick<
 
 export type ActivityHostType = "organisation" | "user" | "event";
 
+export type ActivityType = "Festival" | "Bars & Soirées" | "Par des joueurs";
+
 export type Activity = {
   id: number;
   title: string;
@@ -22,7 +24,7 @@ export type Activity = {
   latitude?: number | null;
   longitude?: number | null;
   seats: number;
-  type: "Festival" | "Bars & Soirées" | "Par des joueurs";
+  type: ActivityType;
   homeHost: boolean;
   price?: number | null;
   private: boolean;
