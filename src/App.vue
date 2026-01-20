@@ -2,7 +2,7 @@
 import Footer from "./components/organisms/footer/Footer.vue";
 import Navbar from "./components/organisms/navbar/Navbar.vue";
 import ToastContainer from "./components/organisms/ToastContainer.vue";
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/vue";
 
 import { useRoute } from "vue-router";
 import { useTokenExpirationCheck } from "./composables/useTokenExpirationCheck";
