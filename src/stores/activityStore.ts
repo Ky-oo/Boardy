@@ -13,7 +13,7 @@ const deriveHostType = (
   hostUserId?: number | null,
   hostType?: ActivityHostType,
   hostUserRole?: string | null,
-  activityType?: string | null
+  activityType?: string | null,
 ): ActivityHostType => {
   if (hostType) return hostType;
   if (hostOrganisation) return "organisation";
@@ -35,31 +35,29 @@ export const useActivityStore = defineStore("activity", {
   getters: {
     getActivities: (state): ActivityWithHost[] => state.activities,
 
-    // Activites a venir (date future uniquement)
     getUpcomingActivities: (state): ActivityWithHost[] => {
       const now = new Date();
       return state.activities.filter((a) => new Date(a.date) > now);
     },
 
-    // Nombre d'activites par type (futures uniquement)
     getOrganisationActivitiesCount: (state): number => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "organisation" && new Date(a.date) > now
+        (a) => a.hostType === "organisation" && new Date(a.date) > now,
       ).length;
     },
 
     getUserActivitiesCount: (state): number => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "user" && new Date(a.date) > now
+        (a) => a.hostType === "user" && new Date(a.date) > now,
       ).length;
     },
 
     getEventActivitiesCount: (state): number => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "event" && new Date(a.date) > now
+        (a) => a.hostType === "event" && new Date(a.date) > now,
       ).length;
     },
 
@@ -67,14 +65,14 @@ export const useActivityStore = defineStore("activity", {
     getOrganisationActivities: (state): Activity[] => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "organisation" && new Date(a.date) > now
+        (a) => a.hostType === "organisation" && new Date(a.date) > now,
       );
     },
 
     getUserActivities: (state): Activity[] => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "user" && new Date(a.date) > now
+        (a) => a.hostType === "user" && new Date(a.date) > now,
       );
     },
 
@@ -100,7 +98,7 @@ export const useActivityStore = defineStore("activity", {
       (userId: number): ActivityWithHost[] => {
         const now = new Date();
         return state.activities.filter(
-          (a) => a.hostId === userId && new Date(a.date) > now
+          (a) => a.hostId === userId && new Date(a.date) > now,
         );
       },
 
@@ -110,7 +108,7 @@ export const useActivityStore = defineStore("activity", {
       (userId: number): ActivityWithHost[] => {
         const now = new Date();
         return state.activities.filter(
-          (a) => a.playersId.includes(userId) && new Date(a.date) > now
+          (a) => a.playersId.includes(userId) && new Date(a.date) > now,
         );
       },
   },
@@ -129,19 +127,19 @@ export const useActivityStore = defineStore("activity", {
         activity.hostUserId,
         activity.hostType,
         hostUserRole,
-        activity.type ?? null
+        activity.type ?? null,
       );
 
       const hostId =
         activity.hostId ??
         (hostType === "organisation"
-          ? hostOrganisation?.id ?? activity.hostOrganisationId ?? null
-          : hostUser?.id ?? activity.hostUserId ?? null);
+          ? (hostOrganisation?.id ?? activity.hostOrganisationId ?? null)
+          : (hostUser?.id ?? activity.hostUserId ?? null));
 
       const playersId =
         activity.playersId?.length && activity.playersId.length > 0
           ? activity.playersId
-          : activity.users?.map((u: ActivityUser) => u.id) ?? [];
+          : (activity.users?.map((u: ActivityUser) => u.id) ?? []);
 
       return {
         ...activity,
@@ -163,7 +161,7 @@ export const useActivityStore = defineStore("activity", {
         city?: string;
         hostOrganisationId?: number;
         hostUserId?: number;
-      } = {}
+      } = {},
     ) {
       this.loading = true;
       this.error = null;
@@ -193,7 +191,7 @@ export const useActivityStore = defineStore("activity", {
             [];
 
         const normalized = activities.map((activity) =>
-          this.normalizeActivity(activity)
+          this.normalizeActivity(activity),
         );
 
         this.activities = append
@@ -289,7 +287,7 @@ export const useActivityStore = defineStore("activity", {
         this.currentActivity =
           this.currentActivity?.id === id ? normalized : this.currentActivity;
         this.activities = this.activities.map((a) =>
-          a.id === id ? normalized : a
+          a.id === id ? normalized : a,
         );
         return normalized;
       } catch (err) {
@@ -305,7 +303,7 @@ export const useActivityStore = defineStore("activity", {
         this.currentActivity =
           this.currentActivity?.id === id ? normalized : this.currentActivity;
         this.activities = this.activities.map((a) =>
-          a.id === id ? normalized : a
+          a.id === id ? normalized : a,
         );
         return normalized;
       } catch (err) {
