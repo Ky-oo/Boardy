@@ -1,10 +1,10 @@
 import { onMounted, onUnmounted } from "vue";
-import { useAuth } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 import { isTokenExpired } from "@/utils/tokenExpiration";
 import { useRouter } from "vue-router";
 
 export const useTokenExpirationCheck = () => {
-  const authStore = useAuth();
+  const authStore = useAuthStore();
   const router = useRouter();
   let intervalId: ReturnType<typeof setInterval> | null = null;
 
