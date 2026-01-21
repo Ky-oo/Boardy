@@ -110,9 +110,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 import type { UserWithoutPassword } from "@/types/User";
-import { useAuth } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 
-const authStore = useAuth();
+const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref("");
 
@@ -138,7 +138,7 @@ watch(
   (user) => {
     fillForm(user);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const isDirty = computed(() => {

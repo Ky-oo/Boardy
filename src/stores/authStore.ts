@@ -49,7 +49,7 @@ const getApiErrorMessage = (error: unknown, fallback: string) => {
   return fallback;
 };
 
-export const useAuth = defineStore("auth", {
+export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
     user: null as UserWithoutPassword | null,
     isLogged: false as boolean,
@@ -97,7 +97,7 @@ export const useAuth = defineStore("auth", {
       pseudo: string,
       email: string,
       password: string,
-      city: string
+      city: string,
     ): Promise<void> {
       try {
         const response: RegisterResponse = await post(`/auth/register`, {
@@ -135,7 +135,7 @@ export const useAuth = defineStore("auth", {
 
     async handleGoogleAuth(
       idToken: string,
-      options?: { redirectOnSuccess?: boolean }
+      options?: { redirectOnSuccess?: boolean },
     ): Promise<{
       needsCompletion: boolean;
       profile?: GoogleProfile;
@@ -230,7 +230,7 @@ export const useAuth = defineStore("auth", {
     },
 
     async updateProfile(
-      payload: Partial<UserWithoutPassword>
+      payload: Partial<UserWithoutPassword>,
     ): Promise<UserWithoutPassword> {
       if (!this.user) {
         throw new Error("Utilisateur non charge.");

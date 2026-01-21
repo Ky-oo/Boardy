@@ -6,6 +6,23 @@ const api = axios.create({
   baseURL,
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      const { useAuthStore } = await import("@/stores/authStore");
+      const { router } = await import("@/router/index");
+
+      const authStore = useAuthStore();
+      authStore.logout();
+      if (router.currentRoute.value.name !== "login") {
+        router.push("/login");
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 export const setAuthToken = (token?: string | null) => {
   if (token) {
     api.defaults.headers.common.Authorization = `Bearer ${token}`;
@@ -22,7 +39,7 @@ export const get = async (route: string, params?: Record<string, any>) => {
 export const post = async (
   route: string,
   body?: any,
-  params?: Record<string, any>
+  params?: Record<string, any>,
 ) => {
   const response = await api.post(route, body, { params });
   return response.data;
@@ -31,7 +48,7 @@ export const post = async (
 export const put = async (
   route: string,
   body?: any,
-  params?: Record<string, any>
+  params?: Record<string, any>,
 ) => {
   const response = await api.put(route, body, { params });
   return response.data;

@@ -13,8 +13,8 @@
             isOrganisationHost
               ? "Créer une soirée pour votre établissement"
               : isBoardyHost
-              ? "Créer une soirée pour Boardy"
-              : "Créer votre partie idéale"
+                ? "Créer une soirée pour Boardy"
+                : "Créer votre partie idéale"
           }}
         </h1>
         <p class="text-primary text-lg font-family-red-hat px-5">
@@ -387,7 +387,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useAuth } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 import IconParticipants from "@/components/atoms/icons/IconParticipants.vue";
 import { useActivityStore } from "@/stores/activityStore";
 import type { Activity } from "@/types/Activity";
@@ -396,7 +396,7 @@ import { useOrganisationStore } from "@/stores/organisationStore";
 
 const router = useRouter();
 const route = useRoute();
-const authStore = useAuth();
+const authStore = useAuthStore();
 const activityStore = useActivityStore();
 const organisationStore = useOrganisationStore();
 
@@ -515,7 +515,7 @@ const routeOrganisationId = computed(() => {
 });
 
 const effectiveOrganisationId = computed(
-  () => routeOrganisationId.value ?? editOrganisationId.value
+  () => routeOrganisationId.value ?? editOrganisationId.value,
 );
 
 const isOrganisationHost = computed(() => !!effectiveOrganisationId.value);
@@ -523,19 +523,19 @@ const isOrganisationHost = computed(() => !!effectiveOrganisationId.value);
 const isBoardyHost = computed(
   () =>
     !isOrganisationHost.value &&
-    ((isAdmin.value && boardyQuery.value) || editIsBoardy.value)
+    ((isAdmin.value && boardyQuery.value) || editIsBoardy.value),
 );
 
 const showHomeAddress = computed(
-  () => !isOrganisationHost.value && !isBoardyHost.value
+  () => !isOrganisationHost.value && !isBoardyHost.value,
 );
 
 const showPriceFields = computed(
-  () => isOrganisationHost.value || isBoardyHost.value
+  () => isOrganisationHost.value || isBoardyHost.value,
 );
 
 const maxParticipants = computed(() =>
-  boardyQuery.value ? Infinity : editOrganisationId.value ? 100 : 20
+  boardyQuery.value ? Infinity : editOrganisationId.value ? 100 : 20,
 );
 
 const organisationName = computed(() => {
@@ -553,7 +553,7 @@ const creatorName = computed(() => {
 });
 
 const submitLabel = computed(() =>
-  isEditMode.value ? "Mettre à jour l'événement" : "Créez votre événement"
+  isEditMode.value ? "Mettre à jour l'événement" : "Créez votre événement",
 );
 
 const populateForm = (activity: any) => {
@@ -648,7 +648,7 @@ const handleSubmit = async () => {
     }
 
     const isoDate = new Date(
-      `${date.value}T${startTime.value || "00:00"}`
+      `${date.value}T${startTime.value || "00:00"}`,
     ).toISOString();
 
     const coords = await geocodeLocation();

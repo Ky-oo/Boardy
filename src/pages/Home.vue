@@ -36,7 +36,7 @@
   </div>
 
   <ActivityGrid @fetch-filtered="fetchFiltered(true)" />
-  <ActivityCta />
+  <ActivityPanel />
 </template>
 
 <script setup lang="ts">
@@ -44,7 +44,7 @@ import { onMounted, ref } from "vue";
 import { useActivityStore } from "@/stores/activityStore";
 import FilterBar from "@/components/molecules/FilterBar.vue";
 import ActivityGrid from "@/components/organisms/grid/ActivityGrid.vue";
-import ActivityCta from "@/components/organisms/ActivityCta.vue";
+import ActivityPanel from "@/components/organisms/panel/ActivityPanel.vue";
 
 const activityStore = useActivityStore();
 
