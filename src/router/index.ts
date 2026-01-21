@@ -1,7 +1,7 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
-import { useAuth } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 
 import Home from "@/pages/Home.vue";
 import CreateEvent from "@/pages/CreateEvent.vue";
@@ -18,16 +18,16 @@ import MentionsLegales from "@/pages/MentionsLegales.vue";
 import PolitiqueConfidentialite from "@/pages/PolitiqueConfidentialite.vue";
 
 const routes: RouteRecordRaw[] = [
-      {
-        path: "/politique-confidentialite",
-        name: "politique-confidentialite",
-        component: PolitiqueConfidentialite,
-      },
-    {
-      path: "/mentions-legales",
-      name: "mentions-legales",
-      component: MentionsLegales,
-    },
+  {
+    path: "/politique-confidentialite",
+    name: "politique-confidentialite",
+    component: PolitiqueConfidentialite,
+  },
+  {
+    path: "/mentions-legales",
+    name: "mentions-legales",
+    component: MentionsLegales,
+  },
   {
     path: "/",
     name: "home",
@@ -95,7 +95,6 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
-
 export const router = createRouter({
   history: createWebHistory(),
   routes,
@@ -105,7 +104,7 @@ export const router = createRouter({
 });
 
 router.beforeEach((to, _from, next) => {
-  const authStore = useAuth();
+  const authStore = useAuthStore();
 
   if (to.meta.requiresAuth && !authStore.checkIfLogged) {
     next({ name: "login" });

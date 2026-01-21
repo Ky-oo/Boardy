@@ -185,8 +185,8 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useAuth } from "../../../stores/authStore";
-const authStore = useAuth();
+import { useAuthStore } from "../../../stores/authStore";
+const authStore = useAuthStore();
 
 const isMobileMenuOpen = ref(false);
 
