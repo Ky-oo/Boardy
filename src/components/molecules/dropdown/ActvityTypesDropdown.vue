@@ -9,7 +9,7 @@
     >
       <option value="">Tous les types</option>
       <option v-for="t in eventTypes" :key="t" :value="t">
-        <span class="hover:cursor-pointer">{{ t }}</span>
+        {{ t }}
       </option>
     </select>
 
