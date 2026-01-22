@@ -1,8 +1,4 @@
 import axios from "axios";
-import { useAuthStore } from "@/stores/authStore";
-import { router } from "@/router/index";
-
-const authStore = useAuthStore();
 const baseURL = import.meta.env.VITE_API_BASE_URL?.toString();
 
 const api = axios.create({
@@ -11,6 +7,8 @@ const api = axios.create({
 
 api.interceptors.request.use(async (config) => {
   if (!config.headers?.Authorization) {
+    const { useAuthStore } = await import("@/stores/authStore");
+    const authStore = useAuthStore();
     const token = authStore.tokens?.accessToken;
     if (token) {
       config.headers = config.headers ?? {};
@@ -25,6 +23,10 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
+      const { useAuthStore } = await import("@/stores/authStore");
+      const { router } = await import("@/router/index");
+
+      const authStore = useAuthStore();
       authStore.logout();
       if (router.currentRoute.value.name !== "login") {
         router.push("/login");
