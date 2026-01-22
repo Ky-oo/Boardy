@@ -1,19 +1,30 @@
 import axios from "axios";
+import { useAuthStore } from "@/stores/authStore";
+import { router } from "@/router/index";
 
+const authStore = useAuthStore();
 const baseURL = import.meta.env.VITE_API_BASE_URL?.toString();
 
 const api = axios.create({
   baseURL,
 });
 
+api.interceptors.request.use(async (config) => {
+  if (!config.headers?.Authorization) {
+    const token = authStore.tokens?.accessToken;
+    if (token) {
+      config.headers = config.headers ?? {};
+      (config.headers as Record<string, string>).Authorization =
+        `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      const { useAuthStore } = await import("@/stores/authStore");
-      const { router } = await import("@/router/index");
-
-      const authStore = useAuthStore();
       authStore.logout();
       if (router.currentRoute.value.name !== "login") {
         router.push("/login");
