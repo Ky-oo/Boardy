@@ -10,7 +10,6 @@ import ActivityDetail from "@/pages/ActivityDetail.vue";
 import ParticipationConfirmed from "@/pages/ParticipationConfirmed.vue";
 import Register from "@/pages/Register.vue";
 import MyEvent from "@/pages/MyEvent.vue";
-import Category from "@/pages/Category.vue";
 import Profile from "@/pages/Profile.vue";
 import Admin from "@/pages/Admin.vue";
 import Organisation from "@/pages/Organisation.vue";
@@ -32,11 +31,6 @@ const routes: RouteRecordRaw[] = [
     path: "/",
     name: "home",
     component: Home,
-  },
-  {
-    path: "/category/:type",
-    name: "category",
-    component: Category,
   },
   {
     path: "/activity/:id",
