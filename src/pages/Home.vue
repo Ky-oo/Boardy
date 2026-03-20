@@ -11,7 +11,7 @@
   </div>
 
   <div class="container mx-auto">
-    <div class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-green rounded-xl">
+    <div class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-orange rounded-xl">
 
       <FilterBar
         @update:search="onSearchUpdate"
@@ -124,7 +124,7 @@
           </p>
           <router-link
             :to="authStore.isLogged ? '/create_event' : '/login'"
-            class="text-xl font-bold hover:cursor-pointer hover:bg-custom-green-hover bg-custom-green text-primary px-6 py-3 rounded-2xl"
+            class="text-xl font-bold hover:cursor-pointer hover:bg-custom-orange-hover bg-custom-orange text-white px-6 py-3 rounded-2xl"
             >Je crée une partie
           </router-link>
         </div>
@@ -141,7 +141,7 @@
           </p>
           <router-link
             :to="authStore.isLogged ? '/create_event' : '/login'"
-            class="text-xl font-bold hover:cursor-pointer hover:bg-custom-green-hover bg-custom-green text-primary px-6 py-3 rounded-2xl"
+            class="text-xl font-bold hover:cursor-pointer hover:bg-custom-orange-hover bg-custom-orange text-white px-6 py-3 rounded-2xl"
             >Je suis disponible
           </router-link>
         </div>

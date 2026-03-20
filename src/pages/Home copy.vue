@@ -8,7 +8,7 @@
     <h2
       class="text-2xl text-custom-white bg-custom-blue inline-block px-10 py-3 rounded-lg"
     >
-      Trouvez des joueurs ou des événements sur boardy.
+      Trouvez des joueurs ou des événements sur Playly.
     </h2>
   </div>
 

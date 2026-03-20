@@ -4,7 +4,7 @@
     <div class="w-full md:col-span-2 xl:flex-1">
       <label
         for="filter-search"
-        class="mb-1 block text-sm font-bold text-primary"
+        class="mb-1 block text-sm font-bold text-white"
       >
         Recherche
       </label>
@@ -36,7 +36,7 @@
 
     <!-- Sélecteur de date -->
     <div class="w-full xl:w-auto">
-      <label for="filter-date" class="mb-1 block text-sm font-bold text-primary">
+      <label for="filter-date" class="mb-1 block text-sm font-bold text-white">
         Date
       </label>
       <div class="relative">
@@ -53,7 +53,7 @@
 
     <!-- Recherche de villes -->
     <div class="w-full xl:w-auto">
-      <label for="filter-city" class="mb-1 block text-sm font-bold text-primary">
+      <label for="filter-city" class="mb-1 block text-sm font-bold text-white">
         Ville
       </label>
       <div class="relative">

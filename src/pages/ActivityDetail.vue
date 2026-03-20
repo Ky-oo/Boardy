@@ -20,7 +20,7 @@
         <div class="relative m-4 sm:m-0">
         <div class="w-full flex flex-col sm:flex-row sm:justify-end gap-4 sm:gap-3 sm:mb-6">
           <button
-            class="px-4 py-2 bg-custom-green hover:cursor-pointer text-primary rounded-lg hover:bg-custom-green-hover"
+            class="px-4 py-2 bg-custom-orange hover:cursor-pointer text-primary rounded-lg hover:bg-custom-orange-hover"
             @click="openGuestModal"
           >
             Ajouter manuellement un utilisateur
@@ -103,7 +103,7 @@
             Demandes de participation
           </h2>
           <button
-            class="px-4 py-2 hover:cursor-pointer bg-custom-white text-custom-primary rounded-lg hover:bg-custom-green font-bold"
+            class="px-4 py-2 hover:cursor-pointer bg-custom-white text-custom-primary rounded-lg hover:bg-custom-orange font-bold"
             @click="loadRequests"
           >
             Rafraichir
@@ -135,7 +135,7 @@
                 class="text-sm font-semibold"
                 :class="{
                   'text-yellow-600': request.status === 'pending',
-                  'text-green-600': request.status === 'approved',
+                  'text-orange-600': request.status === 'approved',
                   'text-red-600': request.status === 'rejected',
                 }"
               >
@@ -186,7 +186,7 @@
 
       <div class="container mx-auto">
         <div
-          class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-green rounded-xl"
+          class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-orange rounded-xl"
         >
           <h1 class="text-2xl text-primary font-black pb-4">
             {{ activityStore.currentActivity.title }}
@@ -401,7 +401,7 @@
           <div class="w-full lg:w-1/3 flex flex-col gap-6 lg:ms-24">
             <div class="card w-full py-4 px-8 rounded-2xl">
               <div class="flex items-center">
-                <div class="bg-custom-green p-2 rounded-lg me-3">
+                <div class="bg-custom-orange p-2 rounded-lg me-3">
                   <IconPerson class="text-custom-blue w-5 h-5" />
                 </div>
                 <div class="text-primary">
@@ -1088,7 +1088,7 @@ const getHost = computed(() => {
   ) {
     return `${activityStore.currentActivity.organisation.name}`;
   } else if (activityStore.currentActivity.hostType === "event") {
-    return `Boardy`;
+    return `Playly`;
   }
   return "";
 });

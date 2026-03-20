@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-custom-green rounded-xl p-8">
+  <div class="bg-custom-orange rounded-xl p-8">
     <div class="flex justify-between items-center pb-4">
       <div>
         <h2 class="text-2xl font-bold text-custom-primary">

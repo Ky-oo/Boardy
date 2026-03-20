@@ -309,7 +309,7 @@ const getHost = computed(() => {
     return `Par ${props.activity.organisation.name}`;
   }
   if (props.activity.hostType === "event") {
-    return "Par Boardy";
+    return "Par Playly";
   }
   return "";
 });
@@ -318,7 +318,7 @@ const getTypeColor = computed(() => {
   if (props.activity.type === "Festival") {
     return "bg-custom-white text-primary";
   } else if (props.activity.type === "Par des joueurs") {
-    return "bg-custom-green text-primary";
+    return "bg-custom-orange text-primary";
   } else if (props.activity.type === "Bars & Soirées") {
     return "bg-custom-red";
   }

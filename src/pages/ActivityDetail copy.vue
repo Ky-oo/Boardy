@@ -864,7 +864,7 @@ const getHost = computed(() => {
   ) {
     return `${activityStore.currentActivity.organisation.name}`;
   } else if (activityStore.currentActivity.hostType === "event") {
-    return `Boardy`;
+    return `Playly`;
   }
   return "";
 });

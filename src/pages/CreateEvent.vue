@@ -13,7 +13,7 @@
             isOrganisationHost
               ? "Créer une soirée pour votre établissement"
               : isBoardyHost
-              ? "Créer une soirée pour Boardy"
+              ? "Créer une soirée pour Playly"
               : "Créer votre partie idéale"
           }}
         </h1>
@@ -345,7 +345,7 @@
           </p>
 
           <p v-else-if="isBoardyHost" class="text-primary text-sm">
-            Organisé par <span class="font-semibold">Boardy</span>.
+            Organisé par <span class="font-semibold">Playly</span>.
           </p>
 
           <p v-else class="text-primary text-sm">
@@ -361,7 +361,7 @@
             <button
               type="button"
               @click="router.push('/')"
-              class="h-10 w-75 hover:cursor-pointer bg-custom-green hover:bg-custom-green-hover text-gray-800 font-semibold rounded-xl transition-colors"
+              class="h-10 w-75 hover:cursor-pointer bg-custom-orange hover:bg-custom-orange-hover text-gray-800 font-semibold rounded-xl transition-colors"
             >
               Annuler
             </button>

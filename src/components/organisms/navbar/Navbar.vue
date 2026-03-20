@@ -5,8 +5,8 @@
         <router-link to="/" class="text-primary hover:text-gray-300">
           <img
             class="logo fill-custom-blue"
-            src="/img/icon/boardy-logo-blue.svg"
-            alt="Boardy Logo"
+            src="/img/icon/logo-de.svg"
+            alt="Playly Logo"
           />
         </router-link>
       </div>

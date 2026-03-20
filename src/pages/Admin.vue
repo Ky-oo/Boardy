@@ -15,7 +15,7 @@
         class="h-10 px-6 hover:cursor-pointer bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors"
         @click="goToBoardyCreate"
       >
-        Creer un evenement Boardy
+        Creer un evenement Playly
       </button>
     </div>
 
@@ -74,7 +74,7 @@
         <div class="flex justify-end gap-4 pt-2">
           <button
             type="button"
-            class="h-10 px-6 hover:cursor-pointer bg-custom-green hover:bg-custom-green-hover text-gray-800 font-semibold rounded-xl transition-colors"
+            class="h-10 px-6 hover:cursor-pointer bg-custom-orange hover:bg-custom-orange-hover text-gray-800 font-semibold rounded-xl transition-colors"
             @click="resetForm"
           >
             Annuler

@@ -83,7 +83,7 @@
           <div class="flex flex-1 justify-end gap-4">
             <button
               type="button"
-              class="h-10 px-6 hover:cursor-pointer bg-custom-green hover:bg-custom-green-hover text-gray-800 font-semibold rounded-xl transition-colors"
+              class="h-10 px-6 hover:cursor-pointer bg-custom-orange hover:bg-custom-orange-hover text-gray-800 font-semibold rounded-xl transition-colors"
               @click="resetForm"
             >
               Annuler

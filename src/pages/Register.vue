@@ -5,7 +5,7 @@
         Créer un compte
       </h1>
       <p class="text-primary text-lg font-family-red-hat">
-        Créez et participez à des événements avec votre compte Boardy.
+        Créez et participez à des événements avec votre compte Playly.
       </p>
     </div>
 
@@ -211,7 +211,7 @@
 
           <button
             type="submit"
-            class="w-full h-10 mt-4 hover:cursor-pointer hover:bg-custom-green-hover text-gray-800 font-semibold rounded-xl bg-custom-green transition-colors"
+            class="w-full h-10 mt-4 hover:cursor-pointer hover:bg-custom-orange-hover text-white font-semibold rounded-xl bg-custom-orange transition-colors"
             :disabled="loading"
           >
             {{ loading ? "Création en cours..." : "Créer mon compte" }}
