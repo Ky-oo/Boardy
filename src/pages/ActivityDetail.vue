@@ -421,20 +421,7 @@
         </div>
       </div>
 
-      <div class="container mx-auto pt-8">
-        <div class="maps px-5 md:px-15">
-          <iframe
-            :src="`https://www.google.com/maps?q=${activityStore.currentActivity.latitude},${activityStore.currentActivity.longitude}&hl=fr&z=14&output=embed`"
-            width="100%"
-            height="300"
-            style="border: 0"
-            allowfullscreen="false"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            class="rounded-2xl"
-          ></iframe>
-        </div>
-      </div>
+      <ActivityDetailMap :activity="activityStore.currentActivity" />
 
       <div class="container mx-auto">
         <ChatPanel
@@ -453,9 +440,7 @@
         >
           Supprimer
         </button>
-        
       </div>
-       
 
       <div class="container mx-auto pb-16 pt-8 px-5">
         <h2 class="text-2xl font-bold mb-6">Événements similaires</h2>
@@ -496,59 +481,40 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from "vue";
-
-// const pageUrl = window.location.href;
-// const smsUrl = `sms:?body=Viens voir cette activité ! ${pageUrl}`;
-// const instagramUrl = `https://www.instagram.com/?url=${encodeURIComponent(pageUrl)}`;
-// const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
-
-// const copyLink = async () => {
-//   try {
-//     await navigator.clipboard.writeText(pageUrl);
-//     alert("Lien copié !");
-//   } catch {
-//     alert("Impossible de copier le lien.");
-//   }
-// };
 import { useRoute, useRouter } from "vue-router";
 import { useActivityStore } from "../stores/activityStore";
-import IconChevronLeft from "../components/atoms/icons/IconChevronLeft.vue";
-import ProgressBar from "../components/atoms/ProgressBar.vue";
-import IconAgenda from "../components/atoms/icons/IconAgenda.vue";
-import IconParticipant from "@/components/atoms/icons/IconParticipant.vue";
-import IconNav from "@/components/atoms/icons/IconNav.vue";
+
 import IconPerson from "@/components/atoms/icons/IconPerson.vue";
-import ActivityCard from "@/components/molecules/ActivityCard.vue";
+import ActivityEditButtons from "@/components/organisms/ActivityEditButtons.vue";
 import ChatPanel from "@/components/organisms/ChatPanel.vue";
-import { useAuth } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
-import { confirmPayment, createCheckoutSession } from "@/utils/payment";
+import { usePaymentStore } from "@/stores/paymentStore";
 import { get as apiGet, post as apiPost } from "@/utils/api/api";
 import type {
   ParticipationRequest,
   ParticipationRequestStatus,
 } from "@/types/ParticipationRequest";
-// import IconMail from "@/components/atoms/icons/IconMail.vue";
-// import IconInsta from "@/components/atoms/icons/IconInsta.vue";
-// import IconFacebook2 from "@/components/atoms/icons/IconFacebook2.vue";
-// import IconCopy from "@/components/atoms/icons/IconCopy.vue";
+import ReturnBackButton from "@/components/molecules/button/ReturnBackButton.vue";
+import AddGuestModal from "@/components/organisms/modal/AddGuestModal.vue";
+import RequestPanel from "@/components/organisms/panel/RequestPanel.vue";
+import ActivityInfoBar from "@/components/organisms/ActivityInfoBar.vue";
+import ActivityDetailMap from "@/components/molecules/map/ActivityDetailMap.vue";
 
 const route = useRoute();
 const router = useRouter();
 const activityStore = useActivityStore();
-const authStore = useAuth();
+const authStore = useAuthStore();
+const paymentStore = usePaymentStore();
 const requestStatus = ref<ParticipationRequestStatus | "none">("none");
 const requests = ref<ParticipationRequest[]>([]);
 const requestsLoading = ref(false);
-const paymentLoading = ref(false);
 const showGuestModal = ref(false);
-const guestName = ref("");
-const guestEmail = ref("");
-const guestError = ref("");
-const guestLoading = ref(false);
 const toastStore = useToastStore();
-const isPaidActivity = computed(() => priceNumber.value > 0);
-const isRequestPending = computed(() => requestStatus.value === "pending");
+
+const guestError = ref("");
+
+const guestLoading = ref(false);
 
 const isParticipating = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
@@ -569,7 +535,7 @@ const isCreator = computed(() => {
 });
 
 const canCancelParticipation = computed(
-  () => isParticipating.value && !isCreator.value
+  () => isParticipating.value && !isCreator.value,
 );
 
 const canEdit = computed(() => {
@@ -580,71 +546,21 @@ const canEdit = computed(() => {
 
 const canManageRequests = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
+  console.log(authStore.user.role);
   if (authStore.user.role === "admin") return true;
   return isCreator.value;
 });
 
-const guestCount = computed(
-  () => activityStore.currentActivity?.guestUsers?.length ?? 0
-);
-
-const participantsCount = computed(() => {
-  if (!activityStore.currentActivity) return 0;
-  return activityStore.currentActivity.playersId.length + guestCount.value;
-});
-
-const remainingSeats = computed(() => {
-  if (!activityStore.currentActivity) return 0;
-  const seats = Number(activityStore.currentActivity.seats || 0);
-  return Math.max(0, seats - participantsCount.value);
-});
-
 const canAccessChat = computed(
-  () => !!authStore.user && (isParticipating.value || isCreator.value)
+  () => !!authStore.user && (isParticipating.value || isCreator.value),
 );
 
 const showRequestPanel = computed(
-  () => canManageRequests.value && !!activityStore.currentActivity?.private
+  () => canManageRequests.value && !!activityStore.currentActivity?.private,
 );
-
-const canRequestParticipation = computed(() => {
-  if (!activityStore.currentActivity || !authStore.isLogged) return false;
-  if (isCreator.value) return false;
-  if (isParticipating.value) return false;
-  if (requestStatus.value === "pending") return false;
-  if (requestStatus.value === "approved") return false;
-  return true;
-});
-
-const daysRemaining = computed(() => {
-  if (!activityStore.currentActivity) return ["0", "0"];
-  const now = new Date();
-  const eventDate = new Date(activityStore.currentActivity.date);
-  const diffTime = eventDate.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  const days = Math.max(0, diffDays);
-  return days.toString().padStart(2, "0").split("");
-});
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("fr-FR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
-
-const formatTime = (date: string) => {
-  return new Date(date).toLocaleTimeString("fr-FR", {
-    hour: "numeric",
-    minute: "numeric",
-  });
-};
 
 const openGuestModal = () => {
   showGuestModal.value = true;
-  guestName.value = "";
-  guestEmail.value = "";
   guestError.value = "";
 };
 
@@ -653,25 +569,15 @@ const closeGuestModal = () => {
   guestError.value = "";
 };
 
-const isValidEmail = (value: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-
-const handleAddGuest = async () => {
+const handleAddGuest = async (guestName: string, guestEmail: string) => {
   if (!activityStore.currentActivity) return;
-  const name = guestName.value.trim();
-  const email = guestEmail.value.trim();
 
-  if (!name) {
-    guestError.value = "Veuillez renseigner un prénom.";
-    return;
-  }
-  if (email && !isValidEmail(email)) {
-    guestError.value = "Veuillez renseigner un email valide.";
-    return;
-  }
+  const name = guestName.trim();
+  const email = guestEmail.trim();
 
   guestLoading.value = true;
   guestError.value = "";
+
   try {
     const payload: { name: string; email?: string } = { name };
     if (email) {
@@ -679,7 +585,7 @@ const handleAddGuest = async () => {
     }
     await apiPost(
       `/activity/${activityStore.currentActivity.id}/guest`,
-      payload
+      payload,
     );
     await activityStore.fetchActivity(activityStore.currentActivity.id);
     toastStore.addToast("Participant ajouté.", { type: "success" });
@@ -696,155 +602,6 @@ const handleAddGuest = async () => {
   }
 };
 
-// const formatPriceValue = (price?: string | number | null) => {
-//   const num = price !== null && price !== undefined ? Number(price) : 0;
-//   if (!num) return "Gratuit";
-//   return `${num.toFixed(2)} €`;
-// };
-
-const normalizeAddressDisplay = (value: string) => {
-  const parts = value
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  const secondPart = parts[1] ?? "";
-  if (parts.length >= 2 && /^\d/.test(secondPart)) {
-    parts.shift();
-  }
-
-  const cleaned = parts.filter((p) => {
-    const lower = p.toLowerCase();
-    if (lower === "france") return false;
-    if (lower.includes("france")) return false;
-    if (lower.includes("métropolitaine") || lower.includes("metropolitaine")) {
-      return false;
-    }
-    return true;
-  });
-
-  const postcodeIndex = cleaned.findIndex((p) => /^\d{5}$/.test(p));
-  const postcode =
-    postcodeIndex >= 0 ? cleaned.splice(postcodeIndex, 1)[0] : "";
-
-  const kept = cleaned.slice(0, 3);
-  if (postcode && !kept.includes(postcode)) {
-    kept.push(postcode);
-  }
-
-  return kept.join(", ");
-};
-
-const removeTrailingCity = (value: string, city: string) => {
-  const trimmedCity = city.trim();
-  if (!trimmedCity) return value;
-
-  const parts = value
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  const last = parts[parts.length - 1];
-  if (
-    last &&
-    last.localeCompare(trimmedCity, undefined, { sensitivity: "base" }) === 0
-  ) {
-    parts.pop();
-  }
-
-  return parts.join(", ");
-};
-
-const formatShortAddress = (activity: {
-  place_name?: string | null;
-  address?: string | null;
-  city?: string | null;
-  postalCode?: string | null;
-}) => {
-  const address = activity.address?.trim() || "";
-  const city = activity.city?.trim() || "";
-  const postalCodeRaw = activity.postalCode?.trim() || "";
-
-  const postalCode = postalCodeRaw === "00000" ? "" : postalCodeRaw;
-
-  let addressDisplay = address ? normalizeAddressDisplay(address) : "";
-  if (addressDisplay && city) {
-    addressDisplay = removeTrailingCity(addressDisplay, city);
-  }
-
-  if (addressDisplay) return addressDisplay;
-
-  const parts = [postalCode, city].filter(Boolean);
-  if (parts.length) return parts.join(" ");
-  return "Adresse indisponible";
-};
-
-const getAddressHref = (activity: {
-  latitude?: number | null;
-  longitude?: number | null;
-  address?: string | null;
-  city?: string | null;
-  place_name?: string | null;
-}) => {
-  const lat = activity.latitude;
-  const lon = activity.longitude;
-  if (typeof lat === "number" && typeof lon === "number") {
-    return `https://www.google.com/maps?q=${lat},${lon}`;
-  }
-
-  const parts = [activity.address]
-    .map((p) => p?.trim())
-    .filter(Boolean) as string[];
-
-  if (!parts.length) return null;
-  const query = encodeURIComponent(parts.join(", "));
-  return `https://www.google.com/maps/search/?api=1&query=${query}`;
-};
-
-const priceNumber = computed(() => {
-  if (!activityStore.currentActivity) return 0;
-  const raw = activityStore.currentActivity.price ?? 0;
-  const num = Number(raw);
-  return Number.isFinite(num) ? num : 0;
-});
-
-const participateLabel = computed(() => {
-  if (paymentLoading.value) {
-    return "Redirection vers le paiement...";
-  }
-  if (activityStore.currentActivity?.private) {
-    if (requestStatus.value === "rejected") {
-      return "Redemander a rejoindre";
-    }
-    if (isPaidActivity.value) {
-      return `Demander a rejoindre (pre-autorisation ${priceNumber.value.toFixed(
-        2
-      )} euro)`;
-    }
-    return "Demander a rejoindre";
-  }
-  if (isPaidActivity.value) {
-    return `Participer pour ${priceNumber.value.toFixed(2)} euro`;
-  }
-  return "Je participe à l'événement";
-});
-
-const formatRequestStatus = (status: ParticipationRequestStatus) => {
-  if (status === "pending") return "En attente";
-  if (status === "approved") return "Acceptee";
-  if (status === "rejected") return "Refusee";
-  return status;
-};
-
-const formatPaymentStatus = (status?: string | null) => {
-  if (!status) return "inconnu";
-  if (status === "authorized") return "pre-autorise";
-  if (status === "paid") return "paye";
-  if (status === "canceled") return "annule";
-  if (status === "refunded") return "rembourse";
-  return status;
-};
-
 const loadRequestStatus = async () => {
   if (!activityStore.currentActivity || !authStore.isLogged) {
     requestStatus.value = "none";
@@ -856,7 +613,7 @@ const loadRequestStatus = async () => {
   }
   try {
     const response = await apiGet(
-      `/activity/${activityStore.currentActivity.id}/request`
+      `/activity/${activityStore.currentActivity.id}/request`,
     );
     const status = response?.status;
     if (
@@ -881,7 +638,7 @@ const loadRequests = async () => {
   requestsLoading.value = true;
   try {
     const response = await apiGet(
-      `/activity/${activityStore.currentActivity.id}/requests`
+      `/activity/${activityStore.currentActivity.id}/requests`,
     );
     requests.value = Array.isArray(response) ? response : [];
   } catch (err) {
@@ -900,29 +657,11 @@ const refreshRequestData = async () => {
   }
 };
 
-const requestParticipation = async () => {
-  if (!activityStore.currentActivity) return;
-  try {
-    const response = await apiPost(
-      `/activity/${activityStore.currentActivity.id}/request`
-    );
-    const status = response?.status;
-    requestStatus.value = status || "pending";
-    toastStore.addToast("Demande envoyee.", { type: "info" });
-  } catch (err: any) {
-    const message =
-      err?.response?.data?.error ||
-      err?.message ||
-      "Impossible d'envoyer la demande.";
-    toastStore.addToast(message, { type: "error" });
-  }
-};
-
 const approveRequest = async (requestId: number) => {
   if (!activityStore.currentActivity) return;
   try {
     await apiPost(
-      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/approve`
+      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/approve`,
     );
     toastStore.addToast("Demande acceptee.", { type: "success" });
     await activityStore.fetchActivity(activityStore.currentActivity.id);
@@ -940,7 +679,7 @@ const rejectRequest = async (requestId: number) => {
   if (!activityStore.currentActivity) return;
   try {
     await apiPost(
-      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/reject`
+      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/reject`,
     );
     toastStore.addToast("Demande refusee.", { type: "info" });
     await loadRequests();
@@ -953,31 +692,21 @@ const rejectRequest = async (requestId: number) => {
   }
 };
 
-const handleParticipate = async () => {
+const requestParticipation = async () => {
   if (!activityStore.currentActivity) return;
-  if (activityStore.currentActivity.private) {
-    if (isPaidActivity.value) {
-      await startPayment();
-    } else {
-      await requestParticipation();
-    }
-    return;
-  }
-  if (isPaidActivity.value) {
-    await startPayment();
-    return;
-  }
   try {
-    const updated = await activityStore.joinActivity(
-      activityStore.currentActivity.id
+    const response = await apiPost(
+      `/activity/${activityStore.currentActivity.id}/request`,
     );
-    if (!updated.private) {
-      setTimeout(() => {
-        router.push("/participation-confirmed");
-      }, 500);
-    }
-  } catch (err) {
-    console.error("Erreur lors de la participation:", err);
+    const status = response?.status;
+    requestStatus.value = status || "pending";
+    toastStore.addToast("Demande envoyee.", { type: "info" });
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'envoyer la demande.";
+    toastStore.addToast(message, { type: "error" });
   }
 };
 
@@ -999,36 +728,13 @@ const handleCancelParticipation = async () => {
   }
 };
 
-const startPayment = async () => {
-  if (!activityStore.currentActivity) return;
-  paymentLoading.value = true;
-  try {
-    const response = await createCheckoutSession(
-      activityStore.currentActivity.id
-    );
-    window.location.href = response.url;
-  } catch (err: any) {
-    const message =
-      err?.response?.data?.error || err?.message || "Erreur lors du paiement.";
-    toastStore.addToast(message, { type: "error" });
-    if (
-      message === "Payment already started" ||
-      message === "Request already pending"
-    ) {
-      await loadRequestStatus();
-    }
-  } finally {
-    paymentLoading.value = false;
-  }
-};
-
 const handlePaymentConfirm = async (sessionId: string) => {
   if (!sessionId || !activityStore.currentActivity) return;
-  paymentLoading.value = true;
+  const result = await paymentStore.confirmPayment(sessionId);
+  if (!result.ok) return;
   try {
-    await confirmPayment(sessionId);
     const refreshed = await activityStore.fetchActivity(
-      activityStore.currentActivity.id
+      activityStore.currentActivity.id,
     );
     if (refreshed?.private) {
       await loadRequestStatus();
@@ -1045,8 +751,6 @@ const handlePaymentConfirm = async (sessionId: string) => {
     const message =
       err?.response?.data?.error || err?.message || "Paiement non confirme.";
     toastStore.addToast(message, { type: "error" });
-  } finally {
-    paymentLoading.value = false;
   }
 };
 
@@ -1061,7 +765,7 @@ const handleEdit = () => {
 const handleDelete = async () => {
   if (!activityStore.currentActivity) return;
   const confirmDelete = window.confirm(
-    "Voulez-vous supprimer cette activité ?"
+    "Voulez-vous supprimer cette activité ?",
   );
   if (!confirmDelete) return;
   await activityStore.deleteActivity(activityStore.currentActivity.id);
@@ -1132,6 +836,6 @@ watch(
       await refreshRequestData();
       window.scrollTo(0, 0);
     }
-  }
+  },
 );
 </script>

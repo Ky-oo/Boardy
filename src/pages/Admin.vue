@@ -1,11 +1,9 @@
 <template>
   <div class="min-h-screen bg-custom-bg mx-20 pt-32 pb-16">
     <div class="text-center mb-10">
-      <h1 class="text-5xl font-family-urban text-primary my-6">
-        Espace admin
-      </h1>
+      <h1 class="text-5xl font-family-urban text-primary my-6">Espace admin</h1>
       <p class="text-primary text-lg font-family-red-hat">
-        Creez et gerez les organisations.
+        Créez et gérez les organisations.
       </p>
     </div>
 
@@ -13,7 +11,7 @@
       <button
         type="button"
         class="h-10 px-6 hover:cursor-pointer bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors"
-        @click="goToBoardyCreate"
+        @click="router.push({ path: '/create_event', query: { boardy: '1' } })"
       >
         Creer un evenement Playly
       </button>
@@ -99,110 +97,49 @@
       <h2 class="text-2xl font-bold text-primary mb-4">
         Organisations existantes
       </h2>
-      <div
-        v-if="loadingOrganisations"
-        class="text-center text-gray-500 py-6"
-      >
+      <div v-if="loadingOrganisations" class="text-center text-gray-500 py-6">
         Chargement...
       </div>
       <div v-else-if="organisations.length === 0" class="text-gray-500">
         Aucune organisation pour le moment.
       </div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div
+        <AdminOrganisationGridItem
           v-for="organisation in organisations"
           :key="organisation.id"
-          class="border border-custom-blue/20 rounded-xl p-4 bg-custom-white"
-        >
-          <p class="font-semibold text-primary">{{ organisation.name }}</p>
-          <p class="text-sm text-gray-600">{{ organisation.address }}</p>
-          <p class="text-xs text-gray-500">Owner ID: {{ organisation.ownerId }}</p>
-        </div>
+          :organisation="organisation"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { get, post } from "@/utils/api/api";
 import type { Organisation } from "@/types/Organisation";
-import type { UserWithoutPassword } from "@/types/User";
-import { useToastStore } from "@/stores/toastStore";
+import { get } from "@/utils/api/api";
+import AdminCreateOrganisationCard from "@/components/organisms/card/AdminCreateOrganisationCard.vue";
 
 const router = useRouter();
-const users = ref<UserWithoutPassword[]>([]);
 const organisations = ref<Organisation[]>([]);
-const loading = ref(false);
 const loadingOrganisations = ref(false);
 const error = ref("");
-const toastStore = useToastStore();
-
-const form = reactive({
-  name: "",
-  address: "",
-  ownerId: "",
-});
-
-const resetForm = () => {
-  form.name = "";
-  form.address = "";
-  form.ownerId = "";
-  error.value = "";
-};
-
-const goToBoardyCreate = () => {
-  router.push({ path: "/create_event", query: { boardy: "1" } });
-};
-
-const loadUsers = async () => {
-  try {
-    const response = await get("/user");
-    users.value = Array.isArray(response) ? response : response?.data || [];
-  } catch (err: any) {
-    error.value = err?.message || "Erreur lors du chargement des utilisateurs.";
-  }
-};
 
 const loadOrganisations = async () => {
   loadingOrganisations.value = true;
+
   try {
-    const response = await get("/organisation");
-    organisations.value = Array.isArray(response)
-      ? response
-      : response?.data || [];
+    organisations.value = await get("/organisation");
   } catch (err: any) {
-    error.value = err?.message || "Erreur lors du chargement des organisations.";
+    error.value =
+      err?.message || "Erreur lors du chargement des organisations.";
   } finally {
     loadingOrganisations.value = false;
   }
 };
 
-const handleSubmit = async () => {
-  if (!form.name || !form.address) return;
-  loading.value = true;
-  error.value = "";
-  try {
-    const payload: Record<string, unknown> = {
-      name: form.name.trim(),
-      address: form.address.trim(),
-    };
-    if (form.ownerId) {
-      payload.ownerId = Number(form.ownerId);
-    }
-    const organisation: Organisation = await post("/organisation", payload);
-    organisations.value = [organisation, ...organisations.value];
-    toastStore.addToast("Organisation creee.", { type: "success" });
-    resetForm();
-  } catch (err: any) {
-    error.value = err?.message || "Erreur lors de la creation.";
-  } finally {
-    loading.value = false;
-  }
-};
-
 onMounted(async () => {
-  await Promise.all([loadUsers(), loadOrganisations()]);
+  await Promise.all([loadOrganisations()]);
 });
 </script>

@@ -117,10 +117,10 @@
 import { computed, onMounted, ref } from "vue";
 import { useActivityStore } from "../stores/activityStore";
 import ActivityCard from "@/components/molecules/ActivityCard.vue";
-import { useAuth } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 
 const activityStore = useActivityStore();
-const authStore = useAuth();
+const authStore = useAuthStore();
 
 const visibleUpcoming = ref(3);
 const visibleCreated = ref(3);
@@ -146,28 +146,29 @@ const upcomingActivities = computed(() => {
 });
 
 const upcomingDisplayed = computed(() =>
-  upcomingActivities.value.slice(0, visibleUpcoming.value)
+  upcomingActivities.value.slice(0, visibleUpcoming.value),
 );
 const createdDisplayed = computed(() =>
-  createdActivities.value.slice(0, visibleCreated.value)
+  createdActivities.value.slice(0, visibleCreated.value),
 );
 const joinedDisplayed = computed(() =>
-  joinedActivities.value.slice(0, visibleJoined.value)
+  joinedActivities.value.slice(0, visibleJoined.value),
 );
 
 const canLoadMoreUpcoming = computed(
   () =>
     visibleUpcoming.value < upcomingActivities.value.length ||
-    activityStore.hasMore
+    activityStore.hasMore,
 );
 const canLoadMoreCreated = computed(
   () =>
     visibleCreated.value < createdActivities.value.length ||
-    activityStore.hasMore
+    activityStore.hasMore,
 );
 const canLoadMoreJoined = computed(
   () =>
-    visibleJoined.value < joinedActivities.value.length || activityStore.hasMore
+    visibleJoined.value < joinedActivities.value.length ||
+    activityStore.hasMore,
 );
 
 onMounted(() => {
@@ -185,7 +186,7 @@ const loadMoreUpcoming = async () => {
   await activityStore.fetchActivities(activityStore.currentPage + 1, true);
   visibleUpcoming.value = Math.min(
     visibleUpcoming.value + 3,
-    upcomingActivities.value.length
+    upcomingActivities.value.length,
   );
 };
 
@@ -198,7 +199,7 @@ const loadMoreCreated = async () => {
   await activityStore.fetchActivities(activityStore.currentPage + 1, true);
   visibleCreated.value = Math.min(
     visibleCreated.value + 3,
-    createdActivities.value.length
+    createdActivities.value.length,
   );
 };
 
@@ -211,8 +212,7 @@ const loadMoreJoined = async () => {
   await activityStore.fetchActivities(activityStore.currentPage + 1, true);
   visibleJoined.value = Math.min(
     visibleJoined.value + 3,
-    joinedActivities.value.length
+    joinedActivities.value.length,
   );
 };
-
 </script>

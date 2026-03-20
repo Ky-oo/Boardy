@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col gap-4 rounded-xl md:grid md:grid-cols-2 xl:flex xl:flex-row xl:items-start">
+  <div
+    class="flex flex-col gap-4 rounded-xl md:grid md:grid-cols-2 xl:flex xl:flex-row xl:items-start"
+  >
     <!-- Champ de recherche avec loupe -->
     <div class="w-full md:col-span-2 xl:flex-1">
       <label
@@ -104,7 +106,9 @@
 
     <!-- Bouton localisation auto -->
     <div class="w-full md:col-span-2 xl:w-auto xl:shrink-0">
-      <span class="hidden xl:block xl:invisible mb-1 text-sm font-bold text-primary">
+      <span
+        class="hidden xl:block xl:invisible mb-1 text-sm font-bold text-primary"
+      >
         Localisation
       </span>
       <button
@@ -254,7 +258,7 @@ watch(
     citySearchTimeout = window.setTimeout(() => {
       fetchCitySuggestions(selectedCity.value);
     }, 300);
-  }
+  },
 );
 
 const handleCityBlur = () => {
@@ -265,7 +269,7 @@ const handleCityBlur = () => {
     if (!trimmed) return;
     const match = citySuggestions.value.find(
       (suggestion) =>
-        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase()
+        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase(),
     );
     if (match) {
       selectCitySuggestion(match);

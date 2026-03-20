@@ -271,7 +271,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useAuth } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 // import IconApple from "@/components/atoms/icons/IconApple.vue";
 // import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
 import {
@@ -290,7 +290,7 @@ import {
 } from "@/utils/userLocation";
 
 const router = useRouter();
-const authStore = useAuth();
+const authStore = useAuthStore();
 
 const firstname = ref("");
 const lastname = ref("");
@@ -426,7 +426,7 @@ const handleCityBlur = () => {
     if (!trimmed) return;
     const match = citySuggestions.value.find(
       (suggestion) =>
-        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase()
+        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase(),
     );
     if (match) {
       selectCitySuggestion(match);
@@ -464,7 +464,7 @@ const validateCity = async () => {
     const cityResults = results.filter((suggestion) => getCityName(suggestion));
     const match = cityResults.find(
       (suggestion) =>
-        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase()
+        getCityName(suggestion).toLowerCase() === trimmed.toLowerCase(),
     );
     const candidate = match || cityResults[0];
     if (!candidate) {
@@ -567,7 +567,7 @@ const handleRegister = async () => {
         pseudo.value,
         email.value,
         password.value,
-        city.value
+        city.value,
       );
     }
   } catch (e: any) {

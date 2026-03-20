@@ -111,7 +111,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useAuth } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 // import IconApple from "@/components/atoms/icons/IconApple.vue";
 // import IconFacebook from "@/components/atoms/icons/IconFacebook.vue";
 import {
@@ -121,7 +121,7 @@ import {
 } from "@/utils/googleAuthFlow";
 
 const router = useRouter();
-const authStore = useAuth();
+const authStore = useAuthStore();
 
 // const email = ref("alice@example.com");
 // const password = ref("azerty");

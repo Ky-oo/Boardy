@@ -1,11 +1,9 @@
-
-
 <template>
   <div class="container bloc-bandeau text-center rounded-xl mx-auto">
     <h1
       class="text-3xl md:text-5xl mx-5 md:mx-15 text-custom-white pt-14 md:pt-20 font-family-red-hat font-black text-shadow-lg text-left"
     >
-      Trouve des événements <br/>
+      Trouve des événements <br />
       proche de chez toi !
     </h1>
   </div>
@@ -14,12 +12,27 @@
     <div class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-orange rounded-xl">
 
       <FilterBar
-        @update:search="onSearchUpdate"
-        @update:date="onDateUpdate"
-        @update:city="onCityUpdate"
+        @update:search="
+          (newQuery: string) => {
+            searchQuery = newQuery;
+            fetchFiltered();
+          }
+        "
+        @update:date="
+          (newDate: string) => {
+            selectedDate = newDate;
+            fetchFiltered();
+          }
+        "
+        @update:city="
+          (newCity: string) => {
+            selectedCity = newCity;
+            fetchFiltered();
+          }
+        "
       />
     </div>
-   </div>
+  </div>
 
   <!-- Section des activités à venir -->
   <div class="container mx-auto">
@@ -157,89 +170,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import { useActivityStore } from "../stores/activityStore";
-import ActivityCard from "../components/molecules/ActivityCard.vue";
+import { onMounted, ref } from "vue";
+import { useActivityStore } from "@/stores/activityStore";
 import FilterBar from "@/components/molecules/FilterBar.vue";
-import { useAuth } from "../stores/authStore";
-import type { Activity } from "@/types/Activity";
-const authStore = useAuth();
+import ActivityGrid from "@/components/organisms/grid/ActivityGrid.vue";
+import ActivityPanel from "@/components/organisms/panel/ActivityPanel.vue";
+
 const activityStore = useActivityStore();
 
 const searchQuery = ref("");
 const selectedDate = ref("");
 const selectedCity = ref("");
-const selectedType = ref<"" | Activity["type"]>("");
 
-const eventTypes: Activity["type"][] = [
-  "Festival",
-  "Bars & Soirées",
-  "Par des joueurs",
-];
-
-const upcomingActivitiesFiltered = computed(() => {
-  const type = selectedType.value;
-  const upcoming = activityStore.getUpcomingActivities;
-  if (!type) return upcoming;
-  return upcoming.filter((a) => a.type === type);
+onMounted(() => {
+  fetchFiltered();
 });
-let searchTimeout: ReturnType<typeof setTimeout> | null = null;
-let cityTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const fetchFiltered = (append = false) => {
+  if (activityStore.loading) return;
+
   const page = append ? activityStore.currentPage + 1 : 1;
+
   activityStore.fetchActivities(page, append, {
     search: searchQuery.value,
     date: selectedDate.value,
     city: selectedCity.value,
   });
-};
-
-const onSearchUpdate = (value: string) => {
-  searchQuery.value = value;
-  if (searchTimeout) clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    fetchFiltered(false);
-  }, 300);
-};
-
-const onDateUpdate = (value: string) => {
-  selectedDate.value = value;
-  const isValidIsoDate = (s: string) => {
-    if (!s) return false;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
-    const [y, m, d] = s.split("-").map(Number);
-    const dt = new Date(s);
-    return (
-      !isNaN(dt.getTime()) &&
-      dt.getUTCFullYear() === y &&
-      dt.getUTCMonth() + 1 === m &&
-      dt.getUTCDate() === d &&
-      new Date(y, m - 1, d).getTime() >= new Date().setHours(0, 0, 0, 0)
-    );
-  };
-
-  if (value !== "" && !isValidIsoDate(value)) {
-    selectedDate.value = "";
-  }
-
-  fetchFiltered(false);
-};
-
-const onCityUpdate = (value: string) => {
-  selectedCity.value = value;
-  if (cityTimeout) clearTimeout(cityTimeout);
-  cityTimeout = setTimeout(() => {
-    fetchFiltered(false);
-  }, 300);
-};
-
-onMounted(() => {
-  fetchFiltered(false);
-});
-
-const loadMore = () => {
-  if (activityStore.loading || !activityStore.hasMore) return;
-  fetchFiltered(true);
 };
 </script>

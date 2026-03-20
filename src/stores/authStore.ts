@@ -3,6 +3,10 @@ import type { UserWithoutPassword } from "../types/User/index.ts";
 import { post, put, setAuthToken } from "../utils/api/api.ts";
 import { router } from "../router/index.ts";
 import { useToastStore } from "./toastStore";
+import {
+  calculateExpiresAt,
+  isTokenExpired,
+} from "../utils/tokenExpiration.ts";
 
 type Tokens = {
   accessToken: string | null;
@@ -12,6 +16,7 @@ interface AuthState {
   user: UserWithoutPassword | null;
   isLogged: boolean;
   tokens: Tokens;
+  expiresAt: number | null;
 }
 
 interface LoginResponse {
@@ -49,16 +54,18 @@ const getApiErrorMessage = (error: unknown, fallback: string) => {
   return fallback;
 };
 
-export const useAuth = defineStore("auth", {
+export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
     user: null as UserWithoutPassword | null,
     isLogged: false as boolean,
     tokens: { accessToken: null } as Tokens,
+    expiresAt: null as number | null,
   }),
   getters: {
     getUser: (state): UserWithoutPassword | null => state.user,
     checkIfLogged: (state): boolean => state.isLogged,
     getTokens: (state): Tokens => state.tokens,
+    isTokenExpired: (state): boolean => isTokenExpired(state.expiresAt),
   },
   actions: {
     async login(email: string, password: string): Promise<void> {
@@ -73,9 +80,14 @@ export const useAuth = defineStore("auth", {
           throw new Error("Réponse de connexion invalide");
         }
 
+        // Récupérer la durée du JWT depuis l'API
+        const jwtExpiresIn = import.meta.env.VITE_JWT_EXPIRES_IN || "1d";
+        const expiresAt = calculateExpiresAt(jwtExpiresIn);
+
         this.isLogged = true;
         this.user = user;
         this.tokens.accessToken = token;
+        this.expiresAt = expiresAt;
         setAuthToken(token);
         const toastStore = useToastStore();
         toastStore.addToast("Vous êtes connecté.", { type: "success" });
@@ -97,7 +109,7 @@ export const useAuth = defineStore("auth", {
       pseudo: string,
       email: string,
       password: string,
-      city: string
+      city: string,
     ): Promise<void> {
       try {
         const response: RegisterResponse = await post(`/auth/register`, {
@@ -114,9 +126,14 @@ export const useAuth = defineStore("auth", {
           throw new Error("Réponse d'inscription invalide");
         }
 
+        // Récupérer la durée du JWT depuis l'API
+        const jwtExpiresIn = import.meta.env.VITE_JWT_EXPIRES_IN || "1d";
+        const expiresAt = calculateExpiresAt(jwtExpiresIn);
+
         this.isLogged = true;
         this.user = user;
         this.tokens.accessToken = token;
+        this.expiresAt = expiresAt;
         setAuthToken(token);
         const toastStore = useToastStore();
         toastStore.addToast("Inscription réussie. Bienvenue !", {
@@ -135,7 +152,7 @@ export const useAuth = defineStore("auth", {
 
     async handleGoogleAuth(
       idToken: string,
-      options?: { redirectOnSuccess?: boolean }
+      options?: { redirectOnSuccess?: boolean },
     ): Promise<{
       needsCompletion: boolean;
       profile?: GoogleProfile;
@@ -159,9 +176,14 @@ export const useAuth = defineStore("auth", {
           throw new Error("Réponse Google invalide");
         }
 
+        // Récupérer la durée du JWT depuis l'API
+        const jwtExpiresIn = import.meta.env.VITE_JWT_EXPIRES_IN || "1d";
+        const expiresAt = calculateExpiresAt(jwtExpiresIn);
+
         this.isLogged = true;
         this.user = user;
         this.tokens.accessToken = token;
+        this.expiresAt = expiresAt;
         setAuthToken(token);
         const toastStore = useToastStore();
         toastStore.addToast("Vous êtes connecté.", { type: "success" });
@@ -200,9 +222,14 @@ export const useAuth = defineStore("auth", {
           throw new Error("Réponse d'inscription Google invalide");
         }
 
+        // Récupérer la durée du JWT depuis l'API
+        const jwtExpiresIn = import.meta.env.VITE_JWT_EXPIRES_IN || "1d";
+        const expiresAt = calculateExpiresAt(jwtExpiresIn);
+
         this.isLogged = true;
         this.user = user;
         this.tokens.accessToken = token;
+        this.expiresAt = expiresAt;
         setAuthToken(token);
         const toastStore = useToastStore();
         toastStore.addToast("Inscription réussie. Bienvenue !", {
@@ -223,6 +250,7 @@ export const useAuth = defineStore("auth", {
       this.user = null;
       this.isLogged = false;
       this.tokens = { accessToken: null };
+      this.expiresAt = null;
       setAuthToken(null);
       const toastStore = useToastStore();
       toastStore.addToast("Vous êtes déconnecté.", { type: "warning" });
@@ -230,7 +258,7 @@ export const useAuth = defineStore("auth", {
     },
 
     async updateProfile(
-      payload: Partial<UserWithoutPassword>
+      payload: Partial<UserWithoutPassword>,
     ): Promise<UserWithoutPassword> {
       if (!this.user) {
         throw new Error("Utilisateur non charge.");
@@ -253,6 +281,10 @@ export const useAuth = defineStore("auth", {
       if (this.tokens?.accessToken) {
         setAuthToken(this.tokens.accessToken);
         this.isLogged = true;
+        // Vérifier si le token n'est pas expiré lors du chargement
+        if (this.expiresAt && isTokenExpired(this.expiresAt)) {
+          this.logout();
+        }
       }
     },
   },
