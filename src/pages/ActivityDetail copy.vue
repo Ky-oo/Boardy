@@ -458,9 +458,8 @@ import IconPerson from "@/components/atoms/icons/IconPerson.vue";
 import IconDe from "@/components/atoms/icons/IconDe.vue";
 import ActivityCard from "@/components/molecules/ActivityCard.vue";
 import ChatPanel from "@/components/organisms/ChatPanel.vue";
-import { useAuth } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
-import { confirmPayment, createCheckoutSession } from "@/utils/payment";
+import { useAuthStore } from "@/stores/authStore";
 import { get as apiGet, post as apiPost } from "@/utils/api/api";
 import type {
   ParticipationRequest,
@@ -470,7 +469,7 @@ import type {
 const route = useRoute();
 const router = useRouter();
 const activityStore = useActivityStore();
-const authStore = useAuth();
+const authStore = useAuthStore();
 const requestStatus = ref<ParticipationRequestStatus | "none">("none");
 const requests = ref<ParticipationRequest[]>([]);
 const requestsLoading = ref(false);
@@ -779,20 +778,11 @@ const startPayment = async () => {
   if (!activityStore.currentActivity) return;
   paymentLoading.value = true;
   try {
-    const response = await createCheckoutSession(
-      activityStore.currentActivity.id
-    );
-    window.location.href = response.url;
+    // Payment functionality to be implemented
+    toastStore.addToast("Paiement non disponible.", { type: "error" });
   } catch (err: any) {
-    const message =
-      err?.response?.data?.error || err?.message || "Erreur lors du paiement.";
+    const message = "Erreur lors du paiement.";
     toastStore.addToast(message, { type: "error" });
-    if (
-      message === "Payment already started" ||
-      message === "Request already pending"
-    ) {
-      await loadRequestStatus();
-    }
   } finally {
     paymentLoading.value = false;
   }
@@ -802,7 +792,7 @@ const handlePaymentConfirm = async (sessionId: string) => {
   if (!sessionId || !activityStore.currentActivity) return;
   paymentLoading.value = true;
   try {
-    await confirmPayment(sessionId);
+    // Payment confirmation to be implemented
     const refreshed = await activityStore.fetchActivity(
       activityStore.currentActivity.id
     );

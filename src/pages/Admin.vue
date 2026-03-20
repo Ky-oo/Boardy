@@ -20,77 +20,7 @@
     <div
       class="max-w-4xl mx-auto bg-custom-white border border-custom-blue/30 rounded-3xl shadow-lg p-8"
     >
-      <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="flex flex-col gap-2">
-            <label for="name" class="text-primary font-medium"
-              >Nom de l'organisation*</label
-            >
-            <input
-              id="name"
-              v-model.trim="form.name"
-              type="text"
-              required
-              class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
-            />
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label for="address" class="text-primary font-medium"
-              >Adresse*</label
-            >
-            <input
-              id="address"
-              v-model.trim="form.address"
-              type="text"
-              required
-              class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
-            />
-          </div>
-
-          <div class="flex flex-col gap-2 md:col-span-2">
-            <label for="owner" class="text-primary font-medium"
-              >Proprietaire (optionnel)</label
-            >
-            <select
-              id="owner"
-              v-model="form.ownerId"
-              class="w-full h-10 px-4 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 focus:outline-none focus:border-custom-white"
-            >
-              <option value="">Moi (admin)</option>
-              <option
-                v-for="user in users"
-                :key="user.id"
-                :value="user.id.toString()"
-              >
-                {{ user.firstname }} {{ user.lastname }} ({{ user.email }})
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-4 pt-2">
-          <button
-            type="button"
-            class="h-10 px-6 hover:cursor-pointer bg-custom-orange hover:bg-custom-orange-hover text-gray-800 font-semibold rounded-xl transition-colors"
-            @click="resetForm"
-          >
-            Annuler
-          </button>
-
-          <button
-            type="submit"
-            class="h-10 px-6 hover:cursor-pointer bg-custom-blue hover:bg-blue-600 text-custom-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="loading"
-          >
-            {{ loading ? "Creation..." : "Creer l'organisation" }}
-          </button>
-        </div>
-
-        <div v-if="error" class="text-red-500 text-sm text-center">
-          {{ error }}
-        </div>
-      </form>
+      <!-- Form will be implemented -->
     </div>
 
     <div class="max-w-4xl mx-auto mt-10">
@@ -119,7 +49,7 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import type { Organisation } from "@/types/Organisation";
 import { get } from "@/utils/api/api";
-import AdminCreateOrganisationCard from "@/components/organisms/card/AdminCreateOrganisationCard.vue";
+
 
 const router = useRouter();
 const organisations = ref<Organisation[]>([]);

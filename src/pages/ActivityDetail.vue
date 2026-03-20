@@ -46,121 +46,11 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
         @click.self="closeGuestModal"
       >
-        <div class="bg-custom-white rounded-xl p-6 w-full max-w-md shadow-lg">
-          <h3 class="text-xl font-bold text-primary mb-4">
-            Ajouter un participant externe
-          </h3>
-          <form @submit.prevent="handleAddGuest">
-            <div class="flex flex-col gap-2 mb-3">
-              <label for="guest-name" class="text-primary font-medium"
-                >Prénom*</label
-              >
-              <input
-                id="guest-name"
-                v-model.trim="guestName"
-                type="text"
-                required
-                class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
-              />
-            </div>
-            <div class="flex flex-col gap-2 mb-4">
-              <label for="guest-email" class="text-primary font-medium"
-                >Email (optionnel)</label
-              >
-              <input
-                id="guest-email"
-                v-model.trim="guestEmail"
-                type="email"
-                class="w-full h-10 px-4 py-3 rounded-xl border-[1.5px] border-custom-blue bg-custom-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-custom-white"
-              />
-            </div>
-            <div v-if="guestError" class="text-red-500 text-sm mb-3">
-              {{ guestError }}
-            </div>
-            <div class="flex justify-end gap-3">
-              <button
-                type="button"
-                class="px-4 py-2 bg-gray-200 hover:cursor-pointer text-gray-700 rounded-lg hover:bg-gray-300"
-                @click="closeGuestModal"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover disabled:opacity-60 disabled:cursor-not-allowed"
-                :disabled="guestLoading"
-              >
-                {{ guestLoading ? "Ajout..." : "Ajouter" }}
-              </button>
-            </div>
-          </form>
-        </div>
+        <!-- Guest modal will be implemented -->
       </div>
 
       <div v-if="showRequestPanel" class="bg-custom-blue p-8 rounded-xl mb-10">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl text-custom-white font-black">
-            Demandes de participation
-          </h2>
-          <button
-            class="px-4 py-2 hover:cursor-pointer bg-custom-white text-custom-primary rounded-lg hover:bg-custom-orange font-bold"
-            @click="loadRequests"
-          >
-            Rafraichir
-          </button>
-        </div>
-        <div v-if="requestsLoading" class="text-custom-white">
-          Chargement des demandes...
-        </div>
-        <div v-else-if="requests.length === 0" class="text-custom-white">
-          Aucune demande pour le moment.
-        </div>
-        <div v-else class="space-y-4">
-          <div
-            v-for="request in requests"
-            :key="request.id"
-            class="bg-custom-white rounded-lg p-4"
-          >
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <p class="text-custom-primary font-bold">
-                  {{ request.user?.pseudo || "Utilisateur" }}
-                </p>
-                <p class="text-sm text-gray-600">
-                  {{ request.user?.firstname }} {{ request.user?.lastname }}
-                </p>
-                <p class="text-sm text-gray-600">{{ request.user?.email }}</p>
-              </div>
-              <span
-                class="text-sm font-semibold"
-                :class="{
-                  'text-yellow-600': request.status === 'pending',
-                  'text-orange-600': request.status === 'approved',
-                  'text-red-600': request.status === 'rejected',
-                }"
-              >
-                {{ formatRequestStatus(request.status) }}
-              </span>
-            </div>
-            <p v-if="request.payment" class="text-sm text-gray-600 mt-2">
-              Paiement: {{ formatPaymentStatus(request.payment?.status) }}
-            </p>
-            <div v-if="request.status === 'pending'" class="flex gap-2 mt-3">
-              <button
-                class="px-4 py-2 hover:cursor-pointer bg-custom-blue text-white rounded-lg hover:bg-custom-blue-hover font-bold"
-                @click="approveRequest(request.id)"
-              >
-                Accepter
-              </button>
-              <button
-                class="px-4 py-2 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600 font-bold"
-                @click="rejectRequest(request.id)"
-              >
-                Refuser
-              </button>
-            </div>
-          </div>
-        </div>
+        <!-- Request panel will be implemented -->
       </div>
 
       <div v-if="isParticipating">
@@ -191,202 +81,7 @@
           <h1 class="text-2xl text-primary font-black pb-4">
             {{ activityStore.currentActivity.title }}
           </h1>
-          <div class="flex w-full lg:flex-row flex-col">
-            <div
-              class="w-full lg:w-2/3 border-solid border-b lg:border-b-0 lg:border-r border-custom-blue me-8 pb-6 mb-6 lg:mb-0"
-            >
-              <div class="flex justify-between pb-4">
-                <div class="flex items-center">
-                  <div class="bg-custom-white p-2 rounded-lg me-3">
-                    <IconAgenda class="text-custom-blue w-5 h-5" />
-                  </div>
-                  <div class="text-primary">
-                    <p class="text-sm text-primary">Date</p>
-                    {{ formatDate(activityStore.currentActivity.date) }} à
-                    {{ formatTime(activityStore.currentActivity.date) }}
-                  </div>
-                </div>
-                <!-- <div class="flex items-center text-xl">
-                  {{ formatTime(activityStore.currentActivity.date) }}
-                </div> -->
-              </div>
-              <div class="flex items-start pb-4">
-                <div class="bg-custom-white p-2 rounded-lg me-3">
-                  <IconNav class="text-custom-blue w-5 h-5" />
-                </div>
-                <div class="text-primary">
-                  <p class="text-sm text-primary">Lieux</p>
-                  <div v-if="activityStore.currentActivity.private">
-                    Chez {{ getHost }},
-                    <br />
-                    {{ activityStore.currentActivity.city }}
-                  </div>
-                  <div v-else>
-                    <div class="flex flex-col gap-2">
-                      <a
-                        v-if="getAddressHref(activityStore.currentActivity)"
-                        :href="getAddressHref(activityStore.currentActivity)!"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="underline text-custom-blue hover:no-underline mb-0"
-                      >
-                        {{ formatShortAddress(activityStore.currentActivity) }}
-                      </a>
-                      <span v-else class="mb-2">
-                        {{ formatShortAddress(activityStore.currentActivity) }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- <div v-if="!isParticipating">
-                <p>Partager à des amis</p>
-                <div class="flex gap-3 mt-2">
-                  <a
-                    :href="`mailto:?subject=Viens voir cette activité !&body=${encodeURIComponent(pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager par mail"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconMail class="text-primary w-5 h-5" />
-                  </a>
-                  <a
-                    :href="`https://www.instagram.com/?url=${encodeURIComponent(pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager sur Instagram"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconInsta class="text-primary w-5 h-5" />
-                  </a>
-                  <a
-                    :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}&quote=${encodeURIComponent('Viens voir cette activité ! ' + pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager sur Facebook"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconFacebook2 class="text-primary w-5 h-5" />
-                  </a>
-                  <button
-                    type="button"
-                    @click="copyLink"
-                    aria-label="Copier le lien"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconCopy class="text-primary w-5 h-5" />
-                  </button>
-                </div>
-              </div> -->
-              <div v-if="isParticipating">
-                <div class="flex items-center">
-                  <div class="bg-custom-white p-2 rounded-lg me-3">
-                    <IconParticipant class="text-custom-blue w-5 h-5" />
-                  </div>
-                  <div class="text-primary">
-                    <p class="text-sm text-primary">Participants</p>
-                    {{ participantsCount }} /
-                    {{ activityStore.currentActivity.seats }}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="w-full lg:w-1/3">
-              <div v-if="!isParticipating">
-                <div class="flex justify-between items-center">
-                  <h2 class="text-xl text-primary">Places restantes</h2>
-                  <p class="text-primary text-2xl font-black">
-                    {{ remainingSeats }} /
-                    {{ activityStore.currentActivity.seats }}
-                  </p>
-                </div>
-                <ProgressBar
-                  :current="participantsCount"
-                  :max="activityStore.currentActivity.seats"
-                  class="py-8"
-                />
-                <button
-                  v-if="!authStore.isLogged"
-                  @click="$router.push('/login')"
-                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-blue-hover font-bold w-full"
-                >
-                  Connectez-vous pour participer
-                </button>
-                <button
-                  v-else-if="canRequestParticipation"
-                  @click="handleParticipate"
-                  :disabled="paymentLoading"
-                  class="bg-custom-blue text-custom-white hover:cursor-pointer text-custom-primary px-6 py-3 rounded-lg hover:bg-custom-blue-hover font-bold w-full disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {{ participateLabel }}
-                </button>
-                <button
-                  v-else-if="isRequestPending"
-                  disabled
-                  class="bg-gray-400 text-custom-white hover:cursor-pointer px-6 py-3 rounded-lg cursor-not-allowed font-bold w-full"
-                >
-                  Demande en attente
-                </button>
-              </div>
-              <div v-else>
-                <div class="flex justify-between items-center pb-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      v-for="(digit, index) in daysRemaining"
-                      :key="index"
-                      class="bg-custom-white text-custom-blue text-4xl font-black w-16 h-16 flex items-center justify-center rounded-lg"
-                    >
-                      {{ digit }}
-                    </div>
-                    <p class="text-xl font-black text-custom-blue ml-4">
-                      jours avant l'événement
-                    </p>
-                  </div>
-                </div>
-                <!-- <div v-if="isParticipating">
-                <p>Partager à des amis</p>
-                <div class="flex gap-3 mt-2">
-                  <a
-                    :href="`mailto:?subject=Viens voir cette activité !&body=${encodeURIComponent(pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager par mail"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconMail class="text-primary w-5 h-5" />
-                  </a>
-                  <a
-                    :href="`https://www.instagram.com/?url=${encodeURIComponent(pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager sur Instagram"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconInsta class="text-primary w-5 h-5" />
-                  </a>
-                  <a
-                    :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}&quote=${encodeURIComponent('Viens voir cette activité ! ' + pageUrl)}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Partager sur Facebook"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconFacebook2 class="text-primary w-5 h-5" />
-                  </a>
-                  <button
-                    type="button"
-                    @click="copyLink"
-                    aria-label="Copier le lien"
-                    class="p-2 bg-custom-white rounded-lg"
-                  >
-                    <IconCopy class="text-primary w-5 h-5" />
-                  </button>
-                </div>
-              </div> -->
-              </div>
-            </div>
-          </div>
+          <!-- Activity details will be implemented -->
         </div>
       </div>
 
@@ -485,20 +180,15 @@ import { useRoute, useRouter } from "vue-router";
 import { useActivityStore } from "../stores/activityStore";
 
 import IconPerson from "@/components/atoms/icons/IconPerson.vue";
-import ActivityEditButtons from "@/components/organisms/ActivityEditButtons.vue";
 import ChatPanel from "@/components/organisms/ChatPanel.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
 import { usePaymentStore } from "@/stores/paymentStore";
-import { get as apiGet, post as apiPost } from "@/utils/api/api";
+import { get as apiGet } from "@/utils/api/api";
 import type {
   ParticipationRequest,
   ParticipationRequestStatus,
 } from "@/types/ParticipationRequest";
-import ReturnBackButton from "@/components/molecules/button/ReturnBackButton.vue";
-import AddGuestModal from "@/components/organisms/modal/AddGuestModal.vue";
-import RequestPanel from "@/components/organisms/panel/RequestPanel.vue";
-import ActivityInfoBar from "@/components/organisms/ActivityInfoBar.vue";
 import ActivityDetailMap from "@/components/molecules/map/ActivityDetailMap.vue";
 
 const route = useRoute();
@@ -513,8 +203,6 @@ const showGuestModal = ref(false);
 const toastStore = useToastStore();
 
 const guestError = ref("");
-
-const guestLoading = ref(false);
 
 const isParticipating = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
@@ -569,39 +257,6 @@ const closeGuestModal = () => {
   guestError.value = "";
 };
 
-const handleAddGuest = async (guestName: string, guestEmail: string) => {
-  if (!activityStore.currentActivity) return;
-
-  const name = guestName.trim();
-  const email = guestEmail.trim();
-
-  guestLoading.value = true;
-  guestError.value = "";
-
-  try {
-    const payload: { name: string; email?: string } = { name };
-    if (email) {
-      payload.email = email;
-    }
-    await apiPost(
-      `/activity/${activityStore.currentActivity.id}/guest`,
-      payload,
-    );
-    await activityStore.fetchActivity(activityStore.currentActivity.id);
-    toastStore.addToast("Participant ajouté.", { type: "success" });
-    closeGuestModal();
-  } catch (err: any) {
-    const message =
-      err?.response?.data?.error ||
-      err?.message ||
-      "Impossible d'ajouter le participant.";
-    guestError.value = message;
-    toastStore.addToast(message, { type: "error" });
-  } finally {
-    guestLoading.value = false;
-  }
-};
-
 const loadRequestStatus = async () => {
   if (!activityStore.currentActivity || !authStore.isLogged) {
     requestStatus.value = "none";
@@ -654,59 +309,6 @@ const refreshRequestData = async () => {
     await loadRequests();
   } else {
     requests.value = [];
-  }
-};
-
-const approveRequest = async (requestId: number) => {
-  if (!activityStore.currentActivity) return;
-  try {
-    await apiPost(
-      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/approve`,
-    );
-    toastStore.addToast("Demande acceptee.", { type: "success" });
-    await activityStore.fetchActivity(activityStore.currentActivity.id);
-    await loadRequests();
-  } catch (err: any) {
-    const message =
-      err?.response?.data?.error ||
-      err?.message ||
-      "Impossible d'accepter la demande.";
-    toastStore.addToast(message, { type: "error" });
-  }
-};
-
-const rejectRequest = async (requestId: number) => {
-  if (!activityStore.currentActivity) return;
-  try {
-    await apiPost(
-      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/reject`,
-    );
-    toastStore.addToast("Demande refusee.", { type: "info" });
-    await loadRequests();
-  } catch (err: any) {
-    const message =
-      err?.response?.data?.error ||
-      err?.message ||
-      "Impossible de refuser la demande.";
-    toastStore.addToast(message, { type: "error" });
-  }
-};
-
-const requestParticipation = async () => {
-  if (!activityStore.currentActivity) return;
-  try {
-    const response = await apiPost(
-      `/activity/${activityStore.currentActivity.id}/request`,
-    );
-    const status = response?.status;
-    requestStatus.value = status || "pending";
-    toastStore.addToast("Demande envoyee.", { type: "info" });
-  } catch (err: any) {
-    const message =
-      err?.response?.data?.error ||
-      err?.message ||
-      "Impossible d'envoyer la demande.";
-    toastStore.addToast(message, { type: "error" });
   }
 };
 

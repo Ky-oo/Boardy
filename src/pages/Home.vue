@@ -38,9 +38,6 @@
   <div class="container mx-auto">
     <div
       class="bloc-activites mx-5 md:mx-15"
-      :class="{
-        'has-activities': upcomingActivitiesFiltered.length >= 7,
-      }"
     >
       <div>
         Découvre les événements du monde du jeu de société et participe à ceux qui t’intéressent.
@@ -50,35 +47,7 @@
           <h2 class="text-xl md:text-2xl font-bold mb-6">
             Événements populaires
           </h2>
-          <div class="relative w-full md:w-auto h-10">
-            <select
-              id="type"
-              name="type"
-              v-model="selectedType"
-              class="block w-full md:w-auto h-full appearance-none border border-gray-300 rounded-lg pl-4 pr-10 leading-none"
-            >
-              <option value="">Tous les types</option>
-              <option v-for="t in eventTypes" :key="t" :value="t">
-                {{ t }}
-              </option>
-            </select>
 
-            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <svg
-                class="h-4 w-4 text-gray-600"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </span>
-          </div>
         </div>
         
         <div v-if="activityStore.loading" class="text-center py-8">
@@ -90,7 +59,7 @@
         </div>
 
         <div
-          v-else-if="upcomingActivitiesFiltered.length === 0"
+          v-else-if="activityStore.activities.length === 0"
           class="text-center py-8"
         >
           <p class="text-gray-600">Aucune activité à venir pour le moment.</p>
@@ -99,7 +68,7 @@
         <div v-else>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <ActivityCard
-              v-for="activity in upcomingActivitiesFiltered"
+              v-for="activity in activityStore.activities"
               :key="activity.id"
               :activity="activity"
             />
@@ -107,7 +76,7 @@
           <div class="flex justify-center mt-8">
             <button
               v-if="activityStore.hasMore"
-              @click="loadMore"
+              @click="() => fetchFiltered(true)"
               :disabled="activityStore.loading"
               class="px-6 py-3 hover:cursor-pointer bg-custom-blue text-custom-white rounded-lg hover:bg-custom-blue-hover disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -136,7 +105,7 @@
             Créer votre propre événement et laisser des joueurs y participer.
           </p>
           <router-link
-            :to="authStore.isLogged ? '/create_event' : '/login'"
+            to="/login"
             class="text-xl font-bold hover:cursor-pointer hover:bg-custom-orange-hover bg-custom-orange text-white px-6 py-3 rounded-2xl"
             >Je crée une partie
           </router-link>
@@ -153,7 +122,7 @@
             Montrer aux joueurs autour de vous que vous êtes disponibles pour jouer à <br class="hidden md:block"/> n'importe quel jeu ou a un certain type de jeu.
           </p>
           <router-link
-            :to="authStore.isLogged ? '/create_event' : '/login'"
+            to="/login"
             class="text-xl font-bold hover:cursor-pointer hover:bg-custom-orange-hover bg-custom-orange text-white px-6 py-3 rounded-2xl"
             >Je suis disponible
           </router-link>
@@ -173,8 +142,7 @@
 import { onMounted, ref } from "vue";
 import { useActivityStore } from "@/stores/activityStore";
 import FilterBar from "@/components/molecules/FilterBar.vue";
-import ActivityGrid from "@/components/organisms/grid/ActivityGrid.vue";
-import ActivityPanel from "@/components/organisms/panel/ActivityPanel.vue";
+
 
 const activityStore = useActivityStore();
 
