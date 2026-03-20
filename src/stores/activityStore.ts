@@ -186,9 +186,11 @@ export const useActivityStore = defineStore("activity", {
         const response = await get(`/activity`, params);
         const activities: Activity[] = Array.isArray(response)
           ? response
-          : (response?.rows as Activity[]) ||
-            (response?.data as Activity[]) ||
-            [];
+          : response?.rows?.length
+            ? response.rows
+            : response?.data?.length
+              ? response.data
+              : [];
 
         const normalized = activities.map((activity) =>
           this.normalizeActivity(activity),
@@ -198,8 +200,11 @@ export const useActivityStore = defineStore("activity", {
           ? [...this.activities, ...normalized]
           : normalized;
 
+        const pagination = response?.pagination;
         this.currentPage = page;
-        this.hasMore = activities.length >= 6;
+        this.hasMore = pagination
+          ? page < pagination.totalPages
+          : activities.length >= 6;
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Erreur lors du chargement";

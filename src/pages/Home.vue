@@ -59,7 +59,7 @@
         </div>
 
         <div
-          v-else-if="activityStore.activities.length === 0"
+          v-else-if="upcomingActivities.length === 0"
           class="text-center py-8"
         >
           <p class="text-gray-600">Aucune activité à venir pour le moment.</p>
@@ -68,7 +68,7 @@
         <div v-else>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <ActivityCard
-              v-for="activity in activityStore.activities"
+              v-for="activity in upcomingActivities"
               :key="activity.id"
               :activity="activity"
             />
@@ -139,12 +139,15 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useActivityStore } from "@/stores/activityStore";
 import FilterBar from "@/components/molecules/FilterBar.vue";
+import ActivityCard from "@/components/molecules/ActivityCard.vue";
 
 
 const activityStore = useActivityStore();
+
+const upcomingActivities = computed(() => activityStore.getUpcomingActivities);
 
 const searchQuery = ref("");
 const selectedDate = ref("");
