@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto">
     <div
-      class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-green rounded-xl"
+      class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-orange rounded-xl"
     >
       <h1 class="text-2xl text-primary font-black pb-4">
         {{ props.activity?.title }}
@@ -15,7 +15,7 @@
               <div class="bg-custom-white p-2 rounded-lg me-3">
                 <IconAgenda class="text-custom-blue w-5 h-5" />
               </div>
-              <div class="text-primary">
+              <div class="text-white">
                 <p class="text-sm text-primary">Date</p>
                 {{ formatDate(props.activity?.date) }} à
                 {{ formatTime(props.activity?.date) }}
@@ -28,7 +28,7 @@
             </div>
             <div class="text-primary">
               <p class="text-sm text-primary">Lieux</p>
-              <div v-if="props.activity?.private">
+              <div class="text-white" v-if="props.activity?.private">
                 Chez {{ props.host }},
                 <br />
                 {{ props.activity?.city }}
