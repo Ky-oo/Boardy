@@ -37,6 +37,14 @@
             Mon organisation
           </router-link>
         </li>
+        <li v-if="authStore.isLogged">
+          <router-link
+            to="/groups"
+            class="text-primary hover:cursor-pointer hover:text-gray-300"
+          >
+            Mes groupes
+          </router-link>
+        </li>
         <li v-if="authStore.user?.role === 'admin'">
           <router-link
             to="/admin"
@@ -132,6 +140,15 @@
             @click="closeMobileMenu"
           >
             Mon organisation
+          </router-link>
+        </li>
+        <li v-if="authStore.isLogged">
+          <router-link
+            to="/groups"
+            class="block text-primary hover:cursor-pointer hover:text-gray-300"
+            @click="closeMobileMenu"
+          >
+            Mes groupes
           </router-link>
         </li>
         <li v-if="authStore.user?.role === 'admin'">

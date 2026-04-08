@@ -15,6 +15,8 @@ import Admin from "@/pages/Admin.vue";
 import Organisation from "@/pages/Organisation.vue";
 import MentionsLegales from "@/pages/MentionsLegales.vue";
 import PolitiqueConfidentialite from "@/pages/PolitiqueConfidentialite.vue";
+import Groups from "@/pages/Groups.vue";
+import GroupDetail from "@/pages/GroupDetail.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -86,6 +88,16 @@ const routes: RouteRecordRaw[] = [
     name: "organisation",
     component: Organisation,
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/groups",
+    name: "groups",
+    component: Groups,
+  },
+  {
+    path: "/group/:id",
+    name: "group-detail",
+    component: GroupDetail,
   },
 ];
 

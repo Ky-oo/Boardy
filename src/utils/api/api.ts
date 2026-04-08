@@ -24,12 +24,17 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       const { useAuthStore } = await import("@/stores/authStore");
-      const { router } = await import("@/router/index");
-
       const authStore = useAuthStore();
-      authStore.logout();
-      if (router.currentRoute.value.name !== "login") {
-        router.push("/login");
+
+      const hasValidToken =
+        !!authStore.tokens?.accessToken && !authStore.isTokenExpired;
+
+      if (!hasValidToken) {
+        const { router } = await import("@/router/index");
+        authStore.logout();
+        if (router.currentRoute.value.name !== "login") {
+          router.push("/login");
+        }
       }
     }
     return Promise.reject(error);

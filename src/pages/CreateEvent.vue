@@ -13,8 +13,8 @@
             isOrganisationHost
               ? "Créer une soirée pour votre établissement"
               : isBoardyHost
-              ? "Créer une soirée pour Playly"
-              : "Créer votre partie idéale"
+                ? "Créer une soirée pour Playly"
+                : "Créer votre partie idéale"
           }}
         </h1>
         <p class="text-primary text-lg font-family-red-hat px-5">
@@ -514,6 +514,13 @@ const routeOrganisationId = computed(() => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 });
 
+const routeGroupId = computed(() => {
+  const raw = route.query.groupId;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  const parsed = value ? Number(value) : NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+});
+
 const effectiveOrganisationId = computed(
   () => routeOrganisationId.value ?? editOrganisationId.value,
 );
@@ -676,6 +683,10 @@ const handleSubmit = async () => {
       homeHost: showHomeAddress.value ? isHomeAddress.value : false,
       private: isPrivate.value,
     };
+
+    if (routeGroupId.value) {
+      payload.groupId = routeGroupId.value;
+    }
 
     if (isOrganisationHost.value) {
       payload.hostOrganisationId = effectiveOrganisationId.value;

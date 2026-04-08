@@ -38,6 +38,7 @@ export type Activity = {
   playersId: number[];
   users?: ActivityUser[];
   chatId?: number | null;
+  groupId?: number | null;
   createdAt?: string;
   updatedAt?: string;
 };

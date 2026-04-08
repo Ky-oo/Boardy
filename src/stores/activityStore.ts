@@ -37,27 +37,30 @@ export const useActivityStore = defineStore("activity", {
 
     getUpcomingActivities: (state): ActivityWithHost[] => {
       const now = new Date();
-      return state.activities.filter((a) => new Date(a.date) > now);
+      return state.activities.filter(
+        (a) => new Date(a.date) > now && !a.groupId,
+      );
     },
 
     getOrganisationActivitiesCount: (state): number => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "organisation" && new Date(a.date) > now,
+        (a) =>
+          a.hostType === "organisation" && new Date(a.date) > now && !a.groupId,
       ).length;
     },
 
     getUserActivitiesCount: (state): number => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "user" && new Date(a.date) > now,
+        (a) => a.hostType === "user" && new Date(a.date) > now && !a.groupId,
       ).length;
     },
 
     getEventActivitiesCount: (state): number => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "event" && new Date(a.date) > now,
+        (a) => a.hostType === "event" && new Date(a.date) > now && !a.groupId,
       ).length;
     },
 
@@ -65,14 +68,15 @@ export const useActivityStore = defineStore("activity", {
     getOrganisationActivities: (state): Activity[] => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "organisation" && new Date(a.date) > now,
+        (a) =>
+          a.hostType === "organisation" && new Date(a.date) > now && !a.groupId,
       );
     },
 
     getUserActivities: (state): Activity[] => {
       const now = new Date();
       return state.activities.filter(
-        (a) => a.hostType === "user" && new Date(a.date) > now,
+        (a) => a.hostType === "user" && new Date(a.date) > now && !a.groupId,
       );
     },
 
@@ -87,6 +91,7 @@ export const useActivityStore = defineStore("activity", {
       return state.activities
         .filter((a) => {
           if (a.id === currentId || new Date(a.date) <= now) return false;
+          if (a.groupId) return false;
           return a.city === currentCity;
         })
         .slice(0, 3);
@@ -149,6 +154,7 @@ export const useActivityStore = defineStore("activity", {
         organisation: hostOrganisation,
         guestUsers,
         playersId,
+        groupId: activity.groupId ?? (activity as any).group_id ?? null,
       };
     },
 
