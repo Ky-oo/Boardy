@@ -16,42 +16,48 @@
         <IconChevronLeft class="mr-2" /> Retour
       </button>
 
-      <div v-if="canEdit" class="container mx-auto ">
+      <div v-if="canEdit" class="container mx-auto">
         <div class="relative m-4 sm:m-0">
-        <div class="w-full flex flex-col sm:flex-row sm:justify-end gap-4 sm:gap-3 sm:mb-6">
-          <button
-            class="px-4 py-2 bg-custom-orange hover:cursor-pointer text-primary rounded-lg hover:bg-custom-orange-hover"
-            @click="openGuestModal"
+          <div
+            class="w-full flex flex-col sm:flex-row sm:justify-end gap-4 sm:gap-3 sm:mb-6"
           >
-            Ajouter manuellement un utilisateur
-          </button>
-          <button
-            class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover"
-            @click="handleEdit"
-          >
-            Modifier
-          </button>
-          <button
-            class="hidden sm:inline-block px-4 py-2 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600"
-            @click="handleDelete"
-          >
-            Supprimer
-          </button>
-        </div>
+            <button
+              class="px-4 py-2 bg-custom-orange hover:cursor-pointer text-primary rounded-lg hover:bg-custom-orange-hover"
+              @click="openGuestModal"
+            >
+              Ajouter manuellement un utilisateur
+            </button>
+            <button
+              class="px-4 py-2 bg-custom-blue hover:cursor-pointer text-white rounded-lg hover:bg-custom-blue-hover"
+              @click="handleEdit"
+            >
+              Modifier
+            </button>
+            <button
+              class="hidden sm:inline-block px-4 py-2 bg-red-500 hover:cursor-pointer text-white rounded-lg hover:bg-red-600"
+              @click="handleDelete"
+            >
+              Supprimer
+            </button>
+          </div>
         </div>
       </div>
 
-      <div
+      <AddGuestModal
         v-if="showGuestModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-        @click.self="closeGuestModal"
-      >
-        <!-- Guest modal will be implemented -->
-      </div>
+        :guest-loading="guestLoading"
+        @close-guest-modal="closeGuestModal"
+        @add-guest="handleAddGuest"
+      />
 
-      <div v-if="showRequestPanel" class="bg-custom-blue p-8 rounded-xl mb-10">
-        <!-- Request panel will be implemented -->
-      </div>
+      <RequestPanel
+        v-if="showRequestPanel"
+        :requests="requests"
+        :requests-loading="requestsLoading"
+        @refresh-requests="loadRequests"
+        @approve-request="approveRequest"
+        @reject-request="rejectRequest"
+      />
 
       <div v-if="isParticipating">
         <h2 class="text-2xl font-black text-custom-primary mb-5 mx-5">
@@ -74,16 +80,20 @@
         />
       </div>
 
-      <div class="container mx-auto">
-        <div
-          class="filter-bar mx-5 md:mx-15 mb-35 px-10 py-8 bg-custom-orange rounded-xl"
-        >
-          <h1 class="text-2xl text-primary font-black pb-4">
-            {{ activityStore.currentActivity.title }}
-          </h1>
-          <!-- Activity details will be implemented -->
-        </div>
-      </div>
+      <ActivityInfoBar
+        class="mt-6 bg-red"
+        :activity="activityStore.currentActivity"
+        :is-creator="isCreator"
+        :is-participating="isParticipating"
+        :participants-count="
+          activityStore.currentActivity.playersId.length +
+          (activityStore.currentActivity.guestUsers?.length ?? 0)
+        "
+        :request-status="requestStatus"
+        :host="getHost"
+        @load-request-status="loadRequestStatus"
+        @request-participation="requestParticipation"
+      />
 
       <div class="container mx-auto">
         <div class="flex lg:flex-row flex-col w-full px-5 md:px-15">
@@ -184,12 +194,17 @@ import ChatPanel from "@/components/organisms/ChatPanel.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
 import { usePaymentStore } from "@/stores/paymentStore";
-import { get as apiGet } from "@/utils/api/api";
+import { get as apiGet, post as apiPost } from "@/utils/api/api";
+import ActivityInfoBar from "@/components/organisms/ActivityInfoBar.vue";
+import AddGuestModal from "@/components/organisms/modal/AddGuestModal.vue";
+import RequestPanel from "@/components/organisms/panel/RequestPanel.vue";
 import type {
   ParticipationRequest,
   ParticipationRequestStatus,
 } from "@/types/ParticipationRequest";
 import ActivityDetailMap from "@/components/molecules/map/ActivityDetailMap.vue";
+import ActivityCard from "@/components/molecules/ActivityCard.vue";
+import IconChevronLeft from "@/components/atoms/icons/IconChevronLeft.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -203,6 +218,7 @@ const showGuestModal = ref(false);
 const toastStore = useToastStore();
 
 const guestError = ref("");
+const guestLoading = ref(false);
 
 const isParticipating = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
@@ -234,7 +250,6 @@ const canEdit = computed(() => {
 
 const canManageRequests = computed(() => {
   if (!activityStore.currentActivity || !authStore.user) return false;
-  console.log(authStore.user.role);
   if (authStore.user.role === "admin") return true;
   return isCreator.value;
 });
@@ -255,6 +270,34 @@ const openGuestModal = () => {
 const closeGuestModal = () => {
   showGuestModal.value = false;
   guestError.value = "";
+};
+
+const handleAddGuest = async (name: string, email: string) => {
+  if (!activityStore.currentActivity) return;
+  if (!name.trim()) {
+    guestError.value = "Le prénom est requis.";
+    return;
+  }
+  guestLoading.value = true;
+  guestError.value = "";
+  try {
+    await apiPost(`/activity/${activityStore.currentActivity.id}/guest`, {
+      name: name.trim(),
+      email: email.trim() || undefined,
+    });
+    await activityStore.fetchActivity(activityStore.currentActivity.id);
+    closeGuestModal();
+    toastStore.addToast("Participant ajouté.", { type: "success" });
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'ajouter le participant.";
+    guestError.value = message;
+    toastStore.addToast(message, { type: "error" });
+  } finally {
+    guestLoading.value = false;
+  }
 };
 
 const loadRequestStatus = async () => {
@@ -309,6 +352,59 @@ const refreshRequestData = async () => {
     await loadRequests();
   } else {
     requests.value = [];
+  }
+};
+
+const requestParticipation = async () => {
+  if (!activityStore.currentActivity) return;
+  try {
+    const response = await apiPost(
+      `/activity/${activityStore.currentActivity.id}/request`,
+    );
+    const status = response?.status;
+    requestStatus.value = status || "pending";
+    toastStore.addToast("Demande envoyée.", { type: "info" });
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'envoyer la demande.";
+    toastStore.addToast(message, { type: "error" });
+  }
+};
+
+const approveRequest = async (requestId: number) => {
+  if (!activityStore.currentActivity) return;
+  try {
+    await apiPost(
+      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/approve`,
+    );
+    toastStore.addToast("Demande acceptée.", { type: "success" });
+    await activityStore.fetchActivity(activityStore.currentActivity.id);
+    await loadRequests();
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible d'accepter la demande.";
+    toastStore.addToast(message, { type: "error" });
+  }
+};
+
+const rejectRequest = async (requestId: number) => {
+  if (!activityStore.currentActivity) return;
+  try {
+    await apiPost(
+      `/activity/${activityStore.currentActivity.id}/requests/${requestId}/reject`,
+    );
+    toastStore.addToast("Demande refusée.", { type: "info" });
+    await loadRequests();
+  } catch (err: any) {
+    const message =
+      err?.response?.data?.error ||
+      err?.message ||
+      "Impossible de refuser la demande.";
+    toastStore.addToast(message, { type: "error" });
   }
 };
 
