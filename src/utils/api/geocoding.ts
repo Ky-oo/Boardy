@@ -10,6 +10,7 @@ export type AddressSuggestion = {
     municipality?: string;
     county?: string;
     state?: string;
+    postcode?: string;
   };
   type?: string;
   class?: string;

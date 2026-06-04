@@ -220,7 +220,7 @@ export const useActivityStore = defineStore("activity", {
       }
     },
 
-    async fetchActivity(id: number) {
+    async fetchActivity(id: string | number) {
       this.loading = true;
       this.error = null;
       try {
@@ -265,17 +265,18 @@ export const useActivityStore = defineStore("activity", {
       }
     },
 
-    async updateActivity(id: number, activity: Partial<Activity>) {
+    async updateActivity(id: string | number, activity: Partial<Activity>) {
+      const numId = typeof id === "string" ? parseInt(id, 10) : id;
       this.loading = true;
       this.error = null;
       try {
         const updated: Activity = await put(`/activity/${id}`, activity);
         const normalized = this.normalizeActivity(updated);
-        const index = this.activities.findIndex((a) => a.id === id);
+        const index = this.activities.findIndex((a) => a.id === numId);
         if (index !== -1) {
           this.activities[index] = normalized;
         }
-        if (this.currentActivity?.id === id) {
+        if (this.currentActivity?.id === numId) {
           this.currentActivity = normalized;
         }
         const toastStore = useToastStore();
@@ -291,14 +292,17 @@ export const useActivityStore = defineStore("activity", {
       }
     },
 
-    async joinActivity(id: number) {
+    async joinActivity(id: string | number) {
+      const numId = typeof id === "string" ? parseInt(id, 10) : id;
       try {
         const updated: Activity = await post(`/activity/${id}/join`);
         const normalized = this.normalizeActivity(updated);
         this.currentActivity =
-          this.currentActivity?.id === id ? normalized : this.currentActivity;
+          this.currentActivity?.id === numId
+            ? normalized
+            : this.currentActivity;
         this.activities = this.activities.map((a) =>
-          a.id === id ? normalized : a,
+          a.id === numId ? normalized : a,
         );
         return normalized;
       } catch (err) {
@@ -307,14 +311,17 @@ export const useActivityStore = defineStore("activity", {
       }
     },
 
-    async leaveActivity(id: number) {
+    async leaveActivity(id: string | number) {
+      const numId = typeof id === "string" ? parseInt(id, 10) : id;
       try {
         const updated: Activity = await del(`/activity/${id}/leave`);
         const normalized = this.normalizeActivity(updated);
         this.currentActivity =
-          this.currentActivity?.id === id ? normalized : this.currentActivity;
+          this.currentActivity?.id === numId
+            ? normalized
+            : this.currentActivity;
         this.activities = this.activities.map((a) =>
-          a.id === id ? normalized : a,
+          a.id === numId ? normalized : a,
         );
         return normalized;
       } catch (err) {
@@ -323,11 +330,12 @@ export const useActivityStore = defineStore("activity", {
       }
     },
 
-    async deleteActivity(id: number) {
+    async deleteActivity(id: string | number) {
+      const numId = typeof id === "string" ? parseInt(id, 10) : id;
       try {
         await del(`/activity/${id}`);
-        this.activities = this.activities.filter((a) => a.id !== id);
-        if (this.currentActivity?.id === id) {
+        this.activities = this.activities.filter((a) => a.id !== numId);
+        if (this.currentActivity?.id === numId) {
           this.currentActivity = null;
         }
         const toastStore = useToastStore();

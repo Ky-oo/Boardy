@@ -18,6 +18,8 @@ export const useAddressAutocomplete = (options: AutocompleteOptions) => {
   const addressSuggestions = ref<AddressSuggestion[]>([]);
   const addressLoading = ref(false);
   const showAddressSuggestions = ref(false);
+  const selectedCity = ref<string | null>(null);
+  const selectedPostalCode = ref<string | null>(null);
 
   let addressSearchTimeout: number | null = null;
   let lastAddressQuery = "";
@@ -87,6 +89,14 @@ export const useAddressAutocomplete = (options: AutocompleteOptions) => {
     address.value = suggestion.display_name;
     latitude.value = Number(suggestion.lat);
     longitude.value = Number(suggestion.lon);
+    selectedCity.value =
+      suggestion.address?.city ??
+      suggestion.address?.town ??
+      suggestion.address?.village ??
+      suggestion.address?.municipality ??
+      null;
+    selectedPostalCode.value =
+      suggestion.address?.postcode ?? null;
     addressSuggestions.value = [];
     addressLoading.value = false;
     showAddressSuggestions.value = false;
@@ -117,6 +127,8 @@ export const useAddressAutocomplete = (options: AutocompleteOptions) => {
     addressSuggestions,
     addressLoading,
     showAddressSuggestions,
+    selectedCity,
+    selectedPostalCode,
     handleAddressInput,
     handleAddressBlur,
     selectAddressSuggestion,

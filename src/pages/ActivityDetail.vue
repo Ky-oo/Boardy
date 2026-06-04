@@ -496,12 +496,12 @@ const getHost = computed(() => {
 });
 
 onMounted(async () => {
-  const id = Number(route.params.id);
+  const id = route.params.id;
   if (id) {
     if (activityStore.activities.length === 0) {
       await activityStore.fetchActivities();
     }
-    await activityStore.fetchActivity(id);
+    await activityStore.fetchActivity(id as string);
     const sessionId =
       typeof route.query.session_id === "string"
         ? route.query.session_id
@@ -523,7 +523,7 @@ onMounted(async () => {
 watch(
   () => route.params.id,
   async (newId) => {
-    const id = Number(newId);
+    const id = newId as string;
     if (id) {
       requestStatus.value = "none";
       requests.value = [];
